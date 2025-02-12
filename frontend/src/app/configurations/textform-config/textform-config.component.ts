@@ -2,7 +2,7 @@ import {Component, inject} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import {DialogRef} from "@angular/cdk/dialog";
-import { TextformComponent } from '../../../components/textform/textform.component';
+import { TextformComponent } from '../../components/textform/textform.component';
 
 @Component({
   selector: 'app-textform-config',

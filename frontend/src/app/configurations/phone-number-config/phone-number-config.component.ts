@@ -2,7 +2,7 @@ import {Component, inject} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import {DialogRef} from "@angular/cdk/dialog";
-import { PhoneNumberComponent } from '../../../components/phone-number/phone-number.component';
+import { PhoneNumberComponent } from '../../components/phone-number/phone-number.component';
 
 @Component({
   selector: 'app-phone-number-config',

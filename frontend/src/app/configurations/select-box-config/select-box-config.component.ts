@@ -2,7 +2,7 @@ import {Component, inject} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {DialogRef} from "@angular/cdk/dialog";
-import { SelectBoxComponent } from '../../../components/select-box/select-box.component';
+import { SelectBoxComponent } from '../../components/select-box/select-box.component';
 
 @Component({
   selector: 'app-select-box-config',

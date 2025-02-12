@@ -9,11 +9,11 @@ import {HttpClientModule} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import { StepperComponent } from '../../components/stepper/stepper.component';
 import { SectionComponent } from '../../components/section/section.component';
-import { TextformConfigComponent } from '../../configurations/basicdatepicker-config/textform-config/textform-config.component';
-import { SelectBoxConfigComponent } from '../../configurations/basicdatepicker-config/select-box-config/select-box-config.component';
-import { RadioButtonConfigComponent } from '../../configurations/basicdatepicker-config/radio-button-config/radio-button-config.component';
-import { TabConfigComponent } from '../../configurations/basicdatepicker-config/tab-config/tab-config.component';
-import { SectionConfigComponent } from '../../configurations/basicdatepicker-config/section-config/section-config.component';
+import { TextformConfigComponent } from '../../configurations/textform-config/textform-config.component';
+import { SelectBoxConfigComponent } from '../../configurations/select-box-config/select-box-config.component';
+import { RadioButtonConfigComponent } from '../../configurations/radio-button-config/radio-button-config.component';
+import { TabConfigComponent } from '../../configurations/tab-config/tab-config.component';
+import { SectionConfigComponent } from '../../configurations/section-config/section-config.component';
 
 export interface FoodNode {
   name: string;

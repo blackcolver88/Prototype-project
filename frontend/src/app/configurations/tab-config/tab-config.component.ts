@@ -6,7 +6,7 @@ import {FormLayout} from '../../model/FormLayout';
 import {FormLayoutType} from '../../model/FormLayoutType';
 import {HttpClientModule} from '@angular/common/http';
 import {DialogRef} from "@angular/cdk/dialog";
-import { StepperComponent } from '../../../components/stepper/stepper.component';
+import { StepperComponent } from '../../components/stepper/stepper.component';
 import { FormLayoutService } from '../../../services/form-layout.service';
 @Component({
   selector: 'app-tab-config',
