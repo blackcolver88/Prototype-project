@@ -1,0 +1,13 @@
+<ng-container *ngIf="isBrowser" class="z-4">
+  <button type="button" (click)="openDialog()" class="w-full sm:w-auto text-white bg-blue-500 hover:bg-blue-600 p-2 rounded mt-2">
+    Add new template
+  </button>
+
+  <ag-grid-angular
+    class="ag-theme-quartz"
+    style="height: 500px; width: 100%;"
+    [rowData]="rowData"
+    [columnDefs]="colDefs"
+    [rowSelection]="'single'">
+  </ag-grid-angular>
+</ng-container>

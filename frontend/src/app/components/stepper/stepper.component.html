@@ -1,0 +1,29 @@
+<section class="example-container">
+    <header>
+      <h2>Step {{ selectedIndex + 1 }}/{{ steps.length }}</h2>
+    </header>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="stepContents[selectedIndex]"
+      (cdkDropListDropped)="onDrop($event, selectedIndex)"
+      class="drop-list"
+    >
+      <div *ngFor="let item of stepContents[selectedIndex]" cdkDrag class="p-2 bg-white shadow-md rounded-lg mb-2">
+        {{ item?.name }}
+      </div>
+    </div>
+
+    <footer class="example-step-navigation-bar">
+      <button class="example-nav-button" cdkStepperPrevious>&larr;</button>
+      <button
+        class="example-step"
+        *ngFor="let step of steps; let i = index"
+        [class.example-active]="selectedIndex === i"
+        (click)="selectStepByIndex(i)"
+      >
+        Step {{ i + 1 }}
+      </button>
+      <button class="example-nav-button" cdkStepperNext>&rarr;</button>
+    </footer>
+  </section>
