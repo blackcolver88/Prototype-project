@@ -1,14 +1,15 @@
 import {Component, inject} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { SelectBoxComponent } from '../../components/select-box/select-box.component';
 import { CommonModule } from '@angular/common';
 import {DialogRef} from "@angular/cdk/dialog";
-import { SelectBoxComponent } from '../../components/select-box/select-box.component';
 
 @Component({
   selector: 'app-select-box-config',
-  imports: [SelectBoxComponent, ReactiveFormsModule, CommonModule],
   templateUrl: './select-box-config.component.html',
-  styleUrl: './select-box-config.component.css'
+  styleUrls: ['./select-box-config.component.css'],
+  standalone: true,
+  imports: [SelectBoxComponent, ReactiveFormsModule, CommonModule]
 })
 export class SelectBoxConfigComponent {
   selectBoxForm: FormGroup;
@@ -45,5 +46,4 @@ export class SelectBoxConfigComponent {
   getOptionsArray(optionsString: string): string[] {
     return optionsString.split(',').map(option => option.trim()).filter(option => option.length > 0);
   }
-
 }

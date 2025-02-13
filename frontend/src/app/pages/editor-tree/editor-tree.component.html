@@ -1,1 +1,70 @@
-<p>editor-tree works!</p>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+
+  <div cdkDropListGroup class="col-span-1 md:col-span-1 px-4 py-2 border-r border-gray-300 w-60">
+    <div class="flex justify-center">
+      <h2 class="text-lg font-bold text-gray-700 mb-4">Tools</h2>
+    </div>
+    <div
+      cdkDropList
+      [cdkDropListData]="dataSource"
+      [cdkDropListConnectedTo]="[acquiredItems]"
+      class="border border-gray-300 min-h-[60px] bg-white rounded overflow-hidden block"
+    >
+      <cdk-tree [dataSource]="dataSource" [treeControl]="treeControl">
+        <cdk-nested-tree-node *cdkTreeNodeDef="let node" class="block pl-10">
+          <div
+            cdkDrag
+            [cdkDragData]="node"
+            class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-1 rounded mb-2 shadow text-sm w-32">
+            {{ node.name }}
+          </div>
+        </cdk-nested-tree-node>
+        <cdk-nested-tree-node *cdkTreeNodeDef="let node; when: hasChild">
+          <div class="flex items-center space-x-2">
+            <button
+              [attr.aria-label]="'Toggle ' + node.name"
+              cdkTreeNodeToggle
+              class="focus:outline-none"
+            >
+              <img src="../../../assets/icons/layout.svg" alt="Toggle Icon" height="32" width="32">
+            </button>
+            <span class="text-md font-semibold">{{ node.name }}</span>
+          </div>
+          <div
+            class="pl-4 mt-2 pb-2"
+            [class.hidden]="!treeControl.isExpanded(node)"
+          >
+            <ng-container cdkTreeNodeOutlet></ng-container>
+          </div>
+        </cdk-nested-tree-node>
+      </cdk-tree>
+    </div>
+  </div>
+
+  <div class="col-span-3 px-4 py-6 bg-gray-50 rounded-lg shadow-lg border border-gray-300"
+       cdkDropList
+       #acquiredItems="cdkDropList"
+       [cdkDropListData]="editorItems"
+       (cdkDropListDropped)="onEditorDrop($event)">
+    <div class="flex justify-center">
+      <h2 class="text-xl font-bold text-gray-700 mb-4">Editor</h2>
+    </div>
+    <div *ngFor="let item of editorItems" cdkDrag class="cursor-pointer p-2 bg-white shadow-md rounded-lg mb-2">
+      <ng-container *ngIf="item?.type === 'stepper'; else defaultContent">
+        <app-stepper [ss]="item.tabs">
+          <cdk-step *ngFor="let tab of item.tabs">
+            <ng-template cdkStepLabel>{{ tab.label }}</ng-template>
+            <p>Content for {{ tab.label }}</p>
+          </cdk-step>
+        </app-stepper>
+      </ng-container>
+      <ng-container *ngIf="item?.type === 'section';">
+        <app-section [section]="item.sections" ></app-section>
+      </ng-container>
+      <ng-template #defaultContent>
+        {{ item?.name }}
+      </ng-template>
+    </div>
+  </div>
+</div>
+<pre class="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">{{ editorItems | json }}</pre>

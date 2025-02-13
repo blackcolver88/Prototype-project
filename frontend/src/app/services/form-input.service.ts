@@ -8,7 +8,7 @@ import {FormInput} from "../model/FormInput";
 })
 export class FormInputService {
 
-  private baseUrl = 'http://localhost:8080/api/form-layouts';
+  private baseUrl = 'http://localhost:8081/api/form-layouts';
 
   constructor(public http: HttpClient) {}
 

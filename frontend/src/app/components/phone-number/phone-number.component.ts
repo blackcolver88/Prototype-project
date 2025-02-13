@@ -4,16 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-phone-number',
-  imports: [],
+  standalone: true,
   templateUrl: './phone-number.component.html',
-  styleUrl: './phone-number.component.css'
+  styleUrls: ['./phone-number.component.css'],
+  imports: [CommonModule, FormsModule]
 })
 export class PhoneNumberComponent {
   @Input() textSize: number = 14;
   @Input() fontColor: string = '#000000';
   @Input() label: string = 'Phone Number';
   @Input() fontFamily: string = 'Arial';
-  @Input() labelPosition: string = 'top'; // 'top', 'left', 'right', 'bottom'
+  @Input() labelPosition: string = 'top';
 
 
   allowOnlyNumbers(event: KeyboardEvent): void {
@@ -22,5 +23,4 @@ export class PhoneNumberComponent {
       event.preventDefault();
     }
   }
-
 }

@@ -9,7 +9,7 @@ import {DialogRef} from "@angular/cdk/dialog";
   standalone: true,
   imports: [CommonModule, EmailComponent, ReactiveFormsModule],
   templateUrl: './email-config.component.html',
-  styleUrls: ['./email-config.component.scss']
+  styleUrls: ['./email-config.component.css']
 })
 export class EmailConfigComponent {
   emailForm: FormGroup;

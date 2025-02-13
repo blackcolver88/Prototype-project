@@ -14,7 +14,7 @@ import { FormTemplateService } from "../../services/form-template.service";
   standalone: true,
   imports: [AgGridAngular, CommonModule, DialogModule],
   templateUrl: './form-template.component.html',
-  styleUrls: ['./form-template.component.scss']
+  styleUrls: ['./form-template.component.css']
 })
 export class FormTemplateComponent implements OnInit {
   rowData: FormTemplate[] = [];

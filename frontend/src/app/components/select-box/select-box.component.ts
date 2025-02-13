@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-select-box',
-  imports: [CommonModule],
   templateUrl: './select-box.component.html',
-  styleUrl: './select-box.component.css'
+  styleUrls: ['./select-box.component.css'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class SelectBoxComponent {
   @Input() label: string = 'Select an option';
   @Input() options: string[] = [];
-
 }

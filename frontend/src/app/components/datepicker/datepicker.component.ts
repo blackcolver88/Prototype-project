@@ -8,7 +8,7 @@ class Identifier {
 @Component({
   selector: 'app-datepicker',
   templateUrl: './datepicker.component.html',
-  styleUrls: ['./datepicker.component.scss'],
+  styleUrls: ['./datepicker.component.css'],
   standalone: true,
   imports: [CommonModule, FormsModule]
 })

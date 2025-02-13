@@ -1,14 +1,15 @@
 import {Component, inject} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
+import { PhoneNumberComponent } from "../../components/phone-number/phone-number.component";
 import {DialogRef} from "@angular/cdk/dialog";
-import { PhoneNumberComponent } from '../../components/phone-number/phone-number.component';
 
 @Component({
   selector: 'app-phone-number-config',
+  standalone: true,
   imports: [CommonModule, PhoneNumberComponent, ReactiveFormsModule],
   templateUrl: './phone-number-config.component.html',
-  styleUrl: './phone-number-config.component.css'
+  styleUrls: ['./phone-number-config.component.css']
 })
 export class PhoneNumberConfigComponent {
   phoneNumberForm: FormGroup;
@@ -21,5 +22,16 @@ export class PhoneNumberConfigComponent {
       fontFamily: ['Arial'],
       labelPosition: ['top']
     });
+  }
 
-}}
+  save(): void {
+    console.log(this.phoneNumberForm.value);
+    const formData = this.phoneNumberForm.value;
+    console.log('Form data saved:', formData);
+    this.dialogRef.close(formData);
+  }
+
+  cancel(): void {
+    this.dialogRef.close();
+  }
+}

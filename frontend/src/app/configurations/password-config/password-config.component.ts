@@ -7,7 +7,7 @@ import {DialogRef} from "@angular/cdk/dialog";
 @Component({
   selector: 'app-password-config',
   templateUrl: './password-config.component.html',
-  styleUrls: ['./password-config.component.scss'],
+  styleUrls: ['./password-config.component.css'],
   standalone: true,
   imports: [PasswordComponent, ReactiveFormsModule, CommonModule],
 })

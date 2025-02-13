@@ -1,5 +1,4 @@
 import {Component, HostListener, ElementRef, ViewChild} from '@angular/core';
-import { NgClass, NgOptimizedImage } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { logoIonic } from 'ionicons/icons';
 import { IonicModule } from "@ionic/angular";
@@ -9,12 +8,10 @@ import {RouterModule} from "@angular/router";
   selector: 'app-navbar',
   standalone: true,
   imports: [
-    NgClass,
-    NgOptimizedImage,
     IonicModule,RouterModule
   ],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss']
+  styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
 

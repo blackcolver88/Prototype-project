@@ -1,3 +1,44 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.cdk-overlay-container {
+  position: fixed;
+  top: 15%;
+  left: 15%;
+  width: 120vw;
+  height: 5vh;
+
+}
+
+.cdk-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: auto;
+}
+.custom-dialog-container {
+  z-index: 1001;
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  max-width: 70vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.custom-dialog-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.text-field-holder {
+  @apply mt-2;
+}
+
+.ag-root-wrapper.ag-layout-normal {
+  height: 100%;
+  z-index: 0 !important;
+}

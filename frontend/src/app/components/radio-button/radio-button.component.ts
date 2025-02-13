@@ -1,12 +1,12 @@
-import { Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-radio-button',
-  imports: [CommonModule],
   templateUrl: './radio-button.component.html',
-  styleUrl: './radio-button.component.css',
-
+  styleUrls: ['./radio-button.component.css'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class RadioButtonComponent {
   @Input() label: string = 'Option';
@@ -14,4 +14,3 @@ export class RadioButtonComponent {
   @Input() textSize: number = 14;
   @Input() textColor: string = '#000000';
 }
-

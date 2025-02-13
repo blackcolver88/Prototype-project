@@ -18,7 +18,7 @@ import {FormsModule} from "@angular/forms";
 @Component({
   selector: 'app-basic-datepicker',
   templateUrl: './basic-datepicker.component.html',
-  styleUrls: ['./basic-datepicker.component.scss'],
+  styleUrls: ['./basic-datepicker.component.css'],
   standalone: true,
   imports: [CommonModule, FormsModule]
 })

@@ -1,19 +1,21 @@
 import {Component, EventEmitter, inject, OnInit, Output} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
+import {StepperComponent} from '../../components/stepper/stepper.component';
 import {CdkStepperModule} from '@angular/cdk/stepper';
+import {FormLayoutService} from '../../services/form-layout.service';
 import {FormLayout} from '../../model/FormLayout';
 import {FormLayoutType} from '../../model/FormLayoutType';
 import {HttpClientModule} from '@angular/common/http';
 import {DialogRef} from "@angular/cdk/dialog";
-import { StepperComponent } from '../../components/stepper/stepper.component';
-import { FormLayoutService } from '../../services/form-layout.service';
+
+
 @Component({
   selector: 'app-tab-config',
-  imports: [ReactiveFormsModule, CommonModule, StepperComponent, CdkStepperModule, HttpClientModule],
   templateUrl: './tab-config.component.html',
-  styleUrl: './tab-config.component.css',
-
+  styleUrls: ['./tab-config.component.css'],
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule, StepperComponent, CdkStepperModule, HttpClientModule]
 })
 export class TabConfigComponent implements OnInit {
   tabForm: FormGroup;
@@ -104,5 +106,4 @@ export class TabConfigComponent implements OnInit {
   remove(): void {
 
   }
-
 }

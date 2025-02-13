@@ -3,10 +3,10 @@ import {CommonModule} from "@angular/common";
 
 @Component({
   selector: 'app-textform',
-  imports:[CommonModule],
+  standalone: true,
   templateUrl: './textform.component.html',
   styleUrl: './textform.component.css',
-
+  imports:[CommonModule]
 })
 export class TextformComponent {
   @Input() textSize: number = 14;
@@ -15,5 +15,4 @@ export class TextformComponent {
   @Input() fontFamily: string = 'Helvetica';
   @Input() labelPosition: string = 'top';
   @Input() labelAlignment: string = 'left';
-
 }

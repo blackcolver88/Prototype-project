@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-password',
   templateUrl: './password.component.html',
-  styleUrls: ['./password.component.scss'],
+  styleUrls: ['./password.component.css'],
   standalone: true,
   imports: [CommonModule],
 })

@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-email',
   standalone: true,
   templateUrl: './email.component.html',
-  styleUrls: ['./email.component.scss'],
+  styleUrls: ['./email.component.css'],
   imports: [CommonModule, FormsModule]
 })
 export class EmailComponent {

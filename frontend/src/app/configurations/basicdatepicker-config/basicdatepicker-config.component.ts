@@ -7,7 +7,7 @@ import {DialogRef} from "@angular/cdk/dialog";
 @Component({
   selector: 'app-basicdatepicker-config',
   templateUrl: './basicdatepicker-config.component.html',
-  styleUrls: ['./basicdatepicker-config.component.scss'],
+  styleUrls: ['./basicdatepicker-config.component.css'],
   standalone: true,
   imports: [BasicDatepickerComponent, ReactiveFormsModule,CommonModule]
 })

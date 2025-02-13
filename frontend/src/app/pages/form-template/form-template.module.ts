@@ -9,6 +9,7 @@ import { FormTemplateRoutingModule } from './form-template-routing.module';
   imports: [
     CommonModule,
     FormTemplateRoutingModule
-  ]
+  ],
+  providers :[]
 })
 export class FormTemplateModule { }

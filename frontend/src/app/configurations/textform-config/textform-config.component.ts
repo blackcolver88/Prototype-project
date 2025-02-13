@@ -1,14 +1,15 @@
 import {Component, inject} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import { CommonModule } from "@angular/common";
+import { TextformComponent } from "../../components/textform/textform.component";
 import {DialogRef} from "@angular/cdk/dialog";
-import { TextformComponent } from '../../components/textform/textform.component';
 
 @Component({
   selector: 'app-textform-config',
+  standalone: true,
   imports: [CommonModule, TextformComponent, ReactiveFormsModule],
   templateUrl: './textform-config.component.html',
-  styleUrl: './textform-config.component.css'
+  styleUrl: './textform-config.component.scss'
 })
 export class TextformConfigComponent {
   textForm: FormGroup;
@@ -34,5 +35,4 @@ export class TextformConfigComponent {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }

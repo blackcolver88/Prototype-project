@@ -4,9 +4,14 @@ import {CommonModule} from "@angular/common";
 
 @Component({
   selector: 'app-section',
-  imports: [],
   templateUrl: './section.component.html',
-  styleUrl: './section.component.css'
+  styleUrls: ['./section.component.css'],
+  imports: [
+    CdkDropList,
+    CdkDrag,
+    CommonModule
+  ],
+  standalone: true
 })
 export class SectionComponent {
   @Input() sectionItems: any[] = [];
@@ -23,6 +28,5 @@ export class SectionComponent {
       previousContainer.data.splice(event.previousIndex, 1);
     }
     this.itemDropped.emit(event.item.data);
-
-}
+  }
 }
