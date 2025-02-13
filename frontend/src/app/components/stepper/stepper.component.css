@@ -1,0 +1,58 @@
+.example-container {
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+
+  .example-step-navigation-bar {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+  }
+
+  .example-nav-button {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .example-step {
+    margin: 0 4px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .example-active {
+    background-color: #1565c0;
+    color: white;
+  }
+
+  .step-content {
+    min-height: 100px;
+    padding: 16px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .example-draggable-item {
+    padding: 8px 16px;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 16px;
+    cursor: move;
+  }
+  .drop-list {
+    min-height: 150px;
+    background-color: #f9f9f9;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+  }

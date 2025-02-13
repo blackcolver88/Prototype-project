@@ -1,0 +1,46 @@
+<div class="flex flex-col md:flex-row md:space-x-8 p-4">
+    <form [formGroup]="selectBoxForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
+
+      <div class="space-y-2">
+        <label for="labelText" class="block font-semibold">Label Text</label>
+        <input id="labelText" formControlName="labelText" type="text" class="w-full border border-gray-300 p-2 rounded" />
+      </div>
+
+      <div class="space-y-2">
+        <label for="options" class="block font-semibold">Options (comma-separated)</label>
+        <input id="options" formControlName="options" type="text" class="w-full border border-gray-300 p-2 rounded" />
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:space-x-4">
+        <button type="button" (click)="addSelectBox()" class="w-full sm:w-auto text-white bg-blue-500 hover:bg-blue-600 p-2 rounded mt-2">+ Add Another Select Box</button>
+        <button type="button" (click)="removeSelectBox()" class="w-full sm:w-auto text-white bg-red-500 hover:bg-red-600 p-2 rounded mt-2">- Remove Last Select Box</button>
+      </div>
+
+      <!-- Save/Cancel Buttons -->
+      <div class="flex space-x-4 mt-4">
+        <button
+          type="button"
+          (click)="save()"
+          class="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 p-2 rounded"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          class="w-full sm:w-auto text-white bg-gray-500 hover:bg-gray-600 p-2 rounded"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+
+    <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
+      <h3 class="font-semibold mb-2">Preview</h3>
+      <app-select-box
+        *ngFor="let selectBox of selectBoxes"
+        [label]="selectBox.labelText"
+        [options]="getOptionsArray(selectBox.options)">
+      </app-select-box>
+    </div>
+  </div>

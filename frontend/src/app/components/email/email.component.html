@@ -1,0 +1,30 @@
+<div class="email-field-holder" [ngClass]="{'flex': labelPosition === 'left' || labelPosition === 'right', 'flex-col': labelPosition === 'top' || labelPosition === 'bottom'}">
+  <label
+    for="emailInput"
+    class="block text-sm font-medium"
+    [ngStyle]="{
+      'color': fontColor,
+      'font-size.px': textSize,
+      'font-family': fontFamily,
+      'text-align': labelAlignment === 'left' ? 'left' : 'right'
+    }"
+    [ngClass]="{
+      'order-1': labelPosition === 'top',
+      'order-2': labelPosition === 'left' || labelPosition === 'bottom',
+      'order-3': labelPosition === 'right'
+    }"
+  >
+    {{ label }}
+  </label>
+
+  <input
+    type="email"
+    id="emailInput"
+    [(ngModel)]="email"
+    placeholder="{{ placeholder }}"
+    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
+    required
+  />
+  <div *ngIf="isEmailInvalid" class="text-red-500 text-sm mt-1">Invalid email address</div>
+</div>
