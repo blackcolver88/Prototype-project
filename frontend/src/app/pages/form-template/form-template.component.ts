@@ -28,7 +28,7 @@ export class FormTemplateComponent implements OnInit {
       cellRenderer: (params: any) => {
         return `<div class="flex items-center">
                 <button class="icon-button" onclick="handleIconClick('${params.data.id}')">
-                  <img src="${params.data.icon || '../../../assets/icons/adjustment.svg'}" alt="Icon" height="32" width="32" class="mr-2" />
+                  <img src="${params.data.icon || '../../../assets/icons/customise.svg'}" alt="Icon" height="32" width="32" class="mr-2" />
                 </button>
               </div>`;
       }
@@ -39,7 +39,7 @@ export class FormTemplateComponent implements OnInit {
       cellRenderer: (params: any) => {
         return `<div class="flex items-center">
             <button class="icon-button" onclick="handleDeleteClick('${params.data.id}')">
-              <img src="${params.data.icon2|| '../../../assets/icons/adjustment.svg'}" alt="Trash Icon" height="32" width="32" class="mr-2" />
+              <img src="${params.data.icon2|| '../../../assets/icons/delete.svg'}" alt="Trash Icon" height="32" width="32" class="mr-2" />
             </button>
           </div>`;
       }
@@ -73,8 +73,8 @@ export class FormTemplateComponent implements OnInit {
       next: (templates: FormTemplate[]) => {
         this.rowData = templates.map(template => ({
           ...template,
-          icon: template.icon || '../../../assets/icons/adjustment.svg',
-          icon2: template.icon2 || '../../../assets/icons/trash.svg',
+          icon: template.icon || '../../../assets/icons/customise.svg',
+          icon2: template.icon2 || '../../../assets/icons/delete.svg',
         }));
         this.changeDetector.detectChanges();
       },
