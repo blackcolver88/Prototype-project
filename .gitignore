@@ -3,5 +3,4 @@
 /frontend/.vscode/
 *.log
 *.env
-/backend/form-service/src/main/resources/application.properties
 /backend/workflow-service/src/main/resources/application.properties
