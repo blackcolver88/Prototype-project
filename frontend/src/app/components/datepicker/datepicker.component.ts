@@ -2,9 +2,6 @@ import {Component, Input} from '@angular/core';
 import  {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 
-class Identifier {
-}
-
 @Component({
   selector: 'app-datepicker',
   templateUrl: './datepicker.component.html',
