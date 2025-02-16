@@ -1,4 +1,39 @@
-<div class="flex items-center">
-  <input id="custom-checkbox" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-  <label for="custom-checkbox" class="ml-2 font-medium" [style.color]="textColor" [style.fontSize.px]="textSize">{{ label }}</label>
+<div class="checkbox-group">
+  <label class="font-medium block mb-2" [style.color]="textColor" [style.fontSize.px]="textSize">
+    {{ groupLabel }}
+    <span *ngIf="isRequired" class="text-red-500 ml-1">*</span>
+  </label>
+  
+  <div class="space-y-2">
+    <div *ngFor="let option of options" class="flex items-center" [ngClass]="{'flex-row-reverse': labelPosition === 'left'}">
+      <input 
+        type="checkbox"
+        [(ngModel)]="option.checked"
+        [name]="name"
+        [disabled]="isDisabled"
+        [style.width.px]="checkboxSize"
+        [style.height.px]="checkboxSize"
+        class="bg-gray-100 border-gray-300 rounded focus:ring-2"
+        [ngStyle]="{
+          'accent-color': checkboxColor,
+          'cursor': isDisabled ? 'not-allowed' : 'pointer'
+        }"
+        (change)="onOptionChange()"
+      >
+      <label 
+        class="font-medium select-none"
+        [ngClass]="{
+          'ml-2': labelPosition === 'right',
+          'mr-2': labelPosition === 'left',
+          'cursor-pointer': !isDisabled,
+          'cursor-not-allowed': isDisabled,
+          'opacity-60': isDisabled
+        }"
+        [style.color]="textColor"
+        [style.fontSize.px]="textSize"
+      >
+        {{ option.label }}
+      </label>
+    </div>
+  </div>
 </div>

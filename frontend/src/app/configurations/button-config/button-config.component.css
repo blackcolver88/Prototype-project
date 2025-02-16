@@ -1,0 +1,10 @@
+.button-config {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .button-config label {
+    display: flex;
+    flex-direction: column;
+  }

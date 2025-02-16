@@ -1,6 +1,19 @@
+<div class="selectbox">
 <div class="flex flex-col">
-  <label for="custom-select" class="font-medium text-lg mb-2">{{ label }}</label>
-  <select id="custom-select" class="border border-gray-300 p-2 rounded">
-    <option *ngFor="let option of options" [value]="option">{{ option }}</option>
+  <label [for]="id" 
+         [style.fontSize.px]="textSize"
+         [style.color]="fontColor"
+         [style.fontFamily]="fontFamily"
+         class="font-medium mb-2">
+    {{ label }}
+  </label>
+  <select [id]="id"
+          [(ngModel)]="selectedValue"
+          class="border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    <option value="" disabled selected>Select an option</option>
+    <option *ngFor="let option of options" [value]="option">
+      {{ option }}
+    </option>
   </select>
+</div>
 </div>

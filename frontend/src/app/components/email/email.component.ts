@@ -13,6 +13,7 @@ export class EmailComponent {
   @Input() label: string = 'Email';
   @Input() labelPosition: 'top' | 'left' | 'right' | 'bottom' = 'top';
   @Input() labelAlignment: 'left' | 'right' = 'left';
+  @Input() type: 'text' | 'number' = 'text';
   @Input() textSize: number = 14;
   @Input() fontColor: string = '#000000';
   @Input() fontFamily: string = 'Arial';

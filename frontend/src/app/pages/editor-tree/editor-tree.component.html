@@ -1,6 +1,6 @@
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start p-4">
 
-  <div cdkDropListGroup class="col-span-1 md:col-span-1 px-4 py-2 border-r border-gray-300 w-60">
+  <div cdkDropListGroup class="col-span-1 md:col-span-1 px-4 py-2 border-r border-gray-300 w-full md:w-60">
     <div class="flex justify-center">
       <h2 class="text-lg font-bold text-gray-700 mb-4">Tools</h2>
     </div>
@@ -25,8 +25,8 @@
               [attr.aria-label]="'Toggle ' + node.name"
               cdkTreeNodeToggle
               class="focus:outline-none"
-            >
-              <img src="../../../assets/icons/layout.svg" alt="Toggle Icon" height="32" width="32">
+            > 
+              <img src="../../../assets/icons/check.svg" alt="Toggle Icon" height="32" width="32">
             </button>
             <span class="text-md font-semibold">{{ node.name }}</span>
           </div>
@@ -49,22 +49,120 @@
     <div class="flex justify-center">
       <h2 class="text-xl font-bold text-gray-700 mb-4">Editor</h2>
     </div>
-    <div *ngFor="let item of editorItems" cdkDrag class="cursor-pointer p-2 bg-white shadow-md rounded-lg mb-2">
-      <ng-container *ngIf="item?.type === 'stepper'; else defaultContent">
-        <app-stepper [ss]="item.tabs">
-          <cdk-step *ngFor="let tab of item.tabs">
-            <ng-template cdkStepLabel>{{ tab.label }}</ng-template>
-            <p>Content for {{ tab.label }}</p>
-          </cdk-step>
-        </app-stepper>
+    <div *ngFor="let item of editorItems" cdkDrag class="cursor-pointer p-2 bg-white shadow-md rounded-lg mb-2 relative">
+      <ng-container [ngSwitch]="item?.type">
+        <!-- Text Field -->
+        <ng-container *ngSwitchCase="'textfield'">
+          <div class="relative">
+            <app-textform [label]="item.config.label" [textName]="item.config.textName" [textSize]="item.config.textSize"
+              [type]="item.config.type" [placeholder]="item.config.placeholder" [fontColor]="item.config.fontColor"
+              [fontFamily]="item.config.fontFamily" [labelPosition]="item.config.labelPosition"
+              [labelAlignment]="item.config.labelAlignment">
+            </app-textform>
+          </div>
+        </ng-container>
+
+        <!-- Email -->
+        <ng-container *ngSwitchCase="'email'">
+          <div class="relative">
+            <app-email [label]="item.config.label" [textSize]="item.config.textSize" [placeholder]="item.config.placeholder"
+              [fontColor]="item.config.fontColor" [fontFamily]="item.config.fontFamily"
+              [labelPosition]="item.config.labelPosition" [labelAlignment]="item.config.labelAlignment">
+            </app-email>
+          </div>
+        </ng-container>
+
+        <!-- Checkbox -->
+        <ng-container *ngSwitchCase="'checkbox-group'">
+          <div class="relative">
+            <app-checkbox [groupLabel]="item.config.groupLabel" [textSize]="item.config.textSize" [textColor]="item.config.textColor"
+              [name]="item.config.name" [options]="item.config.options">
+            </app-checkbox>
+          </div>
+        </ng-container>
+
+        <!-- Phone Number -->
+        <ng-container *ngSwitchCase="'phone'">
+          <div class="relative">
+            <app-phone-number [label]="item.config.label" [textSize]="item.config.textSize"
+              [placeholder]="item.config.placeholder" [fontColor]="item.config.fontColor"
+              [fontFamily]="item.config.fontFamily" [labelPosition]="item.config.labelPosition"
+              [labelAlignment]="item.config.labelAlignment">
+            </app-phone-number>
+          </div>
+        </ng-container>
+
+        <!-- Radio Button -->
+        <ng-container *ngSwitchCase="'radio-button'">
+          <div class="relative">
+            <app-radio-button [label]="item.config.label" [options]="item.config.options"
+              [textSize]="item.config.textSize" [textColor]="item.config.textColor">
+            </app-radio-button>
+          </div>
+        </ng-container>
+
+        <!-- Select Box -->
+        <ng-container *ngSwitchCase="'selectbox'">
+          <div class="relative">
+            <app-select-box 
+              [label]="item.config.labelText"
+              [options]="getOptionsArray(item.config.options)"
+              [textSize]="item.config.textSize"
+              [fontColor]="item.config.fontColor"
+              [fontFamily]="item.config.fontFamily">
+            </app-select-box>
+          </div>
+        </ng-container>
+
+        <!-- Date Picker -->
+        <ng-container *ngSwitchCase="'datepicker'">
+          <div class="relative">
+            <app-datepicker [label]="item.config.label" [textSize]="item.config.textSize"
+              [fontColor]="item.config.fontColor" [fontFamily]="item.config.fontFamily">
+            </app-datepicker>
+          </div>
+        </ng-container> 
+
+        <!-- Ranged Date Picker -->
+        <ng-container *ngSwitchCase="'basic-datepicker'">
+          <div class="relative">
+            <app-basic-datepicker [label]="item.config.label" >
+            </app-basic-datepicker> 
+          </div>
+        </ng-container>  
+
+        <!-- Section -->
+        <ng-container *ngSwitchCase="'section'">
+          <app-section [section]="item.sections"></app-section>
+        </ng-container>
+
+        <!-- Button -->
+        <ng-container *ngSwitchCase="'button'">
+          <div class="relative">
+            <app-button 
+              [label]="item.config.label" 
+              [type]="item.config.type"
+              (buttonClick)="handleButtonClick(item.config.type)">
+            </app-button>
+          </div>
+        </ng-container>
       </ng-container>
-      <ng-container *ngIf="item?.type === 'section';">
-        <app-section [section]="item.sections" ></app-section>
-      </ng-container>
-      <ng-template #defaultContent>
-        {{ item?.name }}
-      </ng-template>
+
+      <!-- Delete Button for all types -->
+      <button (click)="removeItem(item)" class="absolute top-0 right-0 p-2 text-red-500 hover:text-red-700">
+        <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+      </button>
+    </div>
+
+    <!-- Submit Button -->
+    <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
+      <app-button 
+        label="Submit" 
+        type="submit" 
+        (buttonClick)="handleSubmit()"
+        class="text-white bg-green-500 hover:bg-green-600 p-2 rounded">
+      </app-button>
     </div>
   </div>
 </div>
-<pre class="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">{{ editorItems | json }}</pre>
+<pre class="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner overflow-auto">{{ editorItems | json }}</pre>

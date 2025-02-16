@@ -18,7 +18,7 @@ export class RadioButtonConfigComponent {
   constructor(private fb: FormBuilder) {
     this.radioForm = this.fb.group({
       labelText: ['Option 1'],
-      textSize: [14], //
+      textSize: [14],
       textColor: ['#000000'],
     });
   }
@@ -36,8 +36,14 @@ export class RadioButtonConfigComponent {
 
   save(): void {
     const formData = this.radioForm.value;
+    const configuredItem = {
+      ...formData,
+      type: 'radio-button',
+      name: formData.labelText,
+      config: formData
+    };
     console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    this.dialogRef.close(configuredItem);
   }
 
   cancel(): void {

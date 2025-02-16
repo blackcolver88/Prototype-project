@@ -18,6 +18,10 @@ export class DatepickerComponent {
   daysInMonth: Date[] = [];
   weekDays: string[] = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   @Input() label: string = 'Select a date range';
+  @Input() textSize: number = 14;
+  @Input() fontColor: string = '#000000';
+  @Input() fontFamily: string = 'Arial';
+
 
   constructor() {
     this.generateCalendar();

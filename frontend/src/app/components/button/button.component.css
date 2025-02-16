@@ -1,0 +1,9 @@
+.btn-submit {
+    background-color: green;
+    color: white;
+  }
+  
+  .btn-reset {
+    background-color: red;
+    color: white;
+  }

@@ -24,7 +24,13 @@ export class BasicdatepickerConfigComponent {
     console.log('Saved configurations:', this.basicDatepickerForm);
     const formData = this.basicDatepickerForm.value;
     console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    const configuredItem = {  
+      ...formData,
+      type: 'basic-datepicker',
+      name: formData.label,
+      config: formData
+    };
+    this.dialogRef.close(configuredItem);
   }
 
   cancel(): void {

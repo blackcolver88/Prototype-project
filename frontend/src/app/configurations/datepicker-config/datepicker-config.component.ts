@@ -22,8 +22,14 @@ export class DatepickerConfigComponent {
 
   save(): void {
     const formData = this.datepickerForm.value;
+    const configuredItem = {
+      ...formData,
+      type: 'datepicker',
+      name: formData.label,
+      config: formData
+    };
     console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    this.dialogRef.close(configuredItem);
   }
 
   cancel(): void {

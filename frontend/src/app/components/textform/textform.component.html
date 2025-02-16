@@ -1,7 +1,9 @@
-<div class="text-field-holder" [ngClass]="{'flex': labelPosition === 'left' || labelPosition === 'right', 'flex-col': labelPosition === 'top' || labelPosition === 'bottom'}">
-    <label
+  <div class="email-field-holder" [ngClass]="{'flex': labelPosition === 'left' || labelPosition === 'right', 'flex-col': labelPosition === 'top' || labelPosition === 'bottom'}">
+ 
+  <label
       for="textInput"
       class="block text-sm font-medium"
+      
       [ngStyle]="{
         'color': fontColor,
         'font-size.px': textSize,
@@ -17,10 +19,13 @@
       {{ label }}
     </label>
 
-    <textarea
+    <input 
+      type ="text"
       id="textInput"
+      placeholder="{{ placeholder }}"
+      [(ngModel)]="textName"
       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize"
       [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
       rows="4"
-    ></textarea>
+    />
   </div>

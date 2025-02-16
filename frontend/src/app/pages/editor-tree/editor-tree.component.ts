@@ -1,23 +1,40 @@
-import {Component, ViewChild, inject, Output, EventEmitter, OnInit, Input} from '@angular/core';
+import { Component, ViewChild, inject, Output, EventEmitter, OnInit, Input, OnDestroy } from '@angular/core';
 import { CdkTreeModule, NestedTreeControl } from '@angular/cdk/tree';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {Dialog, DialogModule, DialogRef} from '@angular/cdk/dialog';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Dialog, DialogModule, DialogRef } from '@angular/cdk/dialog';
 import { TabConfigComponent } from '../../configurations/tab-config/tab-config.component';
 import { StepperComponent } from '../../components/stepper/stepper.component';
-import {TextformConfigComponent} from "../../configurations/textform-config/textform-config.component";
-import {CheckboxConfigComponent} from "../../configurations/checkbox-config/checkbox-config.component";
-import {SelectBoxConfigComponent} from "../../configurations/select-box-config/select-box-config.component";
-import {RadioButtonConfigComponent} from "../../configurations/radio-button-config/radio-button-config.component";
-import {EmailConfigComponent} from "../../configurations/email-config/email-config.component";
-import {PhoneNumberConfigComponent} from "../../configurations/phone-number-config/phone-number-config.component";
-import {DatepickerConfigComponent} from "../../configurations/datepicker-config/datepicker-config.component";
-import {SectionComponent} from "../../components/section/section.component";
-import {SectionConfigComponent} from "../../configurations/section-config/section-config.component";
-import {CdkStepperModule} from "@angular/cdk/stepper";
-import {BasicdatepickerConfigComponent} from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
-import {HttpClientModule} from "@angular/common/http";
-import {ActivatedRoute} from "@angular/router";
+import { TextformConfigComponent } from "../../configurations/textform-config/textform-config.component";
+import { CheckboxConfigComponent } from "../../configurations/checkbox-config/checkbox-config.component";
+import { SelectBoxConfigComponent } from "../../configurations/select-box-config/select-box-config.component";
+import { RadioButtonConfigComponent } from "../../configurations/radio-button-config/radio-button-config.component";
+import { EmailConfigComponent } from "../../configurations/email-config/email-config.component";
+import { PhoneNumberConfigComponent } from "../../configurations/phone-number-config/phone-number-config.component";
+import { DatepickerConfigComponent } from "../../configurations/datepicker-config/datepicker-config.component";
+import { SectionComponent } from "../../components/section/section.component";
+import { SectionConfigComponent } from "../../configurations/section-config/section-config.component";
+import { CdkStepperModule } from "@angular/cdk/stepper";
+import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
+import { HttpClientModule } from "@angular/common/http";
+import { ActivatedRoute } from "@angular/router";
+import { ChangeDetectorRef } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { TextformComponent } from "../../components/textform/textform.component";
+import { EmailComponent } from "../../components/email/email.component";
+import { CheckboxComponent } from "../../components/checkbox/checkbox.component";
+import { PhoneNumberComponent } from "../../components/phone-number/phone-number.component";
+import { RadioButtonComponent } from "../../components/radio-button/radio-button.component";
+import { SelectBoxComponent } from "../../components/select-box/select-box.component";
+import { DatepickerComponent } from "../../components/datepicker/datepicker.component";
+import { ButtonComponent } from "../../components/button/button.component";
+import { ButtonConfigComponent } from '../../configurations/button-config/button-config.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
+import { BasicDatepickerComponent } from '../../components/basic-datepicker/basic-datepicker.component';
+
 export interface FoodNode {
   name: string;
   children?: FoodNode[];
@@ -37,8 +54,9 @@ const TREE_DATA: FoodNode[] = [
       { name: 'Phone number' },
       { name: 'Radio button' },
       { name: 'Select box' },
-      { name: 'Ranged date picker' },
-      { name: 'Date picker' }
+      { name: 'Basic date picker' },
+      { name: 'Date picker' },
+      { name: 'Button' }
     ],
   },
 ];
@@ -46,26 +64,16 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, StepperComponent, SectionComponent, CdkStepperModule, HttpClientModule, NgOptimizedImage,],
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, StepperComponent,
+    SectionComponent, CdkStepperModule, HttpClientModule, NgOptimizedImage, FontAwesomeModule, 
+    TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent, 
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
-export class EditorTreeComponent implements OnInit {
-  templateId!: string;
-  constructor(private route: ActivatedRoute) {}
-
-  ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      this.templateId = params.get('id')!;
-      this.loadEditorTree(this.templateId);
-    });
-  }
-
-  loadEditorTree(id: string) {
-
-    console.log('Loading editor tree for template ID:', id);
-
-  }
+export class EditorTreeComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>(); // Pour gérer la désinscription des observables
+  templateId!: string; 
   @ViewChild('acquiredItems') acquiredItems!: CdkDropList;
   @Output() saveStepper = new EventEmitter<any>();
   @Output() saveSection = new EventEmitter<any>();
@@ -75,134 +83,181 @@ export class EditorTreeComponent implements OnInit {
   editorItems: any[] = [];
   @Input() tabs: any[] = [];
   private dialog = inject(Dialog);
-  onEditorDrop(event: CdkDragDrop<FoodNode[]>) {
+
+  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary, private matDialog: MatDialog) {
+    library.addIcons(faTrashAlt); // Ajouter l'icône de corbeille
+  }
+
+  ngOnInit() {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      this.templateId = params.get('id')!;
+      this.loadEditorTree(this.templateId);
+    });
+    // this.initializeEditorItems();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(); // Détruit les souscriptions
+    this.destroy$.complete();
+  }
+
+  loadEditorTree(id: string) {
+    console.log('Loading editor tree for template ID:', id);
+  }
+
+  onEditorDrop(event: CdkDragDrop<any[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       const draggedItem = event.item.data;
-      if (draggedItem && draggedItem.name === 'Stepper') {
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog(draggedItem, event.currentIndex);
+      if (!draggedItem) {
+        console.error('Dragged item is null or undefined'); 
+        return;
       }
-      else if(draggedItem && draggedItem.name === 'Text field'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(TextformConfigComponent,draggedItem);
+
+      copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
+
+      switch (draggedItem.name) {
+        case 'Stepper':
+          this.openDialog(TabConfigComponent, draggedItem, event.currentIndex, 'saveStepper');
+          break;
+        case 'Text field':
+          this.openDialog(TextformConfigComponent, draggedItem);
+          break;
+        case 'Email':
+          this.openDialog(EmailConfigComponent, draggedItem);
+          break;
+        case 'Checkbox':
+          this.openDialog(CheckboxConfigComponent, draggedItem);
+          break;
+        case 'Phone number':
+          this.openDialog(PhoneNumberConfigComponent, draggedItem);
+          break;
+        case 'Radio button':
+          this.openDialog(RadioButtonConfigComponent, draggedItem);
+          break;
+          case 'Select box':
+            const selectBoxConfig = {
+              type: 'selectbox',
+              config: {
+                labelText: 'Select Box',
+                options: ['Option 1', 'Option 2', 'Option 3'],
+                textSize: 14,
+                fontColor: '#000000',
+                fontFamily: 'Arial'
+              }
+            };
+            this.openDialog(SelectBoxConfigComponent, draggedItem);
+            break;
+        case 'Basic date picker':
+          this.openDialog(BasicdatepickerConfigComponent, draggedItem);
+          break;
+        case 'Date picker':
+          this.openDialog(DatepickerConfigComponent, draggedItem);
+          break;
+        case 'Section': 
+          this.openDialog(SectionConfigComponent, draggedItem);
+          break;
+        case 'Button':
+          this.openDialog(ButtonConfigComponent, draggedItem);
+          break;
+        default:
+          console.warn('Unhandled item type:', draggedItem.name);
       }
-      else if(draggedItem && draggedItem.name === 'Checkbox'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(CheckboxConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Select box'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(SelectBoxConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Date picker'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(BasicdatepickerConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Radio button'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(RadioButtonConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Email'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(EmailConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Phone number'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(PhoneNumberConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Ranged date picker'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog2(DatepickerConfigComponent,draggedItem);
-      }
-      else if(draggedItem && draggedItem.name === 'Section'){
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog3(draggedItem,event.currentIndex);
-      }
-      else if (draggedItem) {
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
+    }
+  }
+
+  private openDialog(
+    configComponent: any,
+    draggedItem: FoodNode,
+    index?: number,
+    eventName?: string
+  ) {
+    const dialogRef = this.dialog.open(configComponent, {
+      width: '70vw',
+      height: '80vh',
+      data: { item: draggedItem },
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      backdropClass: 'custom-dialog-backdrop',
+    });
+
+    dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(result => {
+      if (result) {
+        if (index !== undefined && index >= 0) {
+          this.editorItems[index] = result;
+        } else {
+          this.editorItems.push(result);
+        }
+        this.cdr.detectChanges();
       } else {
-        console.error('Dragged item is null or undefined');
-      }
-    }
-  }
-
-  private openDialog(draggedItem: FoodNode, index: number) {
-    const dialogRef = this.dialog.open(TabConfigComponent, {
-      width: '70vw',
-      height: '80vh',
-      data: {
-        item: draggedItem
-      },
-      disableClose: false,
-      panelClass: 'custom-dialog-container',
-      backdropClass: 'custom-dialog-backdrop',
-    });
-
-    const componentInstance = dialogRef.componentInstance;
-    if (componentInstance && componentInstance.saveStepper) {
-      componentInstance.saveStepper.subscribe((customizedStepperData: any) => {
         if (index !== undefined && index >= 0) {
-          this.editorItems[index] = customizedStepperData;
-        } else {
-          console.error('No indexes senpaiiiii');
+          this.editorItems.splice(index, 1);
         }
-      });
-    } else {
-      console.error('Component instance or saveStepper is not available');
-    }
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        console.log('Dialog result:', result);
       }
     });
   }
-  private openDialog2(configComponent: any,draggedItem: FoodNode) {
-    const dialogRef: DialogRef<any> = this.dialog.open(configComponent, {
-      width: '70vw',
-      height: '80vh',
-      data: {
-        item: draggedItem
-      },
-      disableClose: false,
-      panelClass: 'custom-dialog-container',
-      backdropClass: 'custom-dialog-backdrop',
-    });
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        console.log('Dialog result:', result);
-      }
-    });
+  handleButtonClick(type: string) {
+    if (type === 'submit') {
+      this.handleSubmit();
+    } else if (type === 'reset') {
+      this.resetForm();
+    }
+  }
+  
+  handleSubmit() {
+    // Implement the logic to handle form submission
+    console.log('Form submitted:', this.editorItems);
+    // Add your form submission logic here
+  }
+  
+  resetForm() {
+    this.editorItems = [];
+    console.log('All items removed');
+  }
 
-  }
-  private openDialog3(draggedItem: FoodNode,index: number) {
-    const dialogRef = this.dialog.open(SectionConfigComponent, {
-      width: '70vw',
-      height: '80vh',
-      data: {
-        item: draggedItem
-      },
-      disableClose: false,
-      panelClass: 'custom-dialog-container',
-      backdropClass: 'custom-dialog-backdrop',
-    });
-    const componentInstance = dialogRef.componentInstance;
-    if (componentInstance) {
-      componentInstance.saveSection.subscribe((customizedSectionData: any) => {
-        if (index !== undefined && index >= 0) {
-          this.editorItems[index] = customizedSectionData;
-        } else {
-          console.error('No indexes senpaiiiii');
-        }
-      });
+  removeItem(item: any) {
+    const index = this.editorItems.indexOf(item);
+    if (index > -1) {
+      this.editorItems.splice(index, 1);
     }
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        console.log('Dialog result:', result);
+    console.log('Item removed:', item);
+  }
+
+  openDeleteDialog(): void {
+    const dialogRef = this.matDialog.open(DeleteConfirmationDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.resetForm();
       }
     });
   }
 
+
+  getOptionsArray(options: string | string[]): string[] {
+    if (Array.isArray(options)) {
+      return options;
+    }
+    if (typeof options === 'string') {
+      return options.split(',').map(option => option.trim()).filter(option => option.length > 0);
+    }
+    return [];
+  }
+
+  // initializeEditorItems() {
+  //   this.editorItems = [
+  //     {
+  //       type: 'radio',
+  //       config: {
+  //         label: 'Sample Radio Button',
+  //         options: ['Option 1', 'Option 2'],
+  //         textSize: 14,
+  //         textColor: '#000000'
+  //       }
+  //     },
+  //     // ... other items ...
+  //   ];
+  //   console.log('Editor Items:', this.editorItems);
+  // }
 }
-

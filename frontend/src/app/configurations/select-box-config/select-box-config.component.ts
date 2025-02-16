@@ -35,8 +35,14 @@ export class SelectBoxConfigComponent {
 
   save(): void {
     const formData = this.selectBoxForm.value;
+    const configuredItem = {
+      ...formData,
+      type: 'selectbox',
+      name: formData.labelText,
+      config: formData
+    };
     console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    this.dialogRef.close(configuredItem);
   }
 
   cancel(): void {

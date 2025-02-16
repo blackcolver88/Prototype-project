@@ -25,10 +25,15 @@ export class PhoneNumberConfigComponent {
   }
 
   save(): void {
-    console.log(this.phoneNumberForm.value);
-    const formData = this.phoneNumberForm.value;
+    const formData = this.phoneNumberForm.value;      
     console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    const configuredItem = {
+      ...formData,
+      type: 'phone',
+      name: formData.label,
+      config: formData
+    };
+    this.dialogRef.close(configuredItem);
   }
 
   cancel(): void {

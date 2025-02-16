@@ -1,0 +1,55 @@
+<div class="flex flex-col md:flex-row md:space-x-8 p-4">
+  <form class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
+
+    <div class="space-y-2">
+      <label for="buttonLabel" class="block font-semibold">Button Label</label>
+      <input
+        id="buttonLabel"
+        [(ngModel)]="buttonLabel"
+        type="text"
+        class="w-full border border-gray-300 p-2 rounded"
+        placeholder="Enter button label"
+        (input)="onConfigChange()"
+      />
+    </div>
+
+    <div class="space-y-2">
+      <label for="buttonType" class="block font-semibold">Button Type</label>
+      <select
+        id="buttonType"
+        [(ngModel)]="buttonType"
+        class="w-full border border-gray-300 p-2 rounded"
+        (change)="onConfigChange()"
+      >
+        <option value="submit">Submit</option>
+        <option value="reset">Reset</option>
+      </select>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:space-x-4 mt-4">
+      <button
+        type="submit"
+        (click)="save()"
+        class="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 p-2 rounded mb-2 sm:mb-0"
+      >
+        Save
+      </button>
+      <button
+        type="button"
+        (click)="cancel()"
+        class="w-full sm:w-auto text-white bg-gray-500 hover:bg-gray-600 p-2 rounded"
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
+    <h3 class="font-semibold mb-2">Preview</h3>
+    <app-button
+      [label]="buttonLabel"
+      [type]="buttonType"
+      (buttonClick)="onConfigChange()"
+    ></app-button>
+  </div>
+</div>
