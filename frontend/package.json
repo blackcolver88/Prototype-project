@@ -25,6 +25,8 @@
     "@angular/router": "^19.0.0",
     "@angular/ssr": "^19.0.2",
     "@ionic/angular": "^8.4.3",
+    "@ionic/angular-toolkit": "^11.0.1",
+    "@tabler/icons": "^3.12.0",
     "@tailwindcss/postcss": "^4.0.6",
     "@tailwindcss/vite": "^4.0.6",
     "ag-grid-angular": "^32.1.0",
