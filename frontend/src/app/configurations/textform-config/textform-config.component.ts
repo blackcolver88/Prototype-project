@@ -17,10 +17,6 @@ export class TextformConfigComponent {
   constructor(private fb: FormBuilder) {
     this.textForm = this.fb.group({
       label: ['Text Field'],
-      tabs: this.fb.array([]),
-      textSize: [14],
-      fontColor: ['#000000'],
-      fontFamily: ['Helvetica'],
       labelPosition: ['top'],
       labelAlignment: ['left']
     });

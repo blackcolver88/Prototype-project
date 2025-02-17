@@ -17,9 +17,7 @@ export class RadioButtonConfigComponent {
   private dialogRef = inject(DialogRef);
   constructor(private fb: FormBuilder) {
     this.radioForm = this.fb.group({
-      labelText: ['Option 1'],
-      textSize: [14], //
-      textColor: ['#000000'],
+      labelText: ['Option 1']
     });
   }
 

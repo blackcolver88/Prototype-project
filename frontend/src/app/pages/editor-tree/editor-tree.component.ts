@@ -1,7 +1,7 @@
 import {Component, ViewChild, inject, Output, EventEmitter, OnInit, Input} from '@angular/core';
 import { CdkTreeModule, NestedTreeControl } from '@angular/cdk/tree';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {Dialog, DialogModule, DialogRef} from '@angular/cdk/dialog';
 import { TabConfigComponent } from '../../configurations/tab-config/tab-config.component';
 import { StepperComponent } from '../../components/stepper/stepper.component';
@@ -18,6 +18,7 @@ import {CdkStepperModule} from "@angular/cdk/stepper";
 import {BasicdatepickerConfigComponent} from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
 import {HttpClientModule} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
+import {PasswordConfigComponent} from '../../configurations/password-config/password-config.component';
 export interface FoodNode {
   name: string;
   children?: FoodNode[];
@@ -26,7 +27,7 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'Stepper' }, { name: 'Section' }],
+    children: [{ name: 'Section' }],
   },
   {
     name: 'Form',
@@ -38,7 +39,8 @@ const TREE_DATA: FoodNode[] = [
       { name: 'Radio button' },
       { name: 'Select box' },
       { name: 'Ranged date picker' },
-      { name: 'Date picker' }
+      { name: 'Date picker' },
+      { name: 'Password'}
     ],
   },
 ];
@@ -46,7 +48,7 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, StepperComponent, SectionComponent, CdkStepperModule, HttpClientModule, NgOptimizedImage,],
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, StepperComponent, SectionComponent, CdkStepperModule, HttpClientModule,],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
@@ -80,11 +82,7 @@ export class EditorTreeComponent implements OnInit {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       const draggedItem = event.item.data;
-      if (draggedItem && draggedItem.name === 'Stepper') {
-        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
-        this.openDialog(draggedItem, event.currentIndex);
-      }
-      else if(draggedItem && draggedItem.name === 'Text field'){
+      if(draggedItem && draggedItem.name === 'Text field'){
         copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
         this.openDialog2(TextformConfigComponent,draggedItem);
       }
@@ -116,6 +114,10 @@ export class EditorTreeComponent implements OnInit {
         copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
         this.openDialog2(DatepickerConfigComponent,draggedItem);
       }
+      else if(draggedItem && draggedItem.name === 'Password'){
+        copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
+        this.openDialog2(PasswordConfigComponent,draggedItem);
+      }
       else if(draggedItem && draggedItem.name === 'Section'){
         copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
         this.openDialog3(draggedItem,event.currentIndex);
@@ -128,36 +130,6 @@ export class EditorTreeComponent implements OnInit {
     }
   }
 
-  private openDialog(draggedItem: FoodNode, index: number) {
-    const dialogRef = this.dialog.open(TabConfigComponent, {
-      width: '70vw',
-      height: '80vh',
-      data: {
-        item: draggedItem
-      },
-      disableClose: false,
-      panelClass: 'custom-dialog-container',
-      backdropClass: 'custom-dialog-backdrop',
-    });
-
-    const componentInstance = dialogRef.componentInstance;
-    if (componentInstance && componentInstance.saveStepper) {
-      componentInstance.saveStepper.subscribe((customizedStepperData: any) => {
-        if (index !== undefined && index >= 0) {
-          this.editorItems[index] = customizedStepperData;
-        } else {
-          console.error('No indexes senpaiiiii');
-        }
-      });
-    } else {
-      console.error('Component instance or saveStepper is not available');
-    }
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        console.log('Dialog result:', result);
-      }
-    });
-  }
   private openDialog2(configComponent: any,draggedItem: FoodNode) {
     const dialogRef: DialogRef<any> = this.dialog.open(configComponent, {
       width: '70vw',

@@ -3,20 +3,19 @@
       *ngIf="labelPosition === 'top'"
       [for]="label"
       class="block text-sm font-medium mb-2"
-      [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
+
     >
       {{ label }}
     </label>
     <div [ngClass]="{
           'flex flex-row items-center': labelPosition === 'left' || labelPosition === 'right',
-          'flex-col': labelPosition === 'top' || labelPosition === 'bottom'
+          'flex-col': labelPosition === 'top'
         }"
     >
       <label
         *ngIf="labelPosition === 'left'"
         [for]="label"
         class="block text-sm font-medium mr-2"
-        [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
       >
         {{ label }}
       </label>
@@ -24,7 +23,6 @@
         type="tel"
         id="phoneInput"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
         pattern="[0-9]*"
       title="Please enter a valid phone number."
       (keypress)="allowOnlyNumbers($event)"
@@ -33,17 +31,8 @@
         *ngIf="labelPosition === 'right'"
         [for]="label"
         class="block text-sm font-medium ml-2"
-        [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
       >
         {{ label }}
       </label>
     </div>
-    <label
-      *ngIf="labelPosition === 'bottom'"
-      [for]="label"
-      class="block text-sm font-medium mt-2"
-      [ngStyle]="{'color': fontColor, 'font-size.px': textSize, 'font-family': fontFamily}"
-    >
-      {{ label }}
-    </label>
   </div>
