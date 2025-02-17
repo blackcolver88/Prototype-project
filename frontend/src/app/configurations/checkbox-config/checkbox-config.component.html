@@ -5,16 +5,6 @@
       <input id="labelText" formControlName="labelText" type="text" class="w-full border border-gray-300 p-2 rounded" />
     </div>
 
-    <div class="space-y-2">
-      <label for="textSize" class="block font-semibold">Text Size</label>
-      <input id="textSize" formControlName="textSize" type="number" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
-
-    <div class="space-y-2">
-      <label for="textColor" class="block font-semibold">Font Color</label>
-      <input id="textColor" formControlName="textColor" type="color" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
-
     <div class="flex flex-col sm:flex-row sm:space-x-4">
       <button type="button" (click)="addCheckbox()" class="w-full sm:w-auto text-white bg-blue-500 hover:bg-blue-600 p-2 rounded mt-2">+ Add Another Checkbox</button>
       <button type="button" (click)="removeCheckbox()" class="w-full sm:w-auto text-white bg-red-500 hover:bg-red-600 p-2 rounded mt-2">- Remove Last Checkbox</button>
@@ -41,9 +31,7 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-checkbox
       *ngFor="let checkbox of checkboxes"
-      [label]="checkbox.labelText"
-      [textSize]="checkbox.textSize"
-      [textColor]="checkbox.textColor">
+      [label]="checkbox.labelText">
     </app-checkbox>
   </div>
 </div>

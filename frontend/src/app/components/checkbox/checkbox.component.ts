@@ -10,6 +10,5 @@ import {CommonModule} from "@angular/common";
 })
 export class CheckboxComponent {
   @Input() label: string = 'Check this box';
-  @Input() textColor: string = '#000000';
-  @Input() textSize: number = 14;
+
 }
