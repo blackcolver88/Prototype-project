@@ -11,6 +11,4 @@ import { CommonModule } from '@angular/common';
 export class RadioButtonComponent {
   @Input() label: string = 'Option';
   @Input() name: string = 'radioGroup';
-  @Input() textSize: number = 14;
-  @Input() textColor: string = '#000000';
 }

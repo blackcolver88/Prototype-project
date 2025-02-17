@@ -17,9 +17,6 @@ export class PhoneNumberConfigComponent {
   constructor(private fb: FormBuilder) {
     this.phoneNumberForm = this.fb.group({
       label: ['Phone Number'],
-      textSize: [14],
-      fontColor: ['#000000'],
-      fontFamily: ['Arial'],
       labelPosition: ['top']
     });
   }

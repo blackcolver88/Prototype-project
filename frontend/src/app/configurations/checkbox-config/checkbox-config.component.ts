@@ -17,9 +17,7 @@ export class CheckboxConfigComponent {
   private dialogRef = inject(DialogRef);
   constructor(private fb: FormBuilder) {
     this.checkboxForm = this.fb.group({
-      labelText: ['Check this box'],
-      textSize: [14],
-      textColor: ['#000000'],
+      labelText: ['Check this box']
     });
   }
 
