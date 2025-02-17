@@ -43,7 +43,8 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'Stepper' }, { name: 'Section' }],
+    children: [{ name: 'Stepper' },
+               { name: 'Section' }],
   },
   {
     name: 'Form',
@@ -72,7 +73,7 @@ const TREE_DATA: FoodNode[] = [
   styleUrls: ['./editor-tree.component.css']
 })
 export class EditorTreeComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>(); // Pour gérer la désinscription des observables
+  private destroy$ = new Subject<void>();
   templateId!: string; 
   @ViewChild('acquiredItems') acquiredItems!: CdkDropList;
   @Output() saveStepper = new EventEmitter<any>();
@@ -85,7 +86,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private dialog = inject(Dialog);
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary, private matDialog: MatDialog) {
-    library.addIcons(faTrashAlt); // Ajouter l'icône de corbeille
+    library.addIcons(faTrashAlt); 
   }
 
   ngOnInit() {
@@ -111,55 +112,45 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     } else {
       const draggedItem = event.item.data;
       if (!draggedItem) {
-        console.error('Dragged item is null or undefined'); 
+        console.error('Dragged item is null or undefined');
         return;
       }
 
-      copyArrayItem([draggedItem], event.container.data, 0, event.currentIndex);
+      const targetIndex = event.currentIndex;
 
       switch (draggedItem.name) {
         case 'Stepper':
-          this.openDialog(TabConfigComponent, draggedItem, event.currentIndex, 'saveStepper');
+          this.openDialog(TabConfigComponent, draggedItem, targetIndex, 'saveStepper');
           break;
         case 'Text field':
-          this.openDialog(TextformConfigComponent, draggedItem);
+          this.openDialog(TextformConfigComponent, draggedItem, targetIndex);
           break;
         case 'Email':
-          this.openDialog(EmailConfigComponent, draggedItem);
+          this.openDialog(EmailConfigComponent, draggedItem, targetIndex);
           break;
         case 'Checkbox':
-          this.openDialog(CheckboxConfigComponent, draggedItem);
+          this.openDialog(CheckboxConfigComponent, draggedItem, targetIndex);
           break;
         case 'Phone number':
-          this.openDialog(PhoneNumberConfigComponent, draggedItem);
+          this.openDialog(PhoneNumberConfigComponent, draggedItem, targetIndex);
           break;
         case 'Radio button':
-          this.openDialog(RadioButtonConfigComponent, draggedItem);
+          this.openDialog(RadioButtonConfigComponent, draggedItem, targetIndex);
           break;
-          case 'Select box':
-            const selectBoxConfig = {
-              type: 'selectbox',
-              config: {
-                labelText: 'Select Box',
-                options: ['Option 1', 'Option 2', 'Option 3'],
-                textSize: 14,
-                fontColor: '#000000',
-                fontFamily: 'Arial'
-              }
-            };
-            this.openDialog(SelectBoxConfigComponent, draggedItem);
-            break;
+        case 'Select box':
+          this.openDialog(SelectBoxConfigComponent, draggedItem, targetIndex);
+          break;
         case 'Basic date picker':
-          this.openDialog(BasicdatepickerConfigComponent, draggedItem);
+          this.openDialog(BasicdatepickerConfigComponent, draggedItem, targetIndex);
           break;
         case 'Date picker':
-          this.openDialog(DatepickerConfigComponent, draggedItem);
+          this.openDialog(DatepickerConfigComponent, draggedItem, targetIndex);
           break;
-        case 'Section': 
-          this.openDialog(SectionConfigComponent, draggedItem);
+        case 'Section':
+          this.openDialog(SectionConfigComponent, draggedItem, targetIndex);
           break;
         case 'Button':
-          this.openDialog(ButtonConfigComponent, draggedItem);
+          this.openDialog(ButtonConfigComponent, draggedItem, targetIndex);
           break;
         default:
           console.warn('Unhandled item type:', draggedItem.name);
@@ -170,7 +161,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private openDialog(
     configComponent: any,
     draggedItem: FoodNode,
-    index?: number,
+    index: number,
     eventName?: string
   ) {
     const dialogRef = this.dialog.open(configComponent, {
@@ -184,16 +175,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
     dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result) {
-        if (index !== undefined && index >= 0) {
-          this.editorItems[index] = result;
-        } else {
-          this.editorItems.push(result);
-        }
+
+        this.editorItems.splice(index, 0, result);
         this.cdr.detectChanges();
-      } else {
-        if (index !== undefined && index >= 0) {
-          this.editorItems.splice(index, 1);
-        }
       }
     });
   }
@@ -206,9 +190,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   
   handleSubmit() {
-    // Implement the logic to handle form submission
     console.log('Form submitted:', this.editorItems);
-    // Add your form submission logic here
   }
   
   resetForm() {
@@ -245,19 +227,11 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  // initializeEditorItems() {
-  //   this.editorItems = [
-  //     {
-  //       type: 'radio',
-  //       config: {
-  //         label: 'Sample Radio Button',
-  //         options: ['Option 1', 'Option 2'],
-  //         textSize: 14,
-  //         textColor: '#000000'
-  //       }
-  //     },
-  //     // ... other items ...
-  //   ];
-  //   console.log('Editor Items:', this.editorItems);
-  // }
+  onSectionItemDropped(event: any, section: any) {
+    section.items = event.items;
+    
+    this.saveSection.emit(section);
+  }
+
+
 }

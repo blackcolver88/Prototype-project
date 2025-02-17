@@ -133,7 +133,13 @@
 
         <!-- Section -->
         <ng-container *ngSwitchCase="'section'">
-          <app-section [section]="item.sections"></app-section>
+          <div class="section-wrapper">
+            <app-section 
+              [sectionItems]="item.items"
+              [connectedDropLists]="['editor-list']"
+              (itemDropped)="onSectionItemDropped($event, item)">
+            </app-section>
+          </div>
         </ng-container>
 
         <!-- Button -->

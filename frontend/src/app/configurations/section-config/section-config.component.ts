@@ -18,19 +18,23 @@ export class SectionConfigComponent {
   customizedSectionData: any;
   constructor(private fb: FormBuilder) {
     this.sectionForm = this.fb.group({
+      type: ['section'],
+      name: ['Section'],
+      items: [[]]
+  
     });
   }
   get section(): FormArray {
-    return this.sectionForm.get('sections') as FormArray;
+    return this.sectionForm.get('section') as FormArray;
   }
   onSave(): void {
-    this.customizedSectionData = {
-      type: 'section'
-    };
-    this.saveSection.emit(this.customizedSectionData);
     const formData = this.sectionForm.value;
-    console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    this.dialogRef.close({
+      type: 'section',
+      name: formData.name,
+      items: [],
+      config: formData
+    });
   }
 
   cancel(): void {
