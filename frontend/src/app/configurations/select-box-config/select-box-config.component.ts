@@ -22,17 +22,6 @@ export class SelectBoxConfigComponent {
     });
   }
 
-  addSelectBox(): void {
-    const selectBoxConfig = this.selectBoxForm.value;
-    this.selectBoxes.push(selectBoxConfig);
-  }
-
-  removeSelectBox(): void {
-    if (this.selectBoxes.length > 0) {
-      this.selectBoxes.pop();
-    }
-  }
-
   save(): void {
     const formData = this.selectBoxForm.value;
     const configuredItem = {

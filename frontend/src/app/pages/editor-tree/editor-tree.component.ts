@@ -1,10 +1,8 @@
 import { Component, ViewChild, inject, Output, EventEmitter, OnInit, Input, OnDestroy } from '@angular/core';
 import { CdkTreeModule, NestedTreeControl } from '@angular/cdk/tree';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Dialog, DialogModule, DialogRef } from '@angular/cdk/dialog';
-import { TabConfigComponent } from '../../configurations/tab-config/tab-config.component';
-import { StepperComponent } from '../../components/stepper/stepper.component';
+import { CommonModule} from '@angular/common';
+import { Dialog, DialogModule} from '@angular/cdk/dialog';
 import { TextformConfigComponent } from "../../configurations/textform-config/textform-config.component";
 import { CheckboxConfigComponent } from "../../configurations/checkbox-config/checkbox-config.component";
 import { SelectBoxConfigComponent } from "../../configurations/select-box-config/select-box-config.component";
@@ -34,6 +32,8 @@ import { ButtonConfigComponent } from '../../configurations/button-config/button
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
 import { BasicDatepickerComponent } from '../../components/basic-datepicker/basic-datepicker.component';
+import {PasswordComponent} from '../../components/password/password.component';
+import {PasswordConfigComponent} from '../../configurations/password-config/password-config.component';
 
 export interface FoodNode {
   name: string;
@@ -43,8 +43,7 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'Stepper' },
-               { name: 'Section' }],
+    children: [{ name: 'Section' }],
   },
   {
     name: 'Form',
@@ -57,7 +56,8 @@ const TREE_DATA: FoodNode[] = [
       { name: 'Select box' },
       { name: 'Basic date picker' },
       { name: 'Date picker' },
-      { name: 'Button' }
+      { name: 'Button' },
+      { name: 'Password' },
     ],
   },
 ];
@@ -65,16 +65,16 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, StepperComponent,
-    SectionComponent, CdkStepperModule, HttpClientModule, NgOptimizedImage, FontAwesomeModule, 
-    TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent, 
-    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent],
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup,
+    SectionComponent, CdkStepperModule, HttpClientModule,FontAwesomeModule,
+    TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent,
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent,PasswordConfigComponent],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
 export class EditorTreeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  templateId!: string; 
+  templateId!: string;
   @ViewChild('acquiredItems') acquiredItems!: CdkDropList;
   @Output() saveStepper = new EventEmitter<any>();
   @Output() saveSection = new EventEmitter<any>();
@@ -86,7 +86,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private dialog = inject(Dialog);
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary, private matDialog: MatDialog) {
-    library.addIcons(faTrashAlt); 
+    library.addIcons(faTrashAlt);
   }
 
   ngOnInit() {
@@ -119,9 +119,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       const targetIndex = event.currentIndex;
 
       switch (draggedItem.name) {
-        case 'Stepper':
-          this.openDialog(TabConfigComponent, draggedItem, targetIndex, 'saveStepper');
-          break;
         case 'Text field':
           this.openDialog(TextformConfigComponent, draggedItem, targetIndex);
           break;
@@ -148,6 +145,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           break;
         case 'Section':
           this.openDialog(SectionConfigComponent, draggedItem, targetIndex);
+          break;
+        case 'Password':
+          this.openDialog(PasswordConfigComponent, draggedItem, targetIndex);
           break;
         case 'Button':
           this.openDialog(ButtonConfigComponent, draggedItem, targetIndex);
@@ -188,11 +188,11 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.resetForm();
     }
   }
-  
+
   handleSubmit() {
     console.log('Form submitted:', this.editorItems);
   }
-  
+
   resetForm() {
     this.editorItems = [];
     console.log('All items removed');
@@ -229,7 +229,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
   onSectionItemDropped(event: any, section: any) {
     section.items = event.items;
-    
+
     this.saveSection.emit(section);
   }
 

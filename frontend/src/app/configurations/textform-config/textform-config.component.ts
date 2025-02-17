@@ -14,7 +14,7 @@ import { DialogRef } from "@angular/cdk/dialog";
 export class TextformConfigComponent {
   textForm: FormGroup;
   private dialogRef = inject(DialogRef);
-  
+
   // Define input types
   inputTypes = [
     { value: 'text', label: 'Text' },
@@ -27,10 +27,7 @@ export class TextformConfigComponent {
       label: ['Text Field', Validators.required],
       textName: [''],
       type: ['text', Validators.required],
-      textSize: [14, [Validators.required, Validators.min(8), Validators.max(72)]],
       placeholder: ['Enter Text Field here'],
-      fontColor: ['#000000', Validators.required],
-      fontFamily: ['Helvetica', Validators.required],
       labelPosition: ['top', Validators.required],
       labelAlignment: ['left', Validators.required]
     });
@@ -39,7 +36,7 @@ export class TextformConfigComponent {
     this.textForm.get('type')?.valueChanges.subscribe(type => {
       const label = this.textForm.get('label')?.value;
       let placeholder: string;
-      
+
       switch(type) {
         case 'email':
           placeholder = `Enter ${label} email`;
@@ -53,7 +50,7 @@ export class TextformConfigComponent {
           placeholder = `Enter ${label} here`;
           this.textForm.get('textName')?.setValidators(Validators.required);
       }
-      
+
       this.textForm.patchValue({
         textName: '',
         placeholder: placeholder
@@ -65,7 +62,7 @@ export class TextformConfigComponent {
     this.textForm.get('label')?.valueChanges.subscribe(label => {
       const type = this.textForm.get('type')?.value;
       let placeholder: string;
-      
+
       switch(type) {
         case 'email':
           placeholder = `Enter ${label} email`;
@@ -76,7 +73,7 @@ export class TextformConfigComponent {
         default:
           placeholder = `Enter ${label} here`;
       }
-      
+
       this.textForm.patchValue({
         placeholder: placeholder
       }, { emitEvent: false });

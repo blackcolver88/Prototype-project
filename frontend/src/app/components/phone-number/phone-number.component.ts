@@ -9,11 +9,8 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule]
 })
 export class PhoneNumberComponent {
-  @Input() textSize: number = 14;
-  @Input() fontColor: string = '#000000';
   @Input() placeholder: string = 'Phone Number';
   @Input() label: string = 'Phone Number';
-  @Input() fontFamily: string = 'Arial';
   @Input() labelPosition: string = 'top';
   @Input() labelAlignment: string = 'left';
 

@@ -6,26 +6,6 @@
     </div>
 
     <div class="space-y-2">
-      <label for="textSize" class="block font-semibold">Text Size</label>
-      <input id="textSize" formControlName="textSize" type="number" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
- 
-    <div class="space-y-2">
-      <label for="textColor" class="block font-semibold">Text Color</label>
-      <input id="textColor" formControlName="textColor" type="color" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
-
-    <div class="space-y-2">
-      <label for="checkboxSize" class="block font-semibold">Checkbox Size</label>
-      <input id="checkboxSize" formControlName="checkboxSize" type="number" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
-
-    <div class="space-y-2">
-      <label for="checkboxColor" class="block font-semibold">Checkbox Color</label>
-      <input id="checkboxColor" formControlName="checkboxColor" type="color" class="w-full border border-gray-300 p-2 rounded" />
-    </div>
-
-    <div class="space-y-2">
       <label class="block font-semibold">Options</label>
       <div formArrayName="options" class="space-y-2">
         <div *ngFor="let option of options.controls; let i=index" [formGroupName]="i" class="flex space-x-2">
@@ -73,14 +53,10 @@
     <app-checkbox
       [groupLabel]="checkboxForm.get('groupLabel')?.value"
       [options]="checkboxForm.get('options')?.value"
-      [textSize]="checkboxForm.get('textSize')?.value"
-      [textColor]="checkboxForm.get('textColor')?.value"
       [name]="checkboxForm.get('name')?.value"
       [isRequired]="checkboxForm.get('isRequired')?.value"
       [isDisabled]="checkboxForm.get('isDisabled')?.value"
-      [labelPosition]="checkboxForm.get('labelPosition')?.value"
-      [checkboxSize]="checkboxForm.get('checkboxSize')?.value"
-      [checkboxColor]="checkboxForm.get('checkboxColor')?.value">
+      [labelPosition]="checkboxForm.get('labelPosition')?.value">
     </app-checkbox>
   </div>
 </div>

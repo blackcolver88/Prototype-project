@@ -25,7 +25,7 @@
               [attr.aria-label]="'Toggle ' + node.name"
               cdkTreeNodeToggle
               class="focus:outline-none"
-            > 
+            >
               <img src="../../../assets/icons/check.svg" alt="Toggle Icon" height="32" width="32">
             </button>
             <span class="text-md font-semibold">{{ node.name }}</span>
@@ -54,19 +54,28 @@
         <!-- Text Field -->
         <ng-container *ngSwitchCase="'textfield'">
           <div class="relative">
-            <app-textform [label]="item.config.label" [textName]="item.config.textName" [textSize]="item.config.textSize"
-              [type]="item.config.type" [placeholder]="item.config.placeholder" [fontColor]="item.config.fontColor"
-              [fontFamily]="item.config.fontFamily" [labelPosition]="item.config.labelPosition"
+            <app-textform [label]="item.config.label" [textName]="item.config.textName"
+              [type]="item.config.type" [placeholder]="item.config.placeholder" [labelPosition]="item.config.labelPosition"
               [labelAlignment]="item.config.labelAlignment">
             </app-textform>
           </div>
         </ng-container>
 
+        <ng-container *ngSwitchCase="'password'"  >
+          <div class="relative">
+            <app-password >
+
+            </app-password>
+          </div>
+
+        </ng-container>
+
+
+
         <!-- Email -->
         <ng-container *ngSwitchCase="'email'">
           <div class="relative">
-            <app-email [label]="item.config.label" [textSize]="item.config.textSize" [placeholder]="item.config.placeholder"
-              [fontColor]="item.config.fontColor" [fontFamily]="item.config.fontFamily"
+            <app-email [label]="item.config.label" [placeholder]="item.config.placeholder"
               [labelPosition]="item.config.labelPosition" [labelAlignment]="item.config.labelAlignment">
             </app-email>
           </div>
@@ -75,7 +84,7 @@
         <!-- Checkbox -->
         <ng-container *ngSwitchCase="'checkbox-group'">
           <div class="relative">
-            <app-checkbox [groupLabel]="item.config.groupLabel" [textSize]="item.config.textSize" [textColor]="item.config.textColor"
+            <app-checkbox [groupLabel]="item.config.groupLabel"
               [name]="item.config.name" [options]="item.config.options">
             </app-checkbox>
           </div>
@@ -84,9 +93,8 @@
         <!-- Phone Number -->
         <ng-container *ngSwitchCase="'phone'">
           <div class="relative">
-            <app-phone-number [label]="item.config.label" [textSize]="item.config.textSize"
-              [placeholder]="item.config.placeholder" [fontColor]="item.config.fontColor"
-              [fontFamily]="item.config.fontFamily" [labelPosition]="item.config.labelPosition"
+            <app-phone-number [label]="item.config.label"
+              [placeholder]="item.config.placeholder" [labelPosition]="item.config.labelPosition"
               [labelAlignment]="item.config.labelAlignment">
             </app-phone-number>
           </div>
@@ -95,8 +103,7 @@
         <!-- Radio Button -->
         <ng-container *ngSwitchCase="'radio-button'">
           <div class="relative">
-            <app-radio-button [label]="item.config.label" [options]="item.config.options"
-              [textSize]="item.config.textSize" [textColor]="item.config.textColor">
+            <app-radio-button [label]="item.config.label" [options]="item.config.options">
             </app-radio-button>
           </div>
         </ng-container>
@@ -104,12 +111,9 @@
         <!-- Select Box -->
         <ng-container *ngSwitchCase="'selectbox'">
           <div class="relative">
-            <app-select-box 
+            <app-select-box
               [label]="item.config.labelText"
-              [options]="getOptionsArray(item.config.options)"
-              [textSize]="item.config.textSize"
-              [fontColor]="item.config.fontColor"
-              [fontFamily]="item.config.fontFamily">
+              [options]="getOptionsArray(item.config.options)">
             </app-select-box>
           </div>
         </ng-container>
@@ -117,24 +121,23 @@
         <!-- Date Picker -->
         <ng-container *ngSwitchCase="'datepicker'">
           <div class="relative">
-            <app-datepicker [label]="item.config.label" [textSize]="item.config.textSize"
-              [fontColor]="item.config.fontColor" [fontFamily]="item.config.fontFamily">
+            <app-datepicker [label]="item.config.label">
             </app-datepicker>
           </div>
-        </ng-container> 
+        </ng-container>
 
         <!-- Ranged Date Picker -->
         <ng-container *ngSwitchCase="'basic-datepicker'">
           <div class="relative">
             <app-basic-datepicker [label]="item.config.label" >
-            </app-basic-datepicker> 
+            </app-basic-datepicker>
           </div>
-        </ng-container>  
+        </ng-container>
 
         <!-- Section -->
         <ng-container *ngSwitchCase="'section'">
           <div class="section-wrapper">
-            <app-section 
+            <app-section
               [sectionItems]="item.items"
               [connectedDropLists]="['editor-list']"
               (itemDropped)="onSectionItemDropped($event, item)">
@@ -145,8 +148,8 @@
         <!-- Button -->
         <ng-container *ngSwitchCase="'button'">
           <div class="relative">
-            <app-button 
-              [label]="item.config.label" 
+            <app-button
+              [label]="item.config.label"
               [type]="item.config.type"
               (buttonClick)="handleButtonClick(item.config.type)">
             </app-button>
@@ -162,9 +165,9 @@
 
     <!-- Submit Button -->
     <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
-      <app-button 
-        label="Submit" 
-        type="submit" 
+      <app-button
+        label="Submit"
+        type="submit"
         (buttonClick)="handleSubmit()"
         class="text-white bg-green-500 hover:bg-green-600 p-2 rounded">
       </app-button>

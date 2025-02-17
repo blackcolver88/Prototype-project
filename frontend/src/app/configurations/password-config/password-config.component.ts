@@ -30,9 +30,17 @@ export class PasswordConfigComponent {
   }
 
   save(): void {
-    const formData = this.passwordForm.value;
-    console.log('Form data saved:', formData);
-    this.dialogRef.close(formData);
+    if (this.passwordForm.valid) {
+      const formData = this.passwordForm.value;
+      const configuredItem = {
+        ...formData,
+        type: 'password',
+        name: formData.label || 'Password', // Assuming you have a label field in your form
+        config: formData
+      };
+      console.log('Form data saved:', configuredItem);
+      this.dialogRef.close(configuredItem);
+    }
   }
 
   cancel(): void {

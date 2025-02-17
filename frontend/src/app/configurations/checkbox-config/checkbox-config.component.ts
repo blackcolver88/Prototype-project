@@ -18,14 +18,10 @@ export class CheckboxConfigComponent {
   constructor(private fb: FormBuilder) {
     this.checkboxForm = this.fb.group({
       groupLabel: ['Checkbox Group'],
-      textSize: [14],
-      textColor: ['#000000'],
       name: [''],
       isRequired: [false],
       isDisabled: [false],
       labelPosition: ['right'],
-      checkboxSize: [16],
-      checkboxColor: ['#4A90E2'],
       options: this.fb.array([])
     });
 

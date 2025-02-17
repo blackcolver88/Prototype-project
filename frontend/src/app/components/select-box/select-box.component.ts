@@ -12,10 +12,8 @@ import { FormsModule } from '@angular/forms';
 export class SelectBoxComponent {
   @Input() label: string = 'Select an option';
   @Input() options: string[] = [];
-  @Input() textSize: number = 14;
-  @Input() fontColor: string = '#000000';
   @Input() fontFamily: string = 'Arial';
   @Input() id: string = 'select-' + Math.random().toString(36).substr(2, 9);
-  
+
   selectedValue: string = '';
 }

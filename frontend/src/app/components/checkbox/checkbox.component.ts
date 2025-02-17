@@ -18,14 +18,10 @@ interface CheckboxOption {
 export class CheckboxComponent {
   @Input() groupLabel: string = 'Checkbox Group';
   @Input() options: CheckboxOption[] = [];
-  @Input() textColor: string = '#000000';
-  @Input() textSize: number = 14;
   @Input() name: string = 'checkbox';
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
   @Input() labelPosition: 'left' | 'right' = 'right';
-  @Input() checkboxSize: number = 16;
-  @Input() checkboxColor: string = '#4A90E2';
 
   @Output() optionChange = new EventEmitter<CheckboxOption[]>();
 
