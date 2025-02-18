@@ -101,10 +101,11 @@
         </ng-container>
 
         <!-- Radio Button -->
-        <ng-container *ngSwitchCase="'radio-button'">
+        <ng-container *ngSwitchCase="'radio-group'">
           <div class="relative">
-            <app-radio-button [label]="item.config.label" [options]="item.config.options">
-            </app-radio-button>
+            <app-checkbox [groupLabel]="item.config.groupLabel"
+                          [name]="item.config.name" [options]="item.config.options">
+            </app-checkbox>
           </div>
         </ng-container>
 

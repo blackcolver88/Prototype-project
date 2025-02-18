@@ -1,8 +1,8 @@
-import {Component, inject} from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { RadioButtonComponent } from '../../components/radio-button/radio-button.component';
-import {DialogRef} from "@angular/cdk/dialog";
+import { CommonModule } from '@angular/common';
+import { DialogRef } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'app-radio-button-config',
@@ -13,34 +13,46 @@ import {DialogRef} from "@angular/cdk/dialog";
 })
 export class RadioButtonConfigComponent {
   radioForm: FormGroup;
-  radioButtons: any[] = [];
   private dialogRef = inject(DialogRef);
+
   constructor(private fb: FormBuilder) {
     this.radioForm = this.fb.group({
-      labelText: ['Option 1']
+      groupLabel: ['Radio Group'],
+      name: [''],
+      isRequired: [false],
+      isDisabled: [false],
+      labelPosition: ['right'],
+      options: this.fb.array([])
     });
+
+    // Add default option
+    this.addOption();
   }
 
-  addRadioButton(): void {
-    const radioConfig = this.radioForm.value;
-    this.radioButtons.push(radioConfig);
+  get options() {
+    return this.radioForm.get('options') as FormArray;
   }
 
-  removeRadioButton(): void {
-    if (this.radioButtons.length > 0) {
-      this.radioButtons.pop();
-    }
+  addOption() {
+    const optionGroup = this.fb.group({
+      label: [`Option ${this.options.length + 1}`],
+      value: [`option_${this.options.length + 1}`]
+    });
+    this.options.push(optionGroup);
+  }
+
+  removeOption(index: number) {
+    this.options.removeAt(index);
   }
 
   save(): void {
     const formData = this.radioForm.value;
     const configuredItem = {
       ...formData,
-      type: 'radio-button',
-      name: formData.labelText,
+      type: 'radio-group',
+      name: formData.groupLabel,
       config: formData
     };
-    console.log('Form data saved:', formData);
     this.dialogRef.close(configuredItem);
   }
 

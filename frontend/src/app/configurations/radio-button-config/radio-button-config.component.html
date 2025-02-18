@@ -1,52 +1,63 @@
 <div class="flex flex-col md:flex-row md:space-x-8 p-4">
-    <form [formGroup]="radioForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
-      <div class="space-y-2">
-        <label for="labelText" class="block font-semibold">Radio Button Label</label>
-        <input id="labelText" formControlName="labelText" type="text" class="w-full border border-gray-300 p-2 rounded" />
-      </div>
-
-
-      <div class="flex flex-col sm:flex-row sm:space-x-4 mt-4">
-        <button
-          type="button"
-          (click)="addRadioButton()"
-          class="w-full sm:w-auto text-white bg-blue-500 hover:bg-blue-600 p-2 rounded"
-        >
-          + Add Another Radio Button
-        </button>
-        <button
-          type="button"
-          (click)="removeRadioButton()"
-          class="w-full sm:w-auto text-white bg-red-500 hover:bg-red-600 p-2 rounded"
-        >
-          - Remove Last Radio Button
-        </button>
-      </div>
-
-      <div class="flex space-x-4 mt-4">
-        <button
-          type="submit"
-          (click)="save()"
-          class="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 p-2 rounded"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          (click)="cancel()"
-          class="w-full sm:w-auto text-white bg-gray-500 hover:bg-gray-600 p-2 rounded"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-
-    <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
-      <h3 class="font-semibold mb-2">Preview</h3>
-      <app-radio-button
-        *ngFor="let radioButton of radioButtons"
-        [label]="radioButton.labelText"
-        [name]="'radioGroup'"
-      ></app-radio-button>
+  <form [formGroup]="radioForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
+    <div class="space-y-2">
+      <label for="groupLabel" class="block font-semibold">Group Label</label>
+      <input id="groupLabel" formControlName="groupLabel" type="text" class="w-full border border-gray-300 p-2 rounded" />
     </div>
+
+    <div class="space-y-2">
+      <label class="block font-semibold">Options</label>
+      <div formArrayName="options" class="space-y-2">
+        <div *ngFor="let option of options.controls; let i=index" [formGroupName]="i" class="flex space-x-2">
+          <input formControlName="label" placeholder="Option label" class="flex-1 border border-gray-300 p-2 rounded" />
+          <button type="button" (click)="removeOption(i)" class="text-red-500 px-2">×</button>
+        </div>
+      </div>
+      <button type="button" (click)="addOption()" class="text-blue-500 mt-2">+ Add Option</button>
+    </div>
+
+    <div class="space-y-2">
+      <label for="labelPosition" class="block font-semibold">Label Position</label>
+      <select id="labelPosition" formControlName="labelPosition" class="w-full border border-gray-300 p-2 rounded">
+        <option value="right">Right</option>
+        <option value="left">Left</option>
+      </select>
+    </div>
+
+    <div class="space-y-2">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" formControlName="isRequired" class="rounded">
+        <span>Required</span>
+      </label>
+    </div>
+
+    <div class="space-y-2">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" formControlName="isDisabled" class="rounded">
+        <span>Disabled</span>
+      </label>
+    </div>
+
+    <div class="flex space-x-4 mt-4">
+      <button type="submit" (click)="save()" class="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 p-2 rounded">
+        Save
+      </button>
+      <button type="button" (click)="cancel()" class="w-full sm:w-auto text-white bg-gray-500 hover:bg-gray-600 p-2 rounded">
+        Cancel
+      </button>
+    </div>
+  </form>
+
+  <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
+    <h3 class="font-semibold mb-2">Preview</h3>
+    <app-radio-button
+      [groupLabel]="radioForm.get('groupLabel')?.value"
+      [options]="radioForm.get('options')?.value"
+      [name]="radioForm.get('name')?.value"
+      [isRequired]="radioForm.get('isRequired')?.value"
+      [isDisabled]="radioForm.get('isDisabled')?.value"
+      [labelPosition]="radioForm.get('labelPosition')?.value"
+      [selectedOption]="radioForm.get('options')?.value[0]?.value"
+    ></app-radio-button>
   </div>
+</div>
