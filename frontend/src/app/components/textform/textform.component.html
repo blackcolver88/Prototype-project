@@ -1,27 +1,27 @@
-  <div class="email-field-holder" [ngClass]="{'flex': labelPosition === 'left' || labelPosition === 'right', 'flex-col': labelPosition === 'top' || labelPosition === 'bottom'}">
+<div class="email-field-holder" [ngClass]="{'flex': labelPosition === 'left' || labelPosition === 'right', 'flex-col': labelPosition === 'top' || labelPosition === 'bottom'}">
 
   <label
-      for="textInput"
-      class="block text-sm font-medium"
+    for="textInput"
+    class="block text-sm font-medium"
 
-      [ngStyle]="{
+    [ngStyle]="{
         'text-align': labelAlignment === 'left' ? 'left' : 'right'
       }"
-      [ngClass]="{
+    [ngClass]="{
         'order-1': labelPosition === 'top',
         'order-2': labelPosition === 'left' || labelPosition === 'bottom',
         'order-3': labelPosition === 'right'
       }"
-    >
-      {{ label }}
-    </label>
+  >
+    {{ label }}
+  </label>
 
-    <input
-      type ="text"
-      id="textInput"
-      placeholder="{{ placeholder }}"
-      [(ngModel)]="textName"
-      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize"
-      rows="4"
-    />
-  </div>
+  <input
+    type ="text"
+    id="textInput"
+    placeholder="{{ placeholder }}"
+    [(ngModel)]="textName"
+    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize"
+    rows="4"
+  />
+</div>
