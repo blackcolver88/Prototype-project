@@ -103,9 +103,16 @@
         <!-- Radio Button -->
         <ng-container *ngSwitchCase="'radio-group'">
           <div class="relative">
-            <app-checkbox [groupLabel]="item.config.groupLabel"
-                          [name]="item.config.name" [options]="item.config.options">
-            </app-checkbox>
+            <app-radio-button
+              [groupLabel]="item.config.groupLabel"
+              [name]="item.config.name"
+              [options]="item.config.options"
+              [isRequired]="item.config.isRequired"
+              [isDisabled]="item.config.isDisabled"
+              [labelPosition]="item.config.labelPosition"
+              [selectedOption]="item.config.selectedOption"
+            >
+            </app-radio-button>
           </div>
         </ng-container>
 
