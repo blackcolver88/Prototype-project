@@ -34,4 +34,13 @@ export class FormTemplateService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  addFormLayoutsToFormTemplate(formTemplateId: number, formLayouts: FormLayout[]): Observable<FormTemplate> {
+    return this.http.post<FormTemplate>(`${this.baseUrl}/${formTemplateId}/form-layouts`, formLayouts);
+  }
+
+  getFormTemplateWithFormLayouts(formTemplateId: number): Observable<FormTemplate> {
+    return this.http.get<FormTemplate>(`${this.baseUrl}/${formTemplateId}/form-layouts`);
+  }
+
+
 }

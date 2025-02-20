@@ -34,6 +34,9 @@ import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component
 import { BasicDatepickerComponent } from '../../components/basic-datepicker/basic-datepicker.component';
 import {PasswordComponent} from '../../components/password/password.component';
 import {PasswordConfigComponent} from '../../configurations/password-config/password-config.component';
+import { FormLayout } from '../../model/FormLayout';
+import { FormTemplateService } from '../../services/form-template.service';
+import { FormTemplate } from '../../model/FormTemplate';
 
 export interface FoodNode {
   name: string;
@@ -43,7 +46,7 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'Section' }],
+    children: [{ name: 'SECTION' }],
   },
   {
     name: 'Form',
@@ -85,17 +88,24 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   @Input() tabs: any[] = [];
   private dialog = inject(Dialog);
 
-  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary, private matDialog: MatDialog) {
+
+  formTemplateId: number | undefined;
+  formLayoutsToAdd: FormLayout[] = []; 
+  formTemplate!: FormTemplate; 
+
+  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
+     private matDialog: MatDialog,private formTemplateService: FormTemplateService) {
     library.addIcons(faTrashAlt);
   }
 
   ngOnInit() {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.templateId = params.get('id')!;
-      this.loadEditorTree(this.templateId);
+      this.loadFormTemplateWithLayouts(this.templateId);
     });
-    // this.initializeEditorItems();
   }
+ 
+
 
   ngOnDestroy() {
     this.destroy$.next(); // Détruit les souscriptions
@@ -143,7 +153,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         case 'Date picker':
           this.openDialog(DatepickerConfigComponent, draggedItem, targetIndex);
           break;
-        case 'Section':
+        case 'SECTION':
           this.openDialog(SectionConfigComponent, draggedItem, targetIndex);
           break;
         case 'Password':
@@ -188,10 +198,36 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.resetForm();
     }
   }
+  loadFormTemplateWithLayouts(id: string) {
+    this.formTemplateService.getFormTemplateWithFormLayouts(+id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (formTemplate: FormTemplate) => {
+          this.editorItems = formTemplate.formLayouts || [];
+          this.cdr.detectChanges();
+        },
+        (error) => {
+          console.error('Error loading form template with layouts:', error);
+        }
+      );
+  }
 
   handleSubmit() {
-    console.log('Form submitted:', this.editorItems);
+    this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, this.editorItems)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (updatedFormTemplate: FormTemplate) => {
+          console.log('Form layouts added successfully:', updatedFormTemplate);
+
+          this.editorItems = updatedFormTemplate.formLayouts || [];
+          this.cdr.detectChanges();
+        },
+        (error) => {
+          console.error('Error adding form layouts:', error);
+        }
+      );
   }
+
 
   resetForm() {
     this.editorItems = [];

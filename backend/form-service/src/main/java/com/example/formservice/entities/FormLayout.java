@@ -1,5 +1,6 @@
 package com.example.formservice.entities;
 import com.example.formservice.entities.enums.FormLayoutType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.ArrayList;
@@ -13,13 +14,11 @@ public class FormLayout {
     private Long id;
 
     private String title;
-    private Long priority;
 
     @Enumerated(EnumType.STRING)
     private FormLayoutType type;
 
-    @Column(length = 1000)
-    private String style;
+
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -31,8 +30,9 @@ public class FormLayout {
     @OneToMany(mappedBy = "formLayout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormInput> formInputs = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "form_template_id")
+    @JsonIgnore
     private FormTemplate formTemplate;
 }
 

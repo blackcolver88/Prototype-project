@@ -1,7 +1,9 @@
 package com.example.formservice.service;
 
 import com.example.formservice.entities.FormLayout;
+import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.repository.FormLayoutRepository;
+import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -9,9 +11,13 @@ import java.util.Optional;
 @Service
 public class FormLayoutService {
     private final FormLayoutRepository formLayoutRepository;
+    private final FormTemplateRepository formTemplateRepository;
 
-    public FormLayoutService(FormLayoutRepository formLayoutRepository) {
+
+    public FormLayoutService(FormLayoutRepository formLayoutRepository, FormTemplateRepository formTemplateRepository) {
         this.formLayoutRepository = formLayoutRepository;
+        this.formTemplateRepository = formTemplateRepository;
+
     }
 
     public List<FormLayout> findAll() {
@@ -38,4 +44,6 @@ public class FormLayoutService {
             throw new IllegalArgumentException("FormLayout with id " + id + " does not exist");
         }
     }
+
+
 }

@@ -18,9 +18,6 @@ public class FormInput {
     private boolean required;
     private Long length;
     private String option;
-    private Long priority;
-    @Column(length = 1000)
-    private String style;
 
     @ManyToOne
     @JoinColumn(name = "form_layout_id")
