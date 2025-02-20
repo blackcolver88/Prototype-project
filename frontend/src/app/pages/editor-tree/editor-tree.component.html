@@ -75,8 +75,10 @@
         <!-- Email -->
         <ng-container *ngSwitchCase="'email'">
           <div class="relative">
-            <app-email [label]="item.config.label" [placeholder]="item.config.placeholder"
-                       [labelPosition]="item.config.labelPosition" [labelAlignment]="item.config.labelAlignment">
+            <app-email [label]="item.config.label"
+                       [placeholder]="item.config.placeholder"
+                       [labelPosition]="item.config.labelPosition"
+                       [labelAlignment]="item.config.labelAlignment">
             </app-email>
           </div>
         </ng-container>
@@ -91,7 +93,7 @@
         </ng-container>
 
         <!-- Phone Number -->
-        <ng-container *ngSwitchCase="'phone'">
+        <ng-container *ngSwitchCase="'number'">
           <div class="relative">
             <app-phone-number [label]="item.config.label"
                               [placeholder]="item.config.placeholder" [labelPosition]="item.config.labelPosition"
