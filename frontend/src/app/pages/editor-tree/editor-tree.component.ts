@@ -46,21 +46,18 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'SECTION' }],
+    children: [{ name: 'Section' }],
   },
   {
     name: 'Form',
     children: [
       { name: 'Text field' },
-      { name: 'Email' },
       { name: 'Checkbox' },
-      { name: 'Phone number' },
       { name: 'Radio button' },
       { name: 'Select box' },
       { name: 'Basic date picker' },
       { name: 'Date picker' },
-      { name: 'Button' },
-      { name: 'Password' },
+      { name: 'Button' }
     ],
   },
 ];
@@ -90,8 +87,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
 
   formTemplateId: number | undefined;
-  formLayoutsToAdd: FormLayout[] = []; 
-  formTemplate!: FormTemplate; 
+  formLayoutsToAdd: FormLayout[] = [];
+  formTemplate!: FormTemplate;
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
      private matDialog: MatDialog,private formTemplateService: FormTemplateService) {
@@ -104,7 +101,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.loadFormTemplateWithLayouts(this.templateId);
     });
   }
- 
+
 
 
   ngOnDestroy() {
