@@ -18,7 +18,7 @@ export class SectionConfigComponent {
   customizedSectionData: any;
   constructor(private fb: FormBuilder) {
     this.sectionForm = this.fb.group({
-      type: ['section'],
+      type: ['SECTION'],
       name: ['Section'],
       items: [[]]
   
@@ -30,7 +30,7 @@ export class SectionConfigComponent {
   onSave(): void {
     const formData = this.sectionForm.value;
     this.dialogRef.close({
-      type: 'section',
+      type: 'SECTION',
       name: formData.name,
       items: [],
       config: formData

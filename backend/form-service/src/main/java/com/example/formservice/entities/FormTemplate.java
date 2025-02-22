@@ -1,4 +1,5 @@
 package com.example.formservice.entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.ArrayList;
@@ -15,4 +16,6 @@ public class FormTemplate {
 
     @OneToMany(mappedBy = "formTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormLayout> formLayouts = new ArrayList<>();
+
+
 }

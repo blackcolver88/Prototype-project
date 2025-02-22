@@ -1,5 +1,6 @@
 package com.example.formservice.controller;
 
+import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.service.FormTemplateService;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,20 @@ public class FormTemplateController {
     public ResponseEntity<Void> deleteFormTemplate(@PathVariable("id") Long id) {
         formTemplateService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/form-layouts")
+    public ResponseEntity<FormTemplate> addFormLayoutsToFormTemplate(
+            @PathVariable Long id,
+            @RequestBody List<FormLayout> formLayouts) {
+        FormTemplate updatedFormTemplate = formTemplateService.addFormLayoutsToFormTemplate(id, formLayouts);
+        return ResponseEntity.ok(updatedFormTemplate);
+    }
+
+    @GetMapping("/{id}/form-layouts")
+    public ResponseEntity<FormTemplate> getFormLayoutsByFormTemplateId(@PathVariable Long id) {
+        FormTemplate formTemplate = formTemplateService.getFormTemplateWithFormLayouts(id);
+        return ResponseEntity.ok(formTemplate);
     }
 }
 
