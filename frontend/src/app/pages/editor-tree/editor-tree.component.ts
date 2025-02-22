@@ -103,7 +103,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.templateId = params.get('id')!;
       this.loadFormTemplateWithLayouts(this.templateId);
     });
-    // this.initializeEditorItems();
   }
  
 

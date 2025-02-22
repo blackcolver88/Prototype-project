@@ -14,13 +14,11 @@ public class FormLayout {
     private Long id;
 
     private String title;
-    private Long priority;
 
     @Enumerated(EnumType.STRING)
     private FormLayoutType type;
 
-    @Column(length = 1000)
-    private String style;
+
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
