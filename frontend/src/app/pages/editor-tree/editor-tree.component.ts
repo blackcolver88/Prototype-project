@@ -85,7 +85,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   @Input() tabs: any[] = [];
   private dialog = inject(Dialog);
 
-
+  formTitle: string = '';
   formTemplateId: number | undefined;
   formLayoutsToAdd: FormLayout[] = [];
   formTemplate!: FormTemplate;
@@ -201,6 +201,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       .subscribe(
         (formTemplate: FormTemplate) => {
           this.editorItems = formTemplate.formLayouts || [];
+          this.formTitle = formTemplate.title ?? '';
           this.cdr.detectChanges();
         },
         (error) => {

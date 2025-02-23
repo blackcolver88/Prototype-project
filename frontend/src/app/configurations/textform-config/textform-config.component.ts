@@ -51,7 +51,7 @@ export class TextformConfigComponent {
           break;
          case 'password':
            placeholder = `Enter ${label} password`;
-           this.textForm.get('textName')?.setValidators([Validators.required]);
+           this.textForm.get('textName')?.setValidators([Validators.email]);
            break;
         default:
           placeholder = `Enter ${label} here`;
