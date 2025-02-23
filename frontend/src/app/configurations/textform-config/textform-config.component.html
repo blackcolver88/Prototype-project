@@ -24,7 +24,7 @@
         class="w-full border border-gray-300 p-2 rounded"
         placeholder="Enter field name (e.g., nom, prenom)"
       />
-      <div *ngIf="textForm.get('textName')?.invalid && textForm.get('textName')?.touched" class="text-red-500">
+      <div *ngIf="textForm.get('textName')?.touched" class="text-red-500">
         Field Name is required.
         <span *ngIf="textForm.get('textName')?.errors?.['email']">Please enter a valid email.</span>
         <span *ngIf="textForm.get('textName')?.errors?.['pattern']">Please enter a valid number.</span>

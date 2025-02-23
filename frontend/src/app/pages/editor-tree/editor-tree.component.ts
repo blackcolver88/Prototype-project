@@ -37,6 +37,7 @@ import {PasswordConfigComponent} from '../../configurations/password-config/pass
 import { FormLayout } from '../../model/FormLayout';
 import { FormTemplateService } from '../../services/form-template.service';
 import { FormTemplate } from '../../model/FormTemplate';
+import { FormLayoutService } from '../../services/form-layout.service';
 
 export interface FoodNode {
   name: string;
@@ -52,15 +53,12 @@ const TREE_DATA: FoodNode[] = [
     name: 'Form',
     children: [
       { name: 'Text field' },
-      { name: 'Email' },
       { name: 'Checkbox' },
-      { name: 'Phone number' },
       { name: 'Radio button' },
       { name: 'Select box' },
       { name: 'Basic date picker' },
       { name: 'Date picker' },
-      { name: 'Button' },
-      { name: 'Password' },
+      { name: 'Button' }
     ],
   },
 ];
@@ -88,13 +86,13 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   @Input() tabs: any[] = [];
   private dialog = inject(Dialog);
 
-
+  formTitle: string = '';
   formTemplateId: number | undefined;
-  formLayoutsToAdd: FormLayout[] = []; 
-  formTemplate!: FormTemplate; 
+  formLayoutsToAdd: FormLayout[] = [];
+  formTemplate!: FormTemplate;
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-     private matDialog: MatDialog,private formTemplateService: FormTemplateService) {
+     private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
     library.addIcons(faTrashAlt);
   }
 
@@ -104,7 +102,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.loadFormTemplateWithLayouts(this.templateId);
     });
   }
- 
+
 
 
   ngOnDestroy() {
@@ -204,6 +202,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       .subscribe(
         (formTemplate: FormTemplate) => {
           this.editorItems = formTemplate.formLayouts || [];
+          this.formTitle = formTemplate.title ?? '';
           this.cdr.detectChanges();
         },
         (error) => {
@@ -236,10 +235,25 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
   removeItem(item: any) {
     const index = this.editorItems.indexOf(item);
-    if (index > -1) {
+    if (index === -1) return;
+
+    // If the item has an ID, delete it via the API
+    if (item.id) {
+      this.formLayoutService.deleteFormLayout(item.id).subscribe({
+        next: () => {
+          this.editorItems.splice(index, 1);
+          console.log('Item deleted successfully:', item);
+        },
+        error: (err) => {
+          console.error('Error deleting item:', err);
+          // Handle error (e.g., show a notification)
+        }
+      });
+    } else {
+      // If the item has no ID, remove it locally
       this.editorItems.splice(index, 1);
+      console.log('Item removed locally:', item);
     }
-    console.log('Item removed:', item);
   }
 
   openDeleteDialog(): void {
