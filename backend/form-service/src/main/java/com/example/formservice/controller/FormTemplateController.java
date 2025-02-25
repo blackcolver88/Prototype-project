@@ -1,5 +1,6 @@
 package com.example.formservice.controller;
 
+import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.service.FormTemplateService;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class FormTemplateController {
 
     private final FormTemplateService formTemplateService;
+
 
     public FormTemplateController(FormTemplateService formTemplateService) {
         this.formTemplateService = formTemplateService;
@@ -58,5 +60,21 @@ public class FormTemplateController {
         FormTemplate formTemplate = formTemplateService.getFormTemplateWithFormLayouts(id);
         return ResponseEntity.ok(formTemplate);
     }
+
+    @PostMapping("/{templateId}/form-inputs")
+    public ResponseEntity<FormInput> addFormInputToTemplate(
+            @PathVariable Long templateId,
+            @RequestBody FormInput formInput) {
+        FormInput savedFormInput = formTemplateService.addFormInputToTemplate(templateId, formInput);
+        return ResponseEntity.ok(savedFormInput);
+    }
+
+    @GetMapping("/{templateId}/form-inputs")
+    public ResponseEntity<List<FormInput>> getFormInputsByTemplateId(@PathVariable Long templateId) {
+        List<FormInput> formInputs = formTemplateService.getFormInputsByTemplateId(templateId);
+        return ResponseEntity.ok(formInputs);
+    }
+
+
 }
 

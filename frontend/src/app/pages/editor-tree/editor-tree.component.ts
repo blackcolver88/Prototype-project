@@ -7,8 +7,6 @@ import { TextformConfigComponent } from "../../configurations/textform-config/te
 import { CheckboxConfigComponent } from "../../configurations/checkbox-config/checkbox-config.component";
 import { SelectBoxConfigComponent } from "../../configurations/select-box-config/select-box-config.component";
 import { RadioButtonConfigComponent } from "../../configurations/radio-button-config/radio-button-config.component";
-import { EmailConfigComponent } from "../../configurations/email-config/email-config.component";
-import { PhoneNumberConfigComponent } from "../../configurations/phone-number-config/phone-number-config.component";
 import { DatepickerConfigComponent } from "../../configurations/datepicker-config/datepicker-config.component";
 import { SectionComponent } from "../../components/section/section.component";
 import { SectionConfigComponent } from "../../configurations/section-config/section-config.component";
@@ -89,7 +87,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formTitle: string = '';
   formTemplateId: number | undefined;
   formLayoutsToAdd: FormLayout[] = [];
-  formTemplate!: FormTemplate;
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
      private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
@@ -100,13 +97,16 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.templateId = params.get('id')!;
       this.loadFormTemplateWithLayouts(this.templateId);
+            this.findDefaultFormLayout();
+            
+
     });
   }
 
 
 
   ngOnDestroy() {
-    this.destroy$.next(); // Détruit les souscriptions
+    this.destroy$.next(); 
     this.destroy$.complete();
   }
 
@@ -117,61 +117,103 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   onEditorDrop(event: CdkDragDrop<any[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+  
+    const draggedItem = event.item.data;
+    if (!draggedItem) {
+      console.error('Dragged item is null or undefined');
+      return;
+    }
+  
+    const targetSection = this.findSectionAt(event.container.data, event.currentIndex);
+    if (targetSection) {
+      this.addItemToSection(draggedItem, targetSection);
     } else {
-      const draggedItem = event.item.data;
-      if (!draggedItem) {
-        console.error('Dragged item is null or undefined');
-        return;
-      }
-
-      const targetIndex = event.currentIndex;
-
-      switch (draggedItem.name) {
-        case 'Text field':
-          this.openDialog(TextformConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Email':
-          this.openDialog(EmailConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Checkbox':
-          this.openDialog(CheckboxConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Phone number':
-          this.openDialog(PhoneNumberConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Radio button':
-          this.openDialog(RadioButtonConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Select box':
-          this.openDialog(SelectBoxConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Basic date picker':
-          this.openDialog(BasicdatepickerConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Date picker':
-          this.openDialog(DatepickerConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'SECTION':
-          this.openDialog(SectionConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Password':
-          this.openDialog(PasswordConfigComponent, draggedItem, targetIndex);
-          break;
-        case 'Button':
-          this.openDialog(ButtonConfigComponent, draggedItem, targetIndex);
-          break;
-        default:
-          console.warn('Unhandled item type:', draggedItem.name);
-      }
+      this.createSectionWithItem(draggedItem, event.currentIndex);
     }
   }
 
-  private openDialog(
-    configComponent: any,
-    draggedItem: FoodNode,
-    index: number,
-    eventName?: string
-  ) {
+  private findSectionAt(data: any[], index: number): any {
+    for (const item of data) {
+      if (item.type === 'SECTION' && item.items) {
+        return item;
+      }
+    }
+    return null;
+  }
+  
+  private addItemToSection(draggedItem: any, section: any): void {
+    this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(itemResult => {
+        if (itemResult) {
+          section.items.push(itemResult as never);
+          this.cdr.detectChanges();
+        }
+      });
+  }
+  
+  private createSectionWithItem(draggedItem: any, targetIndex: number): void {
+    // First, open the section configuration dialog
+    const dialogRef = this.dialog.open(SectionConfigComponent, {
+      width: '70vw',
+      height: '80vh',
+      data: { 
+        item: { name: 'SECTION' },
+        autoCreate: false // Flag to indicate this is an auto-created section
+      },
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      backdropClass: 'custom-dialog-backdrop',
+    });
+  
+    dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(sectionResult => {
+      if (sectionResult) {
+        // Create the section with empty items array
+        const section = {
+          ...sectionResult,
+          items: []
+        };
+  
+        // Now handle the dragged item configuration
+        this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(itemResult => {
+            if (itemResult) {
+              // Add the configured item to the section's items
+              section.items.push(itemResult as never);
+              // Add the section to the editor items
+              this.editorItems.splice(targetIndex, 0, section);
+              this.cdr.detectChanges();
+            }
+          });
+      }
+    });
+  }
+  private getConfigComponent(itemName: string): any {
+    const configMap: { [key: string]: any } = {
+      'Text field': TextformConfigComponent,
+      'Checkbox': CheckboxConfigComponent,
+      'Radio button': RadioButtonConfigComponent,
+      'Select box': SelectBoxConfigComponent,
+      'Basic date picker': BasicdatepickerConfigComponent,
+      'Date picker': DatepickerConfigComponent,
+      'Password': PasswordConfigComponent,
+      'Button': ButtonConfigComponent,
+      'Section': SectionConfigComponent
+    };
+    return configMap[itemName];
+  }
+  
+  private handleItemDrop(draggedItem: any, targetIndex: number): void {
+    const configComponent = this.getConfigComponent(draggedItem.name);
+    if (configComponent) {
+      this.openDialog(configComponent, draggedItem, targetIndex);
+    }
+  }
+
+  private openDialog(configComponent: any, draggedItem: any, index: number) {
     const dialogRef = this.dialog.open(configComponent, {
       width: '70vw',
       height: '80vh',
@@ -181,13 +223,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       backdropClass: 'custom-dialog-backdrop',
     });
 
-    dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (result) {
-
-        this.editorItems.splice(index, 0, result);
-        this.cdr.detectChanges();
-      }
-    });
+    return dialogRef.closed;
   }
   handleButtonClick(type: string) {
     if (type === 'submit') {
@@ -237,7 +273,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     const index = this.editorItems.indexOf(item);
     if (index === -1) return;
 
-    // If the item has an ID, delete it via the API
     if (item.id) {
       this.formLayoutService.deleteFormLayout(item.id).subscribe({
         next: () => {
@@ -246,11 +281,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error deleting item:', err);
-          // Handle error (e.g., show a notification)
         }
       });
     } else {
-      // If the item has no ID, remove it locally
       this.editorItems.splice(index, 1);
       console.log('Item removed locally:', item);
     }
@@ -277,11 +310,66 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  onSectionItemDropped(event: any, section: any) {
-    section.items = event.items;
+  onSectionItemDropped(event: CdkDragDrop<any[]>, section: any) {
+    const draggedItem = event.item.data;
+    if (!draggedItem) {
+      console.error('Dragged item is null or undefined');
+      return;
+    }
 
+    section.items.push(draggedItem);
     this.saveSection.emit(section);
   }
 
+   findDefaultFormLayout() {
+    const defaultSection = this.editorItems.find(item => item.type === 'FormLayout');
+    if (defaultSection) {
+        console.log('Default FormLayout section found:', defaultSection);
+    } else {
+        console.log('No FormLayout section found');
+    }
+  }
+
+  hasFormLayout(): boolean {
+    return this.editorItems.some(item => item.type === 'FormLayout');
+  }
+  loadFormInputs(templateId: string) {
+    this.formTemplateService.getFormInputsByTemplateId(+templateId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        (formInputs) => {
+          console.log('Form inputs loaded:', formInputs);
+          this.editorItems = this.processFormInputs(formInputs);
+          this.cdr.detectChanges(); 
+        },
+        (error) => {
+          console.error('Error loading form inputs:', error);
+        }
+      );
+  }
+
+  processFormInputs(inputs: any[]): any[] {
+    const sections = inputs.filter(input => input.type === 'SECTION');
+    const standaloneInputs = inputs.filter(input => input.type !== 'SECTION' && !input.formLayout?.id);
+
+    if (standaloneInputs.length > 0 && sections.length === 0) {
+      sections.push({
+        type: 'SECTION',
+        config: { title: 'Section' },
+        items: standaloneInputs
+      });
+    }
+
+    sections.forEach(section => {
+      section.items = inputs.filter(input => input.type !== 'SECTION' && input.formLayout?.id === section.id);
+    });
+
+    console.log('Processed editor items:', sections); 
+    return sections;
+  }
+  
+  
+
+  
 
 }
