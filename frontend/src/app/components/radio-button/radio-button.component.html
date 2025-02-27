@@ -5,7 +5,7 @@
   </label>
 
   <div class="space-y-2">
-    <div *ngFor="let option of options" class="flex items-center" [ngClass]="{'flex-row-reverse': labelPosition === 'left'}">
+    <div *ngFor="let option of options" class="flex items-center">
       <input
         type="radio"
         [name]="name"
@@ -21,8 +21,6 @@
       <label
         class="font-medium select-none"
         [ngClass]="{
-          'ml-2': labelPosition === 'right',
-          'mr-2': labelPosition === 'left',
           'cursor-pointer': !isDisabled,
           'cursor-not-allowed': isDisabled,
           'opacity-60': isDisabled

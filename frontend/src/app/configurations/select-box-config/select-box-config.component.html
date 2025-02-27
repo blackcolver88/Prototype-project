@@ -30,12 +30,11 @@
       </div>
     </form>
 
-    <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
-      <h3 class="font-semibold mb-2">Preview</h3>
-      <app-select-box
-        *ngFor="let selectBox of selectBoxes"
-        [label]="selectBox.labelText"
-        [options]="getOptionsArray(selectBox.options)">
-      </app-select-box>
-    </div>
+  <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
+    <h3 class="font-semibold mb-2">Preview</h3>
+    <app-select-box
+      [label]="selectBoxForm.value.labelText"
+      [options]="getOptionsArray(selectBoxForm.value.options)"
+    ></app-select-box>
+  </div>
   </div>

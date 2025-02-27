@@ -21,7 +21,6 @@ export class RadioButtonConfigComponent {
       name: [''],
       isRequired: [false],
       isDisabled: [false],
-      labelPosition: ['right'],
       options: this.fb.array([])
     });
 

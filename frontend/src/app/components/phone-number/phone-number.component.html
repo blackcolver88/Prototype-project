@@ -1,21 +1,10 @@
 <div class="phone">
 <div class="phone-number-field-holder">
-    <label
-      *ngIf="labelPosition === 'top'"
-      [for]="label"
-      class="block text-sm font-medium mb-2"
-    >
-      {{ label }}
-    </label>
-    <div [ngClass]="{
-          'flex flex-row items-center': labelPosition === 'left' || labelPosition === 'right',
-          'flex-col': labelPosition === 'top' || labelPosition === 'bottom'
-        }"
+
+    <div
     >
       <label
-        *ngIf="labelPosition === 'left'"
-        [for]="label"
-        class="block text-sm font-medium mr-2"
+
       >
         {{ label }}
       </label>
@@ -27,20 +16,8 @@
       title="Please enter a valid phone number."
       (keypress)="allowOnlyNumbers($event)"
       />
-      <label
-        *ngIf="labelPosition === 'right'"
-        [for]="label"
-        class="block text-sm font-medium ml-2"
-      >
-        {{ label }}
-      </label>
+
     </div>
-    <label
-      *ngIf="labelPosition === 'bottom'"
-      [for]="label"
-      class="block text-sm font-medium mt-2"
-    >
-      {{ label }}
-    </label>
+
   </div>
 </div>

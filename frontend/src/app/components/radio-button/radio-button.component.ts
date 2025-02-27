@@ -20,7 +20,6 @@ export class RadioButtonComponent {
   @Input() name: string = 'radio';
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
-  @Input() labelPosition: 'left' | 'right' = 'right';
   @Input() selectedOption: string = '';
 
   @Output() optionChange = new EventEmitter<string>();

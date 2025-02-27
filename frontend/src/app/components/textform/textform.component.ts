@@ -14,6 +14,4 @@ export class TextformComponent {
   @Input() textName: string = '';
   @Input() placeholder: string = 'Enter your email';
   @Input() label: string = 'Text Field';
-  @Input() labelPosition: string = 'top';
-  @Input() labelAlignment: string = 'left';
 }

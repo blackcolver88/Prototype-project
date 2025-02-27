@@ -11,8 +11,6 @@ import { FormsModule } from '@angular/forms';
 export class PhoneNumberComponent {
   @Input() placeholder: string = 'Phone Number';
   @Input() label: string = 'Phone Number';
-  @Input() labelPosition: string = 'top';
-  @Input() labelAlignment: string = 'left';
 
   allowOnlyNumbers(event: KeyboardEvent): void {
     const charCode = event.charCode;

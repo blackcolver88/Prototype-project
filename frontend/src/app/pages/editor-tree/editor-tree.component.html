@@ -56,8 +56,7 @@
         <ng-container *ngSwitchCase="'textfield'">
           <div class="relative">
             <app-textform [label]="item.config.label" [textName]="item.config.textName"
-                          [type]="item.config.type" [placeholder]="item.config.placeholder" [labelPosition]="item.config.labelPosition"
-                          [labelAlignment]="item.config.labelAlignment">
+                          [type]="item.config.type" [placeholder]="item.config.placeholder">
             </app-textform>
           </div>
         </ng-container>
@@ -77,9 +76,7 @@
         <ng-container *ngSwitchCase="'email'">
           <div class="relative">
             <app-email [label]="item.config.label"
-                       [placeholder]="item.config.placeholder"
-                       [labelPosition]="item.config.labelPosition"
-                       [labelAlignment]="item.config.labelAlignment">
+                       [placeholder]="item.config.placeholder">
             </app-email>
           </div>
         </ng-container>
@@ -97,8 +94,7 @@
         <ng-container *ngSwitchCase="'number'">
           <div class="relative">
             <app-phone-number [label]="item.config.label"
-                              [placeholder]="item.config.placeholder" [labelPosition]="item.config.labelPosition"
-                              [labelAlignment]="item.config.labelAlignment">
+                              [placeholder]="item.config.placeholder">
             </app-phone-number>
           </div>
         </ng-container>
@@ -112,7 +108,6 @@
               [options]="item.config.options"
               [isRequired]="item.config.isRequired"
               [isDisabled]="item.config.isDisabled"
-              [labelPosition]="item.config.labelPosition"
               [selectedOption]="item.config.selectedOption"
             >
             </app-radio-button>

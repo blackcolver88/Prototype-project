@@ -21,7 +21,6 @@ export class CheckboxComponent {
   @Input() name: string = 'checkbox';
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
-  @Input() labelPosition: 'left' | 'right' = 'right';
 
   @Output() optionChange = new EventEmitter<CheckboxOption[]>();
 

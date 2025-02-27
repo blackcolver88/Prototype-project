@@ -16,13 +16,6 @@
       <button type="button" (click)="addOption()" class="text-blue-500 mt-2">+ Add Option</button>
     </div>
 
-    <div class="space-y-2">
-      <label for="labelPosition" class="block font-semibold">Label Position</label>
-      <select id="labelPosition" formControlName="labelPosition" class="w-full border border-gray-300 p-2 rounded">
-        <option value="right">Right</option>
-        <option value="left">Left</option>
-      </select>
-    </div>
 
     <div class="space-y-2">
       <label class="flex items-center space-x-2">
@@ -55,8 +48,7 @@
       [options]="checkboxForm.get('options')?.value"
       [name]="checkboxForm.get('name')?.value"
       [isRequired]="checkboxForm.get('isRequired')?.value"
-      [isDisabled]="checkboxForm.get('isDisabled')?.value"
-      [labelPosition]="checkboxForm.get('labelPosition')?.value">
+      [isDisabled]="checkboxForm.get('isDisabled')?.value">
     </app-checkbox>
   </div>
 </div>

@@ -13,7 +13,6 @@ import {DialogRef} from "@angular/cdk/dialog";
 })
 export class SelectBoxConfigComponent {
   selectBoxForm: FormGroup;
-  selectBoxes: any[] = [];
   private dialogRef = inject(DialogRef);
   constructor(private fb: FormBuilder) {
     this.selectBoxForm = this.fb.group({
