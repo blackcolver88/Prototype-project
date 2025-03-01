@@ -1,5 +1,6 @@
 package com.example.formservice.entities;
 import com.example.formservice.entities.enums.FormLayoutType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class FormLayout {
     private List<FormLayout> children = new ArrayList<>();
 
     @OneToMany(mappedBy = "formLayout", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<FormInput> formInputs = new ArrayList<>();
 
     @ManyToOne (fetch = FetchType.LAZY)

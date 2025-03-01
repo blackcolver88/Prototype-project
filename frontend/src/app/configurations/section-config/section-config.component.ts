@@ -15,25 +15,27 @@ export class SectionConfigComponent {
   sectionForm: FormGroup;
   @Output() saveSection = new EventEmitter<any>();
   private dialogRef = inject(DialogRef);
-  customizedSectionData: any;
+
+  formTitle!: string;
+
   constructor(private fb: FormBuilder) {
     this.sectionForm = this.fb.group({
       type: ['SECTION'],
-      name: ['Section'],
-      items: [[]]
-  
+      title: '',
+      children: [[]]
     });
   }
-  get section(): FormArray {
-    return this.sectionForm.get('section') as FormArray;
-  }
+
+
   onSave(): void {
     const formData = this.sectionForm.value;
+    this.formTitle = formData.title; 
+
     this.dialogRef.close({
       type: 'SECTION',
-      name: formData.name,
-      items: [],
-      config: formData
+      title: formData.title,
+      children: formData.children,
+      parent: formData.parent
     });
   }
 

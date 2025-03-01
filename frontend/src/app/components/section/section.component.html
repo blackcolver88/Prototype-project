@@ -5,7 +5,24 @@
   [cdkDropListConnectedTo]="connectedDropLists"
   (cdkDropListDropped)="onSectionDrop($event)">
 
-  <div *ngFor="let item of sectionItems" cdkDrag class="p-2 bg-white shadow-md rounded-lg mb-2">
-    {{ item?.name }}
+ <div *ngFor="let item of sectionItems" cdkDrag class="p-2 rounded-lg mb-2">
+    <app-section [sectionItems]="item.items"></app-section>
+  </div>
+
+  <!-- New logic for handling dropped items -->
+  <div cdkDropList
+       [cdkDropListData]="sectionItems"
+       (cdkDropListDropped)="onSectionItemDropped($event, section)"
+       class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
+    <!-- Recursively render nested items -->
+    <ng-container *ngFor="let item of sectionItems">
+      <ng-container [ngSwitch]="item?.type">
+        <!-- Section -->
+        <ng-container *ngSwitchCase="'SECTION'">
+          <app-section [sectionItems]="item.items"></app-section>
+        </ng-container>
+        <!-- Other item types can be added here -->
+      </ng-container>
+    </ng-container>
   </div>
 </div>

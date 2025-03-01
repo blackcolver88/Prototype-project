@@ -16,8 +16,7 @@ public class FormInput {
     private FormInputType type;
 
     private boolean required;
-    private Long length;
-    private String option;
+    
 
     @ManyToOne
     @JoinColumn(name = "form_layout_id")
