@@ -126,12 +126,43 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       return;
     }
   
-    const targetSection = this.findSectionAt(event.container.data, event.currentIndex);
-    if (targetSection) {
-      this.addItemToSection(draggedItem, targetSection);
+    // Handle SECTION drag
+    if (draggedItem.name === 'SECTION') {
+      this.createStandaloneSection(event.currentIndex);
     } else {
-      this.createSectionWithItem(draggedItem, event.currentIndex);
+      // Existing logic for form inputs
+      const targetSection = this.findSectionAt(event.container.data, event.currentIndex);
+      if (targetSection) {
+        this.addItemToSection(draggedItem, targetSection);
+      } else {
+        this.createSectionWithItem(draggedItem, event.currentIndex);
+      }
     }
+  }
+
+  private createStandaloneSection(targetIndex: number): void {
+    const dialogRef = this.dialog.open(SectionConfigComponent, {
+      width: '70vw',
+      height: '80vh',
+      data: { 
+        item: { name: 'SECTION' },
+        autoCreate: false
+      },
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      backdropClass: 'custom-dialog-backdrop',
+    });
+  
+    dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(sectionResult => {
+      if (sectionResult) {
+        const section = {
+          ...sectionResult,
+          items: [] // Initialize items array for the section
+        };
+        this.editorItems.splice(targetIndex, 0, section);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private findSectionAt(data: any[], index: number): any {
@@ -156,6 +187,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
     // First, open the section configuration dialog
+    if (draggedItem.name === 'SECTION') return;
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
       height: '80vh',

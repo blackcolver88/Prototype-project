@@ -71,14 +71,11 @@
                   <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
                 </button>
               </div>
-              
-
               <div cdkDropList
                    [cdkDropListData]="item.items || []"
                    (cdkDropListDropped)="onSectionItemDropped($event, item)"
                    class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
-                <ng-container *ngTemplateOutlet="recursiveSection; context: { items: item.items || [] }">
-                </ng-container>
+                <ng-container *ngTemplateOutlet="recursiveSection; context: { items: item.items || [] }"></ng-container>
               </div>
             </div>
           </ng-container>
@@ -122,9 +119,7 @@
               <!-- Phone Number -->
               <ng-container *ngIf="item?.type === 'number'">
                 <app-phone-number [label]="item.config.label"
-                                [placeholder]="item.config.placeholder" 
-                                [labelPosition]="item.config.labelPosition"
-                                [labelAlignment]="item.config.labelAlignment">
+                                [placeholder]="item.config.placeholder">
                 </app-phone-number>
               </ng-container>
               
@@ -136,7 +131,6 @@
                   [options]="item.config.options"
                   [isRequired]="item.config.isRequired"
                   [isDisabled]="item.config.isDisabled"
-                  [labelPosition]="item.config.labelPosition"
                   [selectedOption]="item.config.selectedOption">
                 </app-radio-button>
               </ng-container>
