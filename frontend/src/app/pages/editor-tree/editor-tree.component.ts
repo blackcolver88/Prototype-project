@@ -186,7 +186,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
-    // First, open the section configuration dialog
     if (draggedItem.name === 'SECTION') return;
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
@@ -213,9 +212,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.destroy$))
           .subscribe(itemResult => {
             if (itemResult) {
-              // Add the configured item to the section's items
               section.items.push(itemResult as never);
-              // Add the section to the editor items
               this.editorItems.splice(targetIndex, 0, section);
               this.cdr.detectChanges();
             }

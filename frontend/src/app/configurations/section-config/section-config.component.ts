@@ -1,42 +1,49 @@
-import {Component, EventEmitter, inject, Output} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {Component, EventEmitter, Inject, inject, OnInit, Output} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { SectionComponent } from "../../components/section/section.component";
-import {DialogRef} from "@angular/cdk/dialog";
+import {DIALOG_DATA, DialogRef} from "@angular/cdk/dialog";
 
 @Component({
   selector: 'app-section-config',
   standalone: true,
-  imports: [CommonModule, SectionComponent, ReactiveFormsModule],
+  imports: [CommonModule, SectionComponent, ReactiveFormsModule,],
   templateUrl: './section-config.component.html',
   styleUrls: ['./section-config.component.css']
 })
-export class SectionConfigComponent {
+export class SectionConfigComponent implements OnInit {
   sectionForm: FormGroup;
   @Output() saveSection = new EventEmitter<any>();
   private dialogRef = inject(DialogRef);
-
-  formTitle!: string;
-
-  constructor(private fb: FormBuilder) {
+  
+  constructor(private fb: FormBuilder, @Inject(DIALOG_DATA) public data: any) {
     this.sectionForm = this.fb.group({
       type: ['SECTION'],
-      title: '',
+      title: ['', Validators.required],
       children: [[]]
     });
   }
 
+  ngOnInit() {
+    if (this.data && this.data.item && this.data.item.config) {
+      this.sectionForm.patchValue({
+        title: this.data.item.config.title || ''
+      });
+    }
+  }
 
   onSave(): void {
-    const formData = this.sectionForm.value;
-    this.formTitle = formData.title; 
-
-    this.dialogRef.close({
-      type: 'SECTION',
-      title: formData.title,
-      children: formData.children,
-      parent: formData.parent
-    });
+    if (this.sectionForm.valid) {
+      const formData = this.sectionForm.value;
+      
+      this.dialogRef.close({
+        type: 'SECTION',
+        config: {
+          title: formData.title
+        },
+        items: []
+      });
+    }
   }
 
   cancel(): void {
