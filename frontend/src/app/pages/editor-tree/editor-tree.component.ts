@@ -8,7 +8,6 @@ import { CheckboxConfigComponent } from "../../configurations/checkbox-config/ch
 import { SelectBoxConfigComponent } from "../../configurations/select-box-config/select-box-config.component";
 import { RadioButtonConfigComponent } from "../../configurations/radio-button-config/radio-button-config.component";
 import { DatepickerConfigComponent } from "../../configurations/datepicker-config/datepicker-config.component";
-import { SectionComponent } from "../../components/section/section.component";
 import { SectionConfigComponent } from "../../configurations/section-config/section-config.component";
 import { CdkStepperModule } from "@angular/cdk/stepper";
 import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
@@ -31,7 +30,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
 import { BasicDatepickerComponent } from '../../components/basic-datepicker/basic-datepicker.component';
 import {PasswordComponent} from '../../components/password/password.component';
-import {PasswordConfigComponent} from '../../configurations/password-config/password-config.component';
 import { FormLayout } from '../../model/FormLayout';
 import { FormTemplateService } from '../../services/form-template.service';
 import { FormTemplate } from '../../model/FormTemplate';
@@ -47,7 +45,7 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'SECTION' }],
+    children: [{ name: 'Section' }],
   },
   {
     name: 'Form',
@@ -67,9 +65,10 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, CdkStepperModule, HttpClientModule,FontAwesomeModule,
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup,
+   CdkStepperModule, HttpClientModule,FontAwesomeModule,
     TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent,
-    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent,TextAreaComponent],
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,TextAreaComponent,PasswordComponent],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
@@ -91,7 +90,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formLayoutsToAdd: FormLayout[] = [];
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-     private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
+    private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
     library.addIcons(faTrashAlt);
   }
 
@@ -126,7 +125,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   
     // Handle SECTION drag
-    if (draggedItem.name === 'SECTION') {
+    if (draggedItem.name === 'Section') {
       this.createStandaloneSection(event.currentIndex);
     } else {
       // Existing logic for form inputs
@@ -144,7 +143,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       width: '70vw',
       height: '80vh',
       data: { 
-        item: { name: 'SECTION' },
+        item: { name: 'Section' },
         autoCreate: false
       },
       disableClose: false,
@@ -166,7 +165,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
   private findSectionAt(data: any[], index: number): any {
     for (const item of data) {
-      if (item.type === 'SECTION' && item.items) {
+      if (item.type === 'Section' && item.items) {
         return item;
       }
     }
@@ -185,12 +184,12 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
-    if (draggedItem.name === 'SECTION') return;
+    if (draggedItem.name === 'Section') return;
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
       height: '80vh',
       data: { 
-        item: { name: 'SECTION' },
+        item: { name: 'Section' },
         autoCreate: false // Flag to indicate this is an auto-created section
       },
       disableClose: false,
@@ -228,7 +227,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       'Select box': SelectBoxConfigComponent,
       'Basic date picker': BasicdatepickerConfigComponent,
       'Date picker': DatepickerConfigComponent,
-      'Password': PasswordConfigComponent,
       'Button': ButtonConfigComponent,
       'Section': SectionConfigComponent
     };
@@ -350,7 +348,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     this.saveSection.emit(section);
   }
 
-   findDefaultFormLayout() {
+  findDefaultFormLayout() {
     const defaultSection = this.editorItems.find(item => item.type === 'FormLayout');
     if (defaultSection) {
         console.log('Default FormLayout section found:', defaultSection);
@@ -378,19 +376,19 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   processFormInputs(inputs: any[]): any[] {
-    const sections = inputs.filter(input => input.type === 'SECTION');
-    const standaloneInputs = inputs.filter(input => input.type !== 'SECTION' && !input.formLayout?.id);
+    const sections = inputs.filter(input => input.type === 'Section');
+    const standaloneInputs = inputs.filter(input => input.type !== 'Section' && !input.formLayout?.id);
 
     if (standaloneInputs.length > 0 && sections.length === 0) {
       sections.push({
-        type: 'SECTION',
+        type: 'Section',
         config: { title: 'Section' },
         items: standaloneInputs
       });
     }
 
     sections.forEach(section => {
-      section.items = inputs.filter(input => input.type !== 'SECTION' && input.formLayout?.id === section.id);
+      section.items = inputs.filter(input => input.type !== 'Section' && input.formLayout?.id === section.id);
     });
 
     console.log('Processed editor items:', sections); 
