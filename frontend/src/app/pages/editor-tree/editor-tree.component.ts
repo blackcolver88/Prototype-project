@@ -118,17 +118,14 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   
     const draggedItem = event.item.data;
-    if (!draggedItem) {
-      console.error('Dragged item is null or undefined');
-      return;
-    }
+    if (!draggedItem) return;
   
-    // Handle SECTION drag
     if (draggedItem.name === 'Section') {
       this.createStandaloneSection(event.currentIndex);
     } else {
-      // Existing logic for form inputs
-      const targetSection = this.findSectionAt(event.container.data, event.currentIndex);
+      const targetItem = event.container.data[event.currentIndex];
+      const targetSection = targetItem?.type === 'Section' ? targetItem : null;
+  
       if (targetSection) {
         this.addItemToSection(draggedItem, targetSection);
       } else {
@@ -163,10 +160,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   private findSectionAt(data: any[], index: number): any {
-    for (const item of data) {
-      if (item.type === 'Section' && item.items) {
-        return item;
-      }
+    if (index >= 0 && index < data.length) {
+      const item = data[index];
+      return item?.type === 'Section' ? item : null;
     }
     return null;
   }
