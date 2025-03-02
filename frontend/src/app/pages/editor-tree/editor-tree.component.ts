@@ -36,6 +36,8 @@ import { FormLayout } from '../../model/FormLayout';
 import { FormTemplateService } from '../../services/form-template.service';
 import { FormTemplate } from '../../model/FormTemplate';
 import { FormLayoutService } from '../../services/form-layout.service';
+import { TextAreaComponent } from '../../components/text-area/text-area.component';
+import { TextAreaConfigComponent } from '../../configurations/text-area-config/text-area-config.component';
 
 export interface FoodNode {
   name: string;
@@ -51,6 +53,7 @@ const TREE_DATA: FoodNode[] = [
     name: 'Form',
     children: [
       { name: 'Text field' },
+      { name: 'Text area' },
       { name: 'Checkbox' },
       { name: 'Radio button' },
       { name: 'Select box' },
@@ -64,10 +67,9 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup,
-    SectionComponent, CdkStepperModule, HttpClientModule,FontAwesomeModule,
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup, CdkStepperModule, HttpClientModule,FontAwesomeModule,
     TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent,
-    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent,PasswordConfigComponent],
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent,TextAreaComponent],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
@@ -102,9 +104,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
     });
   }
-
-
-
   ngOnDestroy() {
     this.destroy$.next(); 
     this.destroy$.complete();
@@ -223,6 +222,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private getConfigComponent(itemName: string): any {
     const configMap: { [key: string]: any } = {
       'Text field': TextformConfigComponent,
+      'Text area': TextAreaConfigComponent,
       'Checkbox': CheckboxConfigComponent,
       'Radio button': RadioButtonConfigComponent,
       'Select box': SelectBoxConfigComponent,

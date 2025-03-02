@@ -122,6 +122,11 @@
                                 [placeholder]="item.config.placeholder">
                 </app-phone-number>
               </ng-container>
+
+              <ng-container *ngIf="item?.type === 'textarea'">
+                <app-text-area [label]="item.label">
+                </app-text-area>
+              </ng-container>
               
               <!-- Radio Group -->
               <ng-container *ngIf="item?.type === 'radio-group'">
