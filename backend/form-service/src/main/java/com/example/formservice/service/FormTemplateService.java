@@ -1,5 +1,6 @@
 package com.example.formservice.service;
 
+import com.example.formservice.DTO.FormInputRequest;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -9,7 +10,9 @@ import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -72,23 +75,89 @@ public class FormTemplateService {
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
     }
 
+
+
+    @Transactional
+    public List<FormInput> addMultipleFormInputsToTemplate(Long templateId, List<FormInputRequest> formInputRequests) {
+        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
+
+        // Get all layouts for this template for validation
+        List<FormLayout> availableLayouts = formLayoutRepository.findByFormTemplateId(templateId);
+        Map<Long, FormLayout> layoutMap = availableLayouts.stream()
+                .collect(Collectors.toMap(FormLayout::getId, layout -> layout));
+
+        List<FormInput> savedFormInputs = new ArrayList<>();
+
+        for (FormInputRequest request : formInputRequests) {
+            FormInput formInput = request.getFormInput();
+            Long layoutId = request.getFormLayoutId();
+
+            // Find the layout
+            FormLayout formLayout;
+            if (layoutId != null) {
+                formLayout = layoutMap.get(layoutId);
+                if (formLayout == null) {
+                    throw new IllegalArgumentException("FormLayout not found with id: " + layoutId + " for template: " + templateId);
+                }
+            } else {
+                // Fallback to first layout if no layout specified
+                formLayout = availableLayouts.stream()
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("No layouts found for template with id: " + templateId));
+            }
+
+            formInput.setFormLayout(formLayout);
+            savedFormInputs.add(formInputRepository.save(formInput));
+        }
+
+        return savedFormInputs;
+    }
+
+
+
     public FormInput addFormInputToTemplate(Long templateId, FormInput formInput) {
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        FormLayout formLayout = formTemplate.getFormLayouts().get(0);
+        // Get the form layout by ID if provided, otherwise use the first layout
+        FormLayout formLayout;
+        if (formInput.getFormLayout() != null && formInput.getFormLayout().getId() != null) {
+            formLayout = formLayoutRepository.findById(formInput.getFormLayout().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + formInput.getFormLayout().getId()));
+
+            // Verify layout belongs to the template
+            if (!formLayout.getFormTemplate().getId().equals(templateId)) {
+                throw new IllegalArgumentException("FormLayout does not belong to the specified template");
+            }
+        } else {
+            // Fallback to first layout
+            formLayout = formTemplate.getFormLayouts().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("No layouts found for template with id: " + templateId));
+        }
+
         formInput.setFormLayout(formLayout);
-
         return formInputRepository.save(formInput);
     }
 
+    @Transactional(readOnly = true)
     public List<FormInput> getFormInputsByTemplateId(Long templateId) {
-        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
+        // Check if template exists
+        if (!formTemplateRepository.existsById(templateId)) {
+            throw new IllegalArgumentException("FormTemplate not found with id: " + templateId);
+        }
 
-        return formTemplate.getFormLayouts().stream()
-                .flatMap(layout -> layout.getFormInputs().stream())
+        // Get all layouts for the template
+        List<FormLayout> layouts = formLayoutRepository.findByFormTemplateId(templateId);
+
+        if (layouts.isEmpty()) {
+            return List.of(); // Return empty list if no layouts found
+        }
+
+        // Collect all form inputs from all layouts
+        return layouts.stream()
+                .flatMap(layout -> formInputRepository.findByFormLayoutId(layout.getId()).stream())
                 .collect(Collectors.toList());
     }
-
 }

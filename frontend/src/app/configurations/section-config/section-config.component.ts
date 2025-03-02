@@ -27,7 +27,7 @@ export class SectionConfigComponent implements OnInit {
   ngOnInit() {
     if (this.data && this.data.item && this.data.item.config) {
       this.sectionForm.patchValue({
-        title: this.data.item.config.title || ''
+        title: this.data.item.title || ''
       });
     }
   }
@@ -38,6 +38,7 @@ export class SectionConfigComponent implements OnInit {
       
       this.dialogRef.close({
         type: 'SECTION',
+        title: formData.title,
         config: {
           title: formData.title
         },

@@ -1,5 +1,6 @@
 package com.example.formservice.controller;
 
+import com.example.formservice.DTO.FormInputRequest;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -61,6 +62,14 @@ public class FormTemplateController {
         return ResponseEntity.ok(formTemplate);
     }
 
+
+    @PostMapping("/{templateId}/bulk-form-inputs")
+    public ResponseEntity<List<FormInput>> addMultipleFormInputsToTemplate(
+            @PathVariable Long templateId,
+            @RequestBody List<FormInputRequest> formInputRequests) {
+        List<FormInput> savedFormInputs = formTemplateService.addMultipleFormInputsToTemplate(templateId, formInputRequests);
+        return ResponseEntity.ok(savedFormInputs);
+    }
     @PostMapping("/{templateId}/form-inputs")
     public ResponseEntity<FormInput> addFormInputToTemplate(
             @PathVariable Long templateId,
