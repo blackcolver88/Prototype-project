@@ -8,7 +8,6 @@ import { CheckboxConfigComponent } from "../../configurations/checkbox-config/ch
 import { SelectBoxConfigComponent } from "../../configurations/select-box-config/select-box-config.component";
 import { RadioButtonConfigComponent } from "../../configurations/radio-button-config/radio-button-config.component";
 import { DatepickerConfigComponent } from "../../configurations/datepicker-config/datepicker-config.component";
-import { SectionComponent } from "../../components/section/section.component";
 import { SectionConfigComponent } from "../../configurations/section-config/section-config.component";
 import { CdkStepperModule } from "@angular/cdk/stepper";
 import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
@@ -31,7 +30,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
 import { BasicDatepickerComponent } from '../../components/basic-datepicker/basic-datepicker.component';
 import {PasswordComponent} from '../../components/password/password.component';
-import {PasswordConfigComponent} from '../../configurations/password-config/password-config.component';
 import { FormLayout } from '../../model/FormLayout';
 import { FormTemplateService } from '../../services/form-template.service';
 import { FormTemplate } from '../../model/FormTemplate';
@@ -64,10 +62,9 @@ const TREE_DATA: FoodNode[] = [
 @Component({
   selector: 'app-editor-tree',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup,
-    SectionComponent, CdkStepperModule, HttpClientModule,FontAwesomeModule,
+  imports: [CdkDropList, CdkDrag, CommonModule, CdkTreeModule, DialogModule, CdkDropListGroup,CdkStepperModule, HttpClientModule,FontAwesomeModule,
     TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent,
-    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent,PasswordConfigComponent],
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent , BasicDatepickerComponent,PasswordComponent],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css']
 })
@@ -89,7 +86,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formLayoutsToAdd: FormLayout[] = [];
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-     private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
+    private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
     library.addIcons(faTrashAlt);
   }
 
@@ -228,7 +225,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       'Select box': SelectBoxConfigComponent,
       'Basic date picker': BasicdatepickerConfigComponent,
       'Date picker': DatepickerConfigComponent,
-      'Password': PasswordConfigComponent,
       'Button': ButtonConfigComponent,
       'Section': SectionConfigComponent
     };
@@ -350,7 +346,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     this.saveSection.emit(section);
   }
 
-   findDefaultFormLayout() {
+  findDefaultFormLayout() {
     const defaultSection = this.editorItems.find(item => item.type === 'FormLayout');
     if (defaultSection) {
         console.log('Default FormLayout section found:', defaultSection);

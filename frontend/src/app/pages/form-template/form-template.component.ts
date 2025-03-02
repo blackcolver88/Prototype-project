@@ -107,7 +107,7 @@ export class FormTemplateComponent implements OnInit {
 
   handleDeleteClick(id: string) {
     const formTemplateId = parseInt(id, 10);
-    if (confirm("Are you sure you want to delete this template?")) {
+    if (confirm("Are you sure you want to delete this form ?")) {
       this.formTemplateService.deleteFormTemplate(formTemplateId).subscribe({
         next: () => {
           this.rowData = this.rowData.filter(template => template.id !== formTemplateId);
