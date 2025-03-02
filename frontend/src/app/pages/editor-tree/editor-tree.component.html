@@ -63,7 +63,7 @@
       <div *ngFor="let item of items" class="mb-4">
         <ng-container [ngSwitch]="item?.type">
           <!-- Section -->
-          <ng-container *ngSwitchCase="'SECTION'">
+          <ng-container *ngSwitchCase="'Section'">
             <div cdkDrag class="bg-white p-4 rounded-lg shadow-md">
               <div class="flex justify-between items-center mb-2">
                 <h3 class="font-semibold text-gray-700">{{ item.title || 'Section' }}</h3>

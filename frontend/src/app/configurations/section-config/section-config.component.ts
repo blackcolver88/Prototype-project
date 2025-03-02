@@ -18,7 +18,7 @@ export class SectionConfigComponent implements OnInit {
   
   constructor(private fb: FormBuilder, @Inject(DIALOG_DATA) public data: any) {
     this.sectionForm = this.fb.group({
-      type: ['SECTION'],
+      type: ['Section'],
       title: ['', Validators.required],
       children: [[]]
     });
@@ -37,7 +37,7 @@ export class SectionConfigComponent implements OnInit {
       const formData = this.sectionForm.value;
       
       this.dialogRef.close({
-        type: 'SECTION',
+        type: 'Section',
         title: formData.title,
         config: {
           title: formData.title

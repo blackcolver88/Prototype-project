@@ -43,7 +43,7 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'SECTION' }],
+    children: [{ name: 'Section' }],
   },
   {
     name: 'Form',
@@ -124,7 +124,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   
     // Handle SECTION drag
-    if (draggedItem.name === 'SECTION') {
+    if (draggedItem.name === 'Section') {
       this.createStandaloneSection(event.currentIndex);
     } else {
       // Existing logic for form inputs
@@ -142,7 +142,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       width: '70vw',
       height: '80vh',
       data: { 
-        item: { name: 'SECTION' },
+        item: { name: 'Section' },
         autoCreate: false
       },
       disableClose: false,
@@ -164,7 +164,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
   private findSectionAt(data: any[], index: number): any {
     for (const item of data) {
-      if (item.type === 'SECTION' && item.items) {
+      if (item.type === 'Section' && item.items) {
         return item;
       }
     }
@@ -183,12 +183,12 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
-    if (draggedItem.name === 'SECTION') return;
+    if (draggedItem.name === 'Section') return;
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
       height: '80vh',
       data: { 
-        item: { name: 'SECTION' },
+        item: { name: 'Section' },
         autoCreate: false // Flag to indicate this is an auto-created section
       },
       disableClose: false,
@@ -374,19 +374,19 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   processFormInputs(inputs: any[]): any[] {
-    const sections = inputs.filter(input => input.type === 'SECTION');
-    const standaloneInputs = inputs.filter(input => input.type !== 'SECTION' && !input.formLayout?.id);
+    const sections = inputs.filter(input => input.type === 'Section');
+    const standaloneInputs = inputs.filter(input => input.type !== 'Section' && !input.formLayout?.id);
 
     if (standaloneInputs.length > 0 && sections.length === 0) {
       sections.push({
-        type: 'SECTION',
+        type: 'Section',
         config: { title: 'Section' },
         items: standaloneInputs
       });
     }
 
     sections.forEach(section => {
-      section.items = inputs.filter(input => input.type !== 'SECTION' && input.formLayout?.id === section.id);
+      section.items = inputs.filter(input => input.type !== 'Section' && input.formLayout?.id === section.id);
     });
 
     console.log('Processed editor items:', sections); 
