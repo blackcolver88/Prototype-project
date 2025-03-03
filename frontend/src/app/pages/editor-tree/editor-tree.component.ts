@@ -120,25 +120,20 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     const draggedItem = event.item.data;
     if (!draggedItem) return;
     
-    // If we're dropping directly on the editor
     if (event.container.id === this.acquiredItems.id) {
       if (draggedItem.name === 'Section') {
         this.createStandaloneSection(event.currentIndex);
       } else {
-        // Try to find a section at or near the drop point
         const targetIndex = event.currentIndex;
         const nearestSectionIndex = this.findNearestSectionIndex(this.editorItems, targetIndex);
         
         if (nearestSectionIndex !== -1) {
-          // Add to existing section
           this.addItemToSection(draggedItem, this.editorItems[nearestSectionIndex]);
         } else {
-          // Create new section with item
           this.createSectionWithItem(draggedItem, targetIndex);
         }
       }
     } else {
-      // If we're dropping into a specific section
       const targetSection = this.findSectionFromEvent(event);
       if (targetSection) {
         this.addItemToSection(draggedItem, targetSection);
@@ -146,9 +141,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   }
   
-  // Add this helper method
   private findNearestSectionIndex(items: any[], targetIndex: number): number {
-    // First look for a section at the target index
     if (targetIndex < items.length && items[targetIndex]?.type === 'Section') {
       return targetIndex;
     }
@@ -160,19 +153,16 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       }
     }
     
-    // Look for the closest section after the target index
     for (let i = targetIndex + 1; i < items.length; i++) {
       if (items[i]?.type === 'Section') {
         return i;
       }
     }
     
-    return -1; // No section found
+    return -1;
   }
   
-  // Add this helper method
   private findSectionFromEvent(event: CdkDragDrop<any[]>): any {
-    // Try to identify the section from the event's container data
     const containerElement = event.container.element.nativeElement;
     const sectionElement = containerElement.closest('[data-section-id]');
     
@@ -184,11 +174,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     return null;
   }
   
-  // Add this helper method
   private findSectionById(sectionId: string | null): any {
     if (!sectionId) return null;
     
-    // Recursively search for section with matching ID
     const findInItems = (items: any[]): any => {
       for (const item of items) {
         if (item.type === 'Section' && item.id === sectionId) {
@@ -269,13 +257,11 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   
     dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe(sectionResult => {
       if (sectionResult) {
-        // Create the section with empty items array
         const section = {
           ...sectionResult,
           items: []
         };
   
-        // Now handle the dragged item configuration
         this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
           .pipe(takeUntil(this.destroy$))
           .subscribe(itemResult => {
@@ -345,7 +331,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   handleSubmit() {
-    // First, save layouts if they don't have IDs yet
     const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
     
     if (layoutsToSave.length > 0) {
@@ -356,7 +341,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
             console.log('Form layouts added successfully:', updatedFormTemplate);
             // Update editor items with saved layouts
             this.editorItems = updatedFormTemplate.formLayouts || [];
-            // Now save form inputs
             this.saveFormInputsToSections();
           },
           error: (error) => {
@@ -364,7 +348,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           }
         });
     } else {
-      // If no layouts need saving, directly save form inputs
       this.saveFormInputsToSections();
     }
   }
@@ -441,7 +424,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   
-  // Add this method to EditorTreeComponent
 saveFormInputsToSections() {
   if (!this.editorItems.length) {
     console.log('No items to save');
@@ -450,17 +432,13 @@ saveFormInputsToSections() {
 
   const formInputRequests: any[] = [];
   
-  // Process each section and its items
   this.editorItems.forEach(section => {
     if (section.type === 'Section' && section.items && section.items.length > 0) {
-      const layoutId = section.id; // Use the section's ID as the layout ID
+      const layoutId = section.id; 
       
-      // Process each form input in the section
       section.items.forEach((item: { type: string; config: { label: any; groupLabel: any; labelText: any; }; }) => {
-        // Skip if the item is not a form element
         if (item.type === 'Section') return;
         
-        // Create a form input request
         const formInputRequest = {
           formInput: {
             type: item.type,
@@ -486,7 +464,6 @@ saveFormInputsToSections() {
     .subscribe({
       next: (savedInputs) => {
         console.log('Form inputs saved successfully:', savedInputs);
-        // Refresh the editor with the saved data
         this.loadFormTemplateWithLayouts(this.templateId);
       },
       error: (error) => {

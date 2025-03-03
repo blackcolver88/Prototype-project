@@ -9,8 +9,7 @@ export interface FormInput {
   option: string;
   required:boolean;
   formValue?: FormValue;
-  config: string;
-  formLayoutId?: number;
+
 
 }
 

@@ -53,7 +53,7 @@ getFormInputsByTemplateId(templateId: number): Observable<FormInput[]> {
       })
     );
 }
-  // Add this to FormTemplateService
+
 addMultipleFormInputsToTemplate(templateId: number, formInputRequests: any[]): Observable<FormInput[]> {
   return this.http.post<FormInput[]>(`${this.baseUrl}/${templateId}/bulk-form-inputs`, formInputRequests)
     .pipe(
