@@ -168,7 +168,11 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     return null;
   }
   
+
   private addItemToSection(draggedItem: any, section: any): void {
+    if (!section.items) {
+      section.items = []; 
+    }
     this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
       .pipe(takeUntil(this.destroy$))
       .subscribe(itemResult => {
