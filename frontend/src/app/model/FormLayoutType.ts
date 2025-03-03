@@ -1,4 +1,4 @@
 export enum FormLayoutType {
-  SECTION = 'SECTION',
+  Section = 'Section',
   TAB = 'TAB'
 }
