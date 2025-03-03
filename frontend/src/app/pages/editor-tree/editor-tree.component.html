@@ -64,7 +64,7 @@
         <ng-container [ngSwitch]="item?.type">
           <!-- Section -->
           <ng-container *ngSwitchCase="'Section'">
-            <div cdkDrag class="bg-white p-4 rounded-lg shadow-md" [attr.data-section-id]="item.id">
+            <div cdkDrag class="bg-white p-4 rounded-lg shadow-md">
               <div class="flex justify-between items-center mb-2">
                 <h3 class="font-semibold text-gray-700">{{ item.title || 'Section' }}</h3>
                 <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
@@ -85,7 +85,8 @@
             <div class="bg-white p-3 rounded shadow-sm relative">
               <!-- Text Field -->
               <ng-container *ngIf="item?.type === 'TEXTFIELD'">
-                <app-textform [label]="item.title" 
+                <app-textform [label]="item.config.label" 
+                            [textName]="item.config.textName"
                             [type]="item.config.type" 
                             [placeholder]="item.config.placeholder"
                       >
@@ -108,7 +109,7 @@
               </ng-container>
 
               <!-- Checkbox Group -->
-              <ng-container *ngIf="item?.type === 'CHECKBOX'">
+              <ng-container *ngIf="item?.type === 'checkbox-group'">
                 <app-checkbox [groupLabel]="item.config.groupLabel"
                             [name]="item.config.name" 
                             [options]="item.config.options">
@@ -128,7 +129,7 @@
               </ng-container>
               
               <!-- Radio Group -->
-              <ng-container *ngIf="item?.type === 'RADIO_BUTTON'">
+              <ng-container *ngIf="item?.type === 'radio-group'">
                 <app-radio-button
                   [groupLabel]="item.config.groupLabel"
                   [name]="item.config.name"
@@ -140,7 +141,7 @@
               </ng-container>
               
               <!-- Select Box -->
-              <ng-container *ngIf="item?.type === 'SELECT_BOX'">
+              <ng-container *ngIf="item?.type === 'selectbox'">
                 <app-select-box
                   [label]="item.config.labelText"
                   [options]="getOptionsArray(item.config.options)">
@@ -154,7 +155,7 @@
               </ng-container>
 
               <!-- Basic Date Picker -->
-              <ng-container *ngIf="item?.type === 'basic_datepicker'">
+              <ng-container *ngIf="item?.type === 'basic-datepicker'">
                 <app-basic-datepicker [label]="item.config.label">
                 </app-basic-datepicker>
               </ng-container>
