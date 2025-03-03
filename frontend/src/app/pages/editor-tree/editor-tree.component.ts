@@ -98,7 +98,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.templateId = params.get('id')!;
       this.loadFormTemplateWithLayouts(this.templateId);
-            this.findDefaultFormLayout();
             
 
     });
@@ -117,22 +116,93 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
     }
-  
+    
     const draggedItem = event.item.data;
     if (!draggedItem) return;
-  
-    if (draggedItem.name === 'Section') {
-      this.createStandaloneSection(event.currentIndex);
+    
+    // If we're dropping directly on the editor
+    if (event.container.id === this.acquiredItems.id) {
+      if (draggedItem.name === 'Section') {
+        this.createStandaloneSection(event.currentIndex);
+      } else {
+        // Try to find a section at or near the drop point
+        const targetIndex = event.currentIndex;
+        const nearestSectionIndex = this.findNearestSectionIndex(this.editorItems, targetIndex);
+        
+        if (nearestSectionIndex !== -1) {
+          // Add to existing section
+          this.addItemToSection(draggedItem, this.editorItems[nearestSectionIndex]);
+        } else {
+          // Create new section with item
+          this.createSectionWithItem(draggedItem, targetIndex);
+        }
+      }
     } else {
-      const targetItem = event.container.data[event.currentIndex];
-      const targetSection = targetItem?.type === 'Section' ? targetItem : null;
-  
+      // If we're dropping into a specific section
+      const targetSection = this.findSectionFromEvent(event);
       if (targetSection) {
         this.addItemToSection(draggedItem, targetSection);
-      } else {
-        this.createSectionWithItem(draggedItem, event.currentIndex);
       }
     }
+  }
+  
+  // Add this helper method
+  private findNearestSectionIndex(items: any[], targetIndex: number): number {
+    // First look for a section at the target index
+    if (targetIndex < items.length && items[targetIndex]?.type === 'Section') {
+      return targetIndex;
+    }
+    
+    // Look for the closest section before the target index
+    for (let i = targetIndex - 1; i >= 0; i--) {
+      if (items[i]?.type === 'Section') {
+        return i;
+      }
+    }
+    
+    // Look for the closest section after the target index
+    for (let i = targetIndex + 1; i < items.length; i++) {
+      if (items[i]?.type === 'Section') {
+        return i;
+      }
+    }
+    
+    return -1; // No section found
+  }
+  
+  // Add this helper method
+  private findSectionFromEvent(event: CdkDragDrop<any[]>): any {
+    // Try to identify the section from the event's container data
+    const containerElement = event.container.element.nativeElement;
+    const sectionElement = containerElement.closest('[data-section-id]');
+    
+    if (sectionElement) {
+      const sectionId = sectionElement.getAttribute('data-section-id');
+      return this.findSectionById(sectionId);
+    }
+    
+    return null;
+  }
+  
+  // Add this helper method
+  private findSectionById(sectionId: string | null): any {
+    if (!sectionId) return null;
+    
+    // Recursively search for section with matching ID
+    const findInItems = (items: any[]): any => {
+      for (const item of items) {
+        if (item.type === 'Section' && item.id === sectionId) {
+          return item;
+        }
+        if (item.items && item.items.length > 0) {
+          const found = findInItems(item.items);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    return findInItems(this.editorItems);
   }
 
   private createStandaloneSection(targetIndex: number): void {
@@ -275,19 +345,28 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   handleSubmit() {
-    this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, this.editorItems)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (updatedFormTemplate: FormTemplate) => {
-          console.log('Form layouts added successfully:', updatedFormTemplate);
-
-          this.editorItems = updatedFormTemplate.formLayouts || [];
-          this.cdr.detectChanges();
-        },
-        (error) => {
-          console.error('Error adding form layouts:', error);
-        }
-      );
+    // First, save layouts if they don't have IDs yet
+    const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
+    
+    if (layoutsToSave.length > 0) {
+      this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedFormTemplate: FormTemplate) => {
+            console.log('Form layouts added successfully:', updatedFormTemplate);
+            // Update editor items with saved layouts
+            this.editorItems = updatedFormTemplate.formLayouts || [];
+            // Now save form inputs
+            this.saveFormInputsToSections();
+          },
+          error: (error) => {
+            console.error('Error adding form layouts:', error);
+          }
+        });
+    } else {
+      // If no layouts need saving, directly save form inputs
+      this.saveFormInputsToSections();
+    }
   }
 
 
@@ -360,42 +439,61 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   hasFormLayout(): boolean {
     return this.editorItems.some(item => item.type === 'FormLayout');
   }
-  loadFormInputs(templateId: string) {
-    this.formTemplateService.getFormInputsByTemplateId(+templateId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (formInputs) => {
-          console.log('Form inputs loaded:', formInputs);
-          this.editorItems = this.processFormInputs(formInputs);
-          this.cdr.detectChanges(); 
-        },
-        (error) => {
-          console.error('Error loading form inputs:', error);
-        }
-      );
+
+  
+  // Add this method to EditorTreeComponent
+saveFormInputsToSections() {
+  if (!this.editorItems.length) {
+    console.log('No items to save');
+    return;
   }
 
-  processFormInputs(inputs: any[]): any[] {
-    const sections = inputs.filter(input => input.type === 'Section');
-    const standaloneInputs = inputs.filter(input => input.type !== 'Section' && !input.formLayout?.id);
-
-    if (standaloneInputs.length > 0 && sections.length === 0) {
-      sections.push({
-        type: 'Section',
-        config: { title: 'Section' },
-        items: standaloneInputs
+  const formInputRequests: any[] = [];
+  
+  // Process each section and its items
+  this.editorItems.forEach(section => {
+    if (section.type === 'Section' && section.items && section.items.length > 0) {
+      const layoutId = section.id; // Use the section's ID as the layout ID
+      
+      // Process each form input in the section
+      section.items.forEach((item: { type: string; config: { label: any; groupLabel: any; labelText: any; }; }) => {
+        // Skip if the item is not a form element
+        if (item.type === 'Section') return;
+        
+        // Create a form input request
+        const formInputRequest = {
+          formInput: {
+            type: item.type,
+            label: item.config?.label || item.config?.groupLabel || item.config?.labelText || '',
+            config: JSON.stringify(item.config)
+          },
+          formLayoutId: layoutId
+        };
+        
+        formInputRequests.push(formInputRequest);
       });
     }
-
-    sections.forEach(section => {
-      section.items = inputs.filter(input => input.type !== 'Section' && input.formLayout?.id === section.id);
-    });
-
-    console.log('Processed editor items:', sections); 
-    return sections;
+  });
+  
+  if (formInputRequests.length === 0) {
+    console.log('No form inputs to save');
+    return;
   }
   
-  
+  // Save all form inputs at once
+  this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (savedInputs) => {
+        console.log('Form inputs saved successfully:', savedInputs);
+        // Refresh the editor with the saved data
+        this.loadFormTemplateWithLayouts(this.templateId);
+      },
+      error: (error) => {
+        console.error('Error saving form inputs:', error);
+      }
+    });
+}
 
   
 

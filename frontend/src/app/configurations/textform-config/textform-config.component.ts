@@ -88,8 +88,9 @@ export class TextformConfigComponent {
       const formData = this.textForm.value;
       const configuredItem = {
         ...formData,
-        type: formData.type === 'email' ? 'email' : formData.type === 'number' ? 'number' : formData.type === 'password' ? 'password' :'textfield',
+        type: formData.type === 'EMAIL' ? 'EMAIL' : formData.type === 'number' ? 'number' : formData.type === 'password' ? 'password' :'TEXTFIELD',
         name: formData.label,
+
         config: formData
       };
       this.dialogRef.close(configuredItem);

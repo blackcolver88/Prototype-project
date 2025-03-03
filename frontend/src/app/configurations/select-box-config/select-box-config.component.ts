@@ -25,7 +25,7 @@ export class SelectBoxConfigComponent {
     const formData = this.selectBoxForm.value;
     const configuredItem = {
       ...formData,
-      type: 'selectbox',
+      type: 'SELECT_BOX',
       name: formData.labelText,
       config: formData
     };

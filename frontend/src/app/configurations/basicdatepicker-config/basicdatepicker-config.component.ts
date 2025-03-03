@@ -26,7 +26,7 @@ export class BasicdatepickerConfigComponent {
     console.log('Form data saved:', formData);
     const configuredItem = {  
       ...formData,
-      type: 'basic-datepicker',
+      type: 'basic_datepicker',
       name: formData.label,
       config: formData
     };

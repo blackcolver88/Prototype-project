@@ -7,8 +7,10 @@ export interface FormInput {
   type: FormInputType;
   formLayout?: FormLayout;
   option: string;
-  length:number;
   required:boolean;
   formValue?: FormValue;
+  config: string;
+  formLayoutId?: number;
+
 }
 

@@ -48,7 +48,7 @@ export class RadioButtonConfigComponent {
     const formData = this.radioForm.value;
     const configuredItem = {
       ...formData,
-      type: 'radio-group',
+      type: 'RADIO_BUTTON',
       name: formData.groupLabel,
       config: formData
     };

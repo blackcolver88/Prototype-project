@@ -50,7 +50,7 @@ export class CheckboxConfigComponent {
     const formData = this.checkboxForm.value;
     const configuredItem = {
       ...formData,
-      type: 'checkbox-group',
+      type: 'CHECKBOX',
       name: formData.groupLabel,
       config: formData
     };

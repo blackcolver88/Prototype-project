@@ -6,7 +6,6 @@ public class FormInputRequest {
     private FormInput formInput;
     private Long formLayoutId;
 
-    // Getters and setters
     public FormInput getFormInput() {
         return formInput;
     }
