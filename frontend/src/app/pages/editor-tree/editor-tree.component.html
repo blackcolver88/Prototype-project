@@ -109,7 +109,7 @@
               </ng-container>
 
               <!-- Checkbox Group -->
-              <ng-container *ngIf="item?.type === 'checkbox-group'">
+              <ng-container *ngIf="item?.type === 'CHECKBOX'">
                 <app-checkbox [groupLabel]="item.config.groupLabel"
                             [name]="item.config.name" 
                             [options]="item.config.options">
@@ -129,7 +129,7 @@
               </ng-container>
               
               <!-- Radio Group -->
-              <ng-container *ngIf="item?.type === 'radio-group'">
+              <ng-container *ngIf="item?.type === 'RADIO_BUTTON'">
                 <app-radio-button
                   [groupLabel]="item.config.groupLabel"
                   [name]="item.config.name"
@@ -141,7 +141,7 @@
               </ng-container>
               
               <!-- Select Box -->
-              <ng-container *ngIf="item?.type === 'selectbox'">
+              <ng-container *ngIf="item?.type === 'SELECT_BOX'">
                 <app-select-box
                   [label]="item.config.labelText"
                   [options]="getOptionsArray(item.config.options)">
@@ -155,7 +155,7 @@
               </ng-container>
 
               <!-- Basic Date Picker -->
-              <ng-container *ngIf="item?.type === 'basic-datepicker'">
+              <ng-container *ngIf="item?.type === 'basic_datepicker'">
                 <app-basic-datepicker [label]="item.config.label">
                 </app-basic-datepicker>
               </ng-container>
