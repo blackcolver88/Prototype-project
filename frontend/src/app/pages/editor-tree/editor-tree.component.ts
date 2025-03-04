@@ -358,22 +358,54 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   removeItem(item: any) {
-    const index = this.editorItems.indexOf(item);
-    if (index === -1) return;
+    // First try to find and remove the item from the top level
+    const topLevelIndex = this.editorItems.indexOf(item);
+    
+    if (topLevelIndex !== -1) {
+      // Item is at top level
+      if (item.id) {
+        this.formLayoutService.deleteFormLayout(item.id).subscribe({
+          next: () => {
+            this.editorItems.splice(topLevelIndex, 1);
+            console.log('Item deleted successfully:', item);
+          },
+          error: (err) => {
+            console.error('Error deleting item:', err);
+          }
+        });
+      } else {
+        this.editorItems.splice(topLevelIndex, 1);
+        console.log('Item removed locally:', item);
+      }
+      return;
+    }
 
-    if (item.id) {
-      this.formLayoutService.deleteFormLayout(item.id).subscribe({
-        next: () => {
-          this.editorItems.splice(index, 1);
-          console.log('Item deleted successfully:', item);
-        },
-        error: (err) => {
-          console.error('Error deleting item:', err);
+    // If item wasn't found at top level, search through sections
+    for (const section of this.editorItems) {
+      if (section.type === 'Section' && section.items) {
+        const sectionItemIndex = section.items.indexOf(item);
+        if (sectionItemIndex !== -1) {
+          // Item found in this section
+          if (item.id) {
+            // If item has an ID, delete from backend
+            this.formLayoutService.deleteFormLayout(item.id).subscribe({
+              next: () => {
+                section.items.splice(sectionItemIndex, 1);
+                console.log('Section item deleted successfully:', item);
+              },
+              error: (err) => {
+                console.error('Error deleting section item:', err);
+              }
+            });
+          } else {
+            // If no ID, just remove locally
+            section.items.splice(sectionItemIndex, 1);
+            console.log('Section item removed locally:', item);
+          }
+          this.cdr.detectChanges();
+          return;
         }
-      });
-    } else {
-      this.editorItems.splice(index, 1);
-      console.log('Item removed locally:', item);
+      }
     }
   }
 

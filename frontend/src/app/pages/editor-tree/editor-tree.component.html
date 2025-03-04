@@ -76,8 +76,8 @@
                   (cdkDropListDropped)="onSectionItemDropped($event, item)"
                   class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
                 <div *ngFor="let sectionItem of item.items" 
-                     cdkDrag 
-                     class="mb-2">
+                    cdkDrag 
+                    class="mb-2">
                   <div class="bg-white p-3 rounded shadow-sm relative">
                     <!-- Text Field -->
                     <ng-container *ngIf="sectionItem?.type === 'TEXTFIELD'">
