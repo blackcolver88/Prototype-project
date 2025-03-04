@@ -21,6 +21,7 @@ export class TextAreaConfigComponent {
 
   save(): void {
     const formData = this.textArea.value;
+    
     const configuredItem = {
       ...formData,
       type: 'textarea',

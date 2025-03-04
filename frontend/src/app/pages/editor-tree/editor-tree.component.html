@@ -94,17 +94,15 @@
               </ng-container>
 
               <!-- Password Field -->
-              <ng-container *ngIf="item?.type === 'password'">
+              <ng-container *ngIf="item?.type === 'PASSWORD'">
                 <app-password>
                 </app-password>
               </ng-container>
 
               <!-- Email -->
-              <ng-container *ngIf="item?.type === 'email'">
+              <ng-container *ngIf="item?.type === 'EMAIL'">
                 <app-email [label]="item.config.label" 
-                         [placeholder]="item.config.placeholder"
-                         [labelPosition]="item.config.labelPosition"
-                         [labelAlignment]="item.config.labelAlignment">
+                         [placeholder]="item.config.placeholder">
                 </app-email>
               </ng-container>
 
@@ -117,7 +115,7 @@
               </ng-container>
               
               <!-- Phone Number -->
-              <ng-container *ngIf="item?.type === 'number'">
+              <ng-container *ngIf="item?.type === 'NUMBER'">
                 <app-phone-number [label]="item.config.label"
                                 [placeholder]="item.config.placeholder">
                 </app-phone-number>

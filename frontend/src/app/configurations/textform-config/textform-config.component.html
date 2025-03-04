@@ -76,7 +76,7 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <ng-container [ngSwitch]="textForm.get('type')?.value">
       <!-- Email Preview -->
-      <app-email *ngSwitchCase="'email'"
+      <app-email *ngSwitchCase="'EMAIL'"
                  [label]="textForm.get('label')?.value"
                  [placeholder]="textForm.get('placeholder')?.value"
                  [email]="textForm.get('textName')?.value">

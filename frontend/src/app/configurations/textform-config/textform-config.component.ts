@@ -88,9 +88,9 @@ export class TextformConfigComponent {
       const formData = this.textForm.value;
       const configuredItem = {
         ...formData,
-        type: formData.type === 'EMAIL' ? 'EMAIL' : formData.type === 'number' ? 'number' : formData.type === 'password' ? 'password' :'TEXTFIELD',
+        type: formData.type === 'email' ? 'EMAIL' : formData.type === 'number' ? 'NUMBER' : formData.type === 'password' ? 'PASSWORD' : 'TEXTFIELD',
+        title: formData.label, 
         name: formData.label,
-
         config: formData
       };
       this.dialogRef.close(configuredItem);
@@ -100,6 +100,7 @@ export class TextformConfigComponent {
       this.textForm.markAllAsTouched();
     }
   }
+  
 
   cancel(): void {
     this.dialogRef.close();

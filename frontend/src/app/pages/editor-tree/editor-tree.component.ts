@@ -339,7 +339,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (updatedFormTemplate: FormTemplate) => {
             console.log('Form layouts added successfully:', updatedFormTemplate);
-            // Update editor items with saved layouts
             this.editorItems = updatedFormTemplate.formLayouts || [];
             this.saveFormInputsToSections();
           },
@@ -424,53 +423,53 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   
-saveFormInputsToSections() {
-  if (!this.editorItems.length) {
-    console.log('No items to save');
-    return;
-  }
-
-  const formInputRequests: any[] = [];
-  
-  this.editorItems.forEach(section => {
-    if (section.type === 'Section' && section.items && section.items.length > 0) {
-      const layoutId = section.id; 
-      
-      section.items.forEach((item: { type: string; config: { label: any; groupLabel: any; labelText: any; }; }) => {
-        if (item.type === 'Section') return;
-        
-        const formInputRequest = {
-          formInput: {
-            type: item.type,
-            label: item.config?.label || item.config?.groupLabel || item.config?.labelText || '',
-            config: JSON.stringify(item.config)
-          },
-          formLayoutId: layoutId
-        };
-        
-        formInputRequests.push(formInputRequest);
-      });
+  saveFormInputsToSections() {
+    if (!this.editorItems.length) {
+      console.log('No items to save');
+      return;
     }
-  });
   
-  if (formInputRequests.length === 0) {
-    console.log('No form inputs to save');
-    return;
-  }
-  
-  // Save all form inputs at once
-  this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (savedInputs) => {
-        console.log('Form inputs saved successfully:', savedInputs);
-        this.loadFormTemplateWithLayouts(this.templateId);
-      },
-      error: (error) => {
-        console.error('Error saving form inputs:', error);
+    const formInputRequests: any[] = [];
+    
+    this.editorItems.forEach(section => {
+      if (section.type === 'Section' && section.items && section.items.length > 0) {
+        const layoutId = section.id; 
+        
+        section.items.forEach((item: { type: string; config: { label: any; groupLabel: any; labelText: any; }; }) => {
+          if (item.type === 'Section') return;
+          
+          const formInputRequest = {
+            formInput: {
+              type: item.type,
+              title: item.config?.label || item.config?.groupLabel || item.config?.labelText || '',
+              config: JSON.stringify(item.config)
+            },
+            formLayoutId: layoutId
+          };
+          
+          formInputRequests.push(formInputRequest);
+        });
       }
     });
-}
+    
+    if (formInputRequests.length === 0) {
+      console.log('No form inputs to save');
+      return;
+    }
+    
+    // Save all form inputs at once
+    this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (savedInputs) => {
+          console.log('Form inputs saved successfully:', savedInputs);
+          this.loadFormTemplateWithLayouts(this.templateId);
+        },
+        error: (error) => {
+          console.error('Error saving form inputs:', error);
+        }
+      });
+  }
 
   
 
