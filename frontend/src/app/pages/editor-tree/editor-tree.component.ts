@@ -399,14 +399,32 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
 
   onSectionItemDropped(event: CdkDragDrop<any[]>, section: any) {
-    const draggedItem = event.item.data;
-    if (!draggedItem) {
-      console.error('Dragged item is null or undefined');
-      return;
-    }
+    if (event.previousContainer === event.container) {
+      // Move item within the same section
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      // Handle new item being dropped into section
+      const draggedItem = event.item.data;
+      if (!draggedItem) {
+        console.error('Dragged item is null or undefined');
+        return;
+      }
 
-    section.items.push(draggedItem);
-    this.saveSection.emit(section);
+      if (!section.items) {
+        section.items = [];
+      }
+
+      // If it's a new item being dropped, open configuration dialog
+      this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(itemResult => {
+          if (itemResult) {
+            // Insert at the specific drop position
+            section.items.splice(event.currentIndex, 0, itemResult);
+            this.cdr.detectChanges();
+          }
+        });
+    }
   }
 
   findDefaultFormLayout() {
