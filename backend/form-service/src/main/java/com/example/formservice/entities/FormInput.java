@@ -3,6 +3,8 @@ import com.example.formservice.entities.enums.FormInputType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
 public class FormInput {
@@ -25,6 +27,9 @@ public class FormInput {
     @ManyToOne
     @JoinColumn(name = "form_value_id")
     private FormValue formValue;
+
+    @OneToMany(mappedBy = "formInput", cascade = CascadeType.ALL)
+    private List<MultipleValue> multipleValues;
 
 
 }

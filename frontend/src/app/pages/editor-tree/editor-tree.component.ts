@@ -14,7 +14,7 @@ import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepi
 import { HttpClientModule } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
 import { ChangeDetectorRef } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { catchError, Subject, switchMap, takeUntil, throwError } from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { TextformComponent } from "../../components/textform/textform.component";
@@ -36,6 +36,7 @@ import { FormTemplate } from '../../model/FormTemplate';
 import { FormLayoutService } from '../../services/form-layout.service';
 import { TextAreaComponent } from '../../components/text-area/text-area.component';
 import { TextAreaConfigComponent } from '../../configurations/text-area-config/text-area-config.component';
+import { FormInput } from '../../model/FormInput';
 
 export interface FoodNode {
   name: string;
@@ -315,20 +316,69 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       this.resetForm();
     }
   }
-  loadFormTemplateWithLayouts(id: string) {
-    this.formTemplateService.getFormTemplateWithFormLayouts(+id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (formTemplate: FormTemplate) => {
-          this.editorItems = formTemplate.formLayouts || [];
-          this.formTitle = formTemplate.title ?? '';
-          this.cdr.detectChanges();
-        },
-        (error) => {
-          console.error('Error loading form template with layouts:', error);
-        }
-      );
-  }
+
+private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
+
+  const inputsByLayoutId = formInputs.reduce((acc, input) => {
+    const layoutId = input.formLayout.id;
+    
+    if (!acc[layoutId]) {
+      acc[layoutId] = [];
+    }
+    acc[layoutId].push(input);
+    return acc;
+  }, {} as Record<number, FormInput[]>);
+
+  this.editorItems = this.editorItems.map(layout => {
+    if (layout.type === 'Section' && layout.id) {
+      const layoutInputs = inputsByLayoutId[layout.id] || [];
+      return {
+        ...layout,
+        items: layoutInputs.map(input => ({
+          type: input.type,
+          config: {
+            label: input.title,
+            required: input.required
+            // Add other relevant config properties
+          }
+        }))
+      };
+    }
+    return layout;
+  });
+
+}
+
+loadFormTemplateWithLayouts(id: string) {
+  this.formTemplateService.getFormTemplateWithFormLayouts(+id)
+    .pipe(
+      takeUntil(this.destroy$),
+      switchMap(formTemplate => {
+        this.editorItems = formTemplate.formLayouts || [];
+        this.formTitle = formTemplate.title ?? '';
+        
+        return this.formTemplateService.getFormInputsByTemplateId(+id);
+      }),
+      catchError(error => {
+        console.error('Error in loading process:', error);
+        return throwError(() => error);
+      })
+    )
+    .subscribe({
+      next: (formInputs: FormInput[]) => {
+        this.populateFormInputsIntoLayouts(formInputs);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading form template with layouts and inputs:', error);
+      }
+    });
+}
+
+
+
+  
+
 
   handleSubmit() {
     const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');

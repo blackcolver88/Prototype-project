@@ -44,15 +44,20 @@ export class FormTemplateService {
   }
 
 
-getFormInputsByTemplateId(templateId: number): Observable<FormInput[]> {
-  return this.http.get<FormInput[]>(`${this.baseUrl}/${templateId}/form-inputs`)
-    .pipe(
-      catchError(error => {
-        console.error('Error fetching form inputs:', error);
-        return throwError(() => error);
-      })
-    );
-}
+
+  getFormInputsByTemplateId(templateId: number): Observable<FormInput[]> {
+    return this.http.get<FormInput[]>(`${this.baseUrl}/${templateId}/form-inputs`)
+      .pipe(
+        map(formInputs => {
+          console.log('Fetched Form Inputs:', formInputs); // Add logging
+          return formInputs;
+        }),
+        catchError(error => {
+          console.error('Error fetching form inputs:', error);
+          return throwError(() => new Error('Failed to fetch form inputs'));
+        })
+      );
+  }
 
 addMultipleFormInputsToTemplate(templateId: number, formInputRequests: any[]): Observable<FormInput[]> {
   return this.http.post<FormInput[]>(`${this.baseUrl}/${templateId}/bulk-form-inputs`, formInputRequests)
