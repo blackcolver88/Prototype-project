@@ -408,22 +408,54 @@ loadFormTemplateWithLayouts(id: string) {
   }
 
   removeItem(item: any) {
-    const index = this.editorItems.indexOf(item);
-    if (index === -1) return;
+    // First try to find and remove the item from the top level
+    const topLevelIndex = this.editorItems.indexOf(item);
+    
+    if (topLevelIndex !== -1) {
+      // Item is at top level
+      if (item.id) {
+        this.formLayoutService.deleteFormLayout(item.id).subscribe({
+          next: () => {
+            this.editorItems.splice(topLevelIndex, 1);
+            console.log('Item deleted successfully:', item);
+          },
+          error: (err) => {
+            console.error('Error deleting item:', err);
+          }
+        });
+      } else {
+        this.editorItems.splice(topLevelIndex, 1);
+        console.log('Item removed locally:', item);
+      }
+      return;
+    }
 
-    if (item.id) {
-      this.formLayoutService.deleteFormLayout(item.id).subscribe({
-        next: () => {
-          this.editorItems.splice(index, 1);
-          console.log('Item deleted successfully:', item);
-        },
-        error: (err) => {
-          console.error('Error deleting item:', err);
+    // If item wasn't found at top level, search through sections
+    for (const section of this.editorItems) {
+      if (section.type === 'Section' && section.items) {
+        const sectionItemIndex = section.items.indexOf(item);
+        if (sectionItemIndex !== -1) {
+          // Item found in this section
+          if (item.id) {
+            // If item has an ID, delete from backend
+            this.formLayoutService.deleteFormLayout(item.id).subscribe({
+              next: () => {
+                section.items.splice(sectionItemIndex, 1);
+                console.log('Section item deleted successfully:', item);
+              },
+              error: (err) => {
+                console.error('Error deleting section item:', err);
+              }
+            });
+          } else {
+            // If no ID, just remove locally
+            section.items.splice(sectionItemIndex, 1);
+            console.log('Section item removed locally:', item);
+          }
+          this.cdr.detectChanges();
+          return;
         }
-      });
-    } else {
-      this.editorItems.splice(index, 1);
-      console.log('Item removed locally:', item);
+      }
     }
   }
 
@@ -449,14 +481,32 @@ loadFormTemplateWithLayouts(id: string) {
   }
 
   onSectionItemDropped(event: CdkDragDrop<any[]>, section: any) {
-    const draggedItem = event.item.data;
-    if (!draggedItem) {
-      console.error('Dragged item is null or undefined');
-      return;
-    }
+    if (event.previousContainer === event.container) {
+      // Move item within the same section
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      // Handle new item being dropped into section
+      const draggedItem = event.item.data;
+      if (!draggedItem) {
+        console.error('Dragged item is null or undefined');
+        return;
+      }
 
-    section.items.push(draggedItem);
-    this.saveSection.emit(section);
+      if (!section.items) {
+        section.items = [];
+      }
+
+      // If it's a new item being dropped, open configuration dialog
+      this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(itemResult => {
+          if (itemResult) {
+            // Insert at the specific drop position
+            section.items.splice(event.currentIndex, 0, itemResult);
+            this.cdr.detectChanges();
+          }
+        });
+    }
   }
 
   findDefaultFormLayout() {
