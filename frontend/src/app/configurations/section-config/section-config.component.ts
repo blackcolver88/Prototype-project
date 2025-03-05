@@ -20,14 +20,15 @@ export class SectionConfigComponent implements OnInit {
     this.sectionForm = this.fb.group({
       type: ['Section'],
       title: ['', Validators.required],
-      children: [[]]
+      children: []
     });
   }
 
   ngOnInit() {
     if (this.data && this.data.item && this.data.item.config) {
       this.sectionForm.patchValue({
-        title: this.data.item.title || ''
+        title: this.data.item.title || '',
+        children: this.data.item.items || []
       });
     }
   }

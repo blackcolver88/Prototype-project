@@ -339,7 +339,6 @@ private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
           config: {
             label: input.title,
             required: input.required
-            // Add other relevant config properties
           }
         }))
       };
@@ -378,28 +377,130 @@ loadFormTemplateWithLayouts(id: string) {
 
 
   
-
-
-  handleSubmit() {
-    const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
-    
-    if (layoutsToSave.length > 0) {
-      this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updatedFormTemplate: FormTemplate) => {
-            console.log('Form layouts added successfully:', updatedFormTemplate);
-            this.editorItems = updatedFormTemplate.formLayouts || [];
-            this.saveFormInputsToSections();
-          },
-          error: (error) => {
-            console.error('Error adding form layouts:', error);
-          }
-        });
-    } else {
-      this.saveFormInputsToSections();
-    }
+handleSubmit() {
+  console.log('Starting form submission process');
+  const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
+  
+  console.log(`Found ${layoutsToSave.length} new sections to save`);
+  
+  if (layoutsToSave.length > 0) {
+    console.log('Step 1: Saving new form layouts');
+    this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedFormTemplate: FormTemplate) => {
+          console.log('Step 1 completed: Form layouts added successfully', updatedFormTemplate);
+          console.log(`Added ${updatedFormTemplate.formLayouts?.length || 0} form layouts`);
+          
+          const sectionItemsMap = new Map();
+          this.editorItems.forEach(item => {
+            if (item.type === 'Section' && item.items && item.items.length) {
+              sectionItemsMap.set(item.title || item.tempId || JSON.stringify(item), item.items);
+            }
+          });
+          
+          this.editorItems = updatedFormTemplate.formLayouts?.map(layout => {
+            const matchingItems = sectionItemsMap.get(layout.title) || [];
+            return {
+              ...layout,
+              items: matchingItems
+            };
+          }) || [];
+          
+          console.log('Updated editorItems with server IDs while preserving items:', this.editorItems);
+          
+          console.log('Proceeding to Step 2: Saving form inputs');
+          this.saveFormInputsToSections();
+        },
+        error: (error) => {
+          console.error('Step 1 failed: Error adding form layouts:', error);
+        }
+      });
+  } else {
+    console.log('No new layouts to save, proceeding directly to saving form inputs');
+    this.saveFormInputsToSections();
   }
+}
+
+saveFormInputsToSections() {
+  console.log('Step 2: Starting to save form inputs to sections');
+  
+  if (!this.editorItems.length) {
+    console.log('No editor items found, nothing to save');
+    return;
+  }
+
+  console.log('Current editorItems structure:', JSON.stringify(this.editorItems, null, 2));
+
+  const formInputRequests: any[] = [];
+  
+  this.editorItems.forEach((section, index) => {
+    console.log(`Processing section ${index}:`, section);
+    
+    if (section.type === 'Section') {
+      const layoutId = section.id;
+      console.log(`Section ID ${layoutId} found`);
+      
+      if (!section.items || !section.items.length) {
+        console.log(`Section ${layoutId} has no items`);
+        return;
+      }
+      
+      console.log(`Section ${layoutId} has ${section.items.length} items`);
+      
+      section.items.forEach((item: any, itemIndex: number) => {
+        console.log(`Processing item ${itemIndex} in section ${layoutId}:`, item);
+        
+        if (item.type === 'Section') {
+          console.log('Skipping nested section');
+          return;
+        }
+        
+        if (!item.type) {
+          console.log('Item missing type property, skipping');
+          return;
+        }
+        
+        const itemConfig = item.config || {};
+        
+        const formInputRequest = {
+          formInput: {
+            type: item.type,
+            title: itemConfig.label || itemConfig.groupLabel || itemConfig.labelText || '',
+            config: JSON.stringify(itemConfig)
+          },
+          formLayoutId: layoutId
+        };
+        
+        formInputRequests.push(formInputRequest);
+        console.log(`Added form input request of type "${item.type}" to queue`);
+      });
+    } else {
+      console.log(`Item at index ${index} is not a section:`, section);
+    }
+  });
+  
+  if (formInputRequests.length === 0) {
+    console.log('No form inputs to save, process completed');
+    return;
+  }
+  
+  console.log(`Step 2: Saving ${formInputRequests.length} form inputs:`, formInputRequests);
+  
+  this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (savedInputs) => {
+        console.log('Step 2 completed: Form inputs saved successfully', savedInputs);
+        console.log(`Saved ${savedInputs.length} form inputs`);
+        console.log('Final step: Reloading form template with layouts');
+        this.loadFormTemplateWithLayouts(this.templateId);
+      },
+      error: (error) => {
+        console.error('Step 2 failed: Error saving form inputs:', error);
+      }
+    });
+}
 
 
   resetForm() {
@@ -523,53 +624,7 @@ loadFormTemplateWithLayouts(id: string) {
   }
 
   
-  saveFormInputsToSections() {
-    if (!this.editorItems.length) {
-      console.log('No items to save');
-      return;
-    }
-  
-    const formInputRequests: any[] = [];
-    
-    this.editorItems.forEach(section => {
-      if (section.type === 'Section' && section.items && section.items.length > 0) {
-        const layoutId = section.id; 
-        
-        section.items.forEach((item: { type: string; config: { label: any; groupLabel: any; labelText: any; }; }) => {
-          if (item.type === 'Section') return;
-          
-          const formInputRequest = {
-            formInput: {
-              type: item.type,
-              title: item.config?.label || item.config?.groupLabel || item.config?.labelText || '',
-              config: JSON.stringify(item.config)
-            },
-            formLayoutId: layoutId
-          };
-          
-          formInputRequests.push(formInputRequest);
-        });
-      }
-    });
-    
-    if (formInputRequests.length === 0) {
-      console.log('No form inputs to save');
-      return;
-    }
-    
-    // Save all form inputs at once
-    this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (savedInputs) => {
-          console.log('Form inputs saved successfully:', savedInputs);
-          this.loadFormTemplateWithLayouts(this.templateId);
-        },
-        error: (error) => {
-          console.error('Error saving form inputs:', error);
-        }
-      });
-  }
+
 
   
 
