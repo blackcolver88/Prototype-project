@@ -117,7 +117,10 @@
                     </ng-container>
 
                     <ng-container *ngIf="sectionItem?.type === 'textarea'">
-                      <app-text-area [label]="sectionItem.label">
+                      <app-text-area 
+                        [label]="sectionItem.config.label" 
+                        [placeholder]="sectionItem.placeholder || 'Enter text here'"
+                      >
                       </app-text-area>
                     </ng-container>
                     
@@ -187,7 +190,8 @@
 
               <!-- Password Field -->
               <ng-container *ngIf="item?.type === 'PASSWORD'">
-                <app-password>
+                <app-password [label]="item.config.label" 
+                [placeholder]="item.config.placeholder">
                 </app-password>
               </ng-container>
 

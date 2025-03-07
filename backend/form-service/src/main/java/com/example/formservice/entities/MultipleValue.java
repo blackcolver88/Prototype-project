@@ -1,5 +1,6 @@
 package com.example.formservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,5 +18,6 @@ public class MultipleValue {
 
     @ManyToOne
     @JoinColumn(name = "form_input_id")
+    @JsonBackReference
     private FormInput formInput;
 }

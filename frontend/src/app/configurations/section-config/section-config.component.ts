@@ -28,7 +28,7 @@ export class SectionConfigComponent implements OnInit {
     if (this.data && this.data.item && this.data.item.config) {
       this.sectionForm.patchValue({
         title: this.data.item.title || '',
-        children: this.data.item.items || []
+        // children: this.data.item.items || []
       });
     }
   }

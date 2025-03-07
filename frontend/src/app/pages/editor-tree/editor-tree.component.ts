@@ -227,7 +227,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     return null;
   }
   
-
   private addItemToSection(draggedItem: any, section: any): void {
     if (!section.items) {
       section.items = []; 
@@ -317,36 +316,35 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   }
 
-private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
-
-  const inputsByLayoutId = formInputs.reduce((acc, input) => {
-    const layoutId = input.formLayout.id;
-    
-    if (!acc[layoutId]) {
-      acc[layoutId] = [];
-    }
-    acc[layoutId].push(input);
-    return acc;
-  }, {} as Record<number, FormInput[]>);
-
-  this.editorItems = this.editorItems.map(layout => {
-    if (layout.type === 'Section' && layout.id) {
-      const layoutInputs = inputsByLayoutId[layout.id] || [];
-      return {
-        ...layout,
-        items: layoutInputs.map(input => ({
-          type: input.type,
-          config: {
-            label: input.title,
-            required: input.required
-          }
-        }))
-      };
-    }
-    return layout;
-  });
-
-}
+  private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
+    const inputsByLayoutId = formInputs.reduce((acc, input) => {
+      const layoutId = input.formLayout.id;
+      
+      if (!acc[layoutId]) {
+        acc[layoutId] = [];
+      }
+      acc[layoutId].push(input);
+      return acc;
+    }, {} as Record<number, FormInput[]>);
+  
+    this.editorItems = this.editorItems.map(layout => {
+      if (layout.type === 'Section' && layout.id) {
+        const layoutInputs = inputsByLayoutId[layout.id] || [];
+        return {
+          ...layout,
+          items: layoutInputs.map(input => ({
+            id: input.id, // Include the ID from the database
+            type: input.type,
+            config: {
+              label: input.title,
+              required: input.required
+            }
+          }))
+        };
+      }
+      return layout;
+    });
+  }
 
 loadFormTemplateWithLayouts(id: string) {
   this.formTemplateService.getFormTemplateWithFormLayouts(+id)
@@ -372,11 +370,7 @@ loadFormTemplateWithLayouts(id: string) {
         console.error('Error loading form template with layouts and inputs:', error);
       }
     });
-}
-
-
-
-  
+} 
 handleSubmit() {
   console.log('Starting form submission process');
   const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
@@ -461,6 +455,11 @@ saveFormInputsToSections() {
           return;
         }
         
+        if (item.id) {
+          console.log(`Item ${itemIndex} already has ID ${item.id}, skipping`);
+          return;
+        }
+        
         const itemConfig = item.config || {};
         
         const formInputRequest = {
@@ -501,7 +500,6 @@ saveFormInputsToSections() {
       }
     });
 }
-
 
   resetForm() {
     this.editorItems = [];
@@ -570,7 +568,6 @@ saveFormInputsToSections() {
     });
   }
 
-
   getOptionsArray(options: string | string[]): string[] {
     if (Array.isArray(options)) {
       return options;
@@ -624,8 +621,4 @@ saveFormInputsToSections() {
   }
 
   
-
-
-  
-
 }

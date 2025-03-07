@@ -17,16 +17,30 @@ public class MultipleValueController {
     private MultipleValueService multipleValueService;
 
     @PostMapping
-    public ResponseEntity<MultipleValue> createMultipleValue(@RequestBody MultipleValue multipleValue) {
+    public ResponseEntity<MultipleValueDTO> createMultipleValue(@RequestBody MultipleValue multipleValue) {
         MultipleValue savedMultipleValue = multipleValueService.saveMultipleValue(multipleValue);
-        return ResponseEntity.ok(savedMultipleValue);
+        MultipleValueDTO responseDTO = mapToDTO(savedMultipleValue);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    private MultipleValueDTO mapToDTO(MultipleValue entity) {
+        MultipleValueDTO dto = new MultipleValueDTO();
+        dto.setId(entity.getId());
+        dto.setValeurs(entity.getValeurs());
+        dto.setFormInputId(entity.getFormInput() != null ? entity.getFormInput().getId() : null);
+        return dto;
     }
 
     @GetMapping("/form-input/{formInputId}")
-    public ResponseEntity<List<MultipleValue>> getMultipleValuesByFormInputId(@PathVariable Long formInputId) {
+    public ResponseEntity<List<MultipleValueDTO>> getMultipleValuesByFormInputId(@PathVariable Long formInputId) {
         List<MultipleValue> multipleValues = multipleValueService.getMultipleValuesByFormInputId(formInputId);
-        return ResponseEntity.ok(multipleValues);
+        List<MultipleValueDTO> dtos = multipleValues.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
+
+
 
     @GetMapping
     public ResponseEntity<List<MultipleValue>> getAllMultipleValues() {

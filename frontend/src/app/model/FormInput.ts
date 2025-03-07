@@ -1,6 +1,7 @@
 import {FormLayout} from  './FormLayout';
 import {FormInputType} from "./FormInputType";
 import {FormValue} from "./FormValue";
+import { MultipleValue } from './MultipleValue';
 // export interface FormInput {
 //   id: number;
 //   title: string;
@@ -24,5 +25,5 @@ export interface FormInput {
     children: any[];
   };
   formValue: any;
-  multipleValues: any[];
+  multipleValues?: MultipleValue[];
 }

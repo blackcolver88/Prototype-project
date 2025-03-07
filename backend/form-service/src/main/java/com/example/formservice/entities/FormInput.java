@@ -1,5 +1,6 @@
 package com.example.formservice.entities;
 import com.example.formservice.entities.enums.FormInputType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -29,6 +30,7 @@ public class FormInput {
     private FormValue formValue;
 
     @OneToMany(mappedBy = "formInput", cascade = CascadeType.ALL)
+    @JsonManagedReference  // Add this annotation to manage the reference
     private List<MultipleValue> multipleValues;
 
 
