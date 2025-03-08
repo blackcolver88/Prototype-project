@@ -37,6 +37,7 @@ import { FormLayoutService } from '../../services/form-layout.service';
 import { TextAreaComponent } from '../../components/text-area/text-area.component';
 import { TextAreaConfigComponent } from '../../configurations/text-area-config/text-area-config.component';
 import { FormInput } from '../../model/FormInput';
+import { FormInputService } from '../../services/form-input.service';
 
 export interface FoodNode {
   name: string;
@@ -91,7 +92,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formLayoutsToAdd: FormLayout[] = [];
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-    private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
+    private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService,
+    private formInputService: FormInputService) {
     library.addIcons(faTrashAlt);
   }
 
@@ -507,51 +509,50 @@ saveFormInputsToSections() {
   }
 
   removeItem(item: any) {
-    // First try to find and remove the item from the top level
+    // First try to find and remove the item from the top level (sections)
     const topLevelIndex = this.editorItems.indexOf(item);
     
     if (topLevelIndex !== -1) {
-      // Item is at top level
+      // Item is a section
       if (item.id) {
         this.formLayoutService.deleteFormLayout(item.id).subscribe({
           next: () => {
             this.editorItems.splice(topLevelIndex, 1);
-            console.log('Item deleted successfully:', item);
+            console.log('Section deleted successfully:', item);
           },
           error: (err) => {
-            console.error('Error deleting item:', err);
+            console.error('Error deleting section:', err);
           }
         });
       } else {
         this.editorItems.splice(topLevelIndex, 1);
-        console.log('Item removed locally:', item);
       }
       return;
     }
 
-    // If item wasn't found at top level, search through sections
+    // If item wasn't found at top level, search through sections for form inputs
     for (const section of this.editorItems) {
       if (section.type === 'Section' && section.items) {
         const sectionItemIndex = section.items.indexOf(item);
         if (sectionItemIndex !== -1) {
-          // Item found in this section
+          // Item is a form input inside a section
           if (item.id) {
-            // If item has an ID, delete from backend
-            this.formLayoutService.deleteFormLayout(item.id).subscribe({
+            // Delete form input from database
+            this.formInputService.deleteFormInput(item.id).subscribe({
               next: () => {
                 section.items.splice(sectionItemIndex, 1);
-                console.log('Section item deleted successfully:', item);
+                console.log('Form input deleted successfully:', item);
+                this.cdr.detectChanges();
               },
               error: (err) => {
-                console.error('Error deleting section item:', err);
+                console.error('Error deleting form input:', err);
               }
             });
           } else {
-            // If no ID, just remove locally
+            // Remove form input locally if it has no ID
             section.items.splice(sectionItemIndex, 1);
-            console.log('Section item removed locally:', item);
+            this.cdr.detectChanges();
           }
-          this.cdr.detectChanges();
           return;
         }
       }
