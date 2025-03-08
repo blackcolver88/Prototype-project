@@ -90,7 +90,9 @@
 
                     <!-- Password Field -->
                     <ng-container *ngIf="sectionItem?.type === 'PASSWORD'">
-                      <app-password>
+                      <app-password 
+                        [label]="sectionItem.config.label"
+                        [placeholder]="sectionItem.config.placeholder">
                       </app-password>
                     </ng-container>
 
@@ -190,8 +192,9 @@
 
               <!-- Password Field -->
               <ng-container *ngIf="item?.type === 'PASSWORD'">
-                <app-password [label]="item.config.label" 
-                [placeholder]="item.config.placeholder">
+                <app-password 
+                  [label]="item.config.label"
+                  [placeholder]="item.config.placeholder">
                 </app-password>
               </ng-container>
 

@@ -87,11 +87,16 @@ export class TextformConfigComponent {
     if (this.textForm.valid) {
       const formData = this.textForm.value;
       const configuredItem = {
-        ...formData,
-        type: formData.type === 'email' ? 'EMAIL' : formData.type === 'number' ? 'NUMBER' : formData.type === 'password' ? 'PASSWORD' : 'TEXTFIELD',
-        title: formData.label, 
+        type: formData.type === 'email' ? 'EMAIL' : 
+              formData.type === 'number' ? 'NUMBER' : 
+              formData.type === 'password' ? 'PASSWORD' : 'TEXTFIELD',
+        title: formData.label,
         name: formData.label,
-        config: formData
+        config: {
+          ...formData,
+          label: formData.label,        // Make sure label is in config
+          placeholder: formData.placeholder
+        }
       };
       this.dialogRef.close(configuredItem);
     } else {
