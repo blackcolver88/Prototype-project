@@ -14,7 +14,7 @@ import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepi
 import { HttpClientModule } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
 import { ChangeDetectorRef } from '@angular/core';
-import { catchError, Subject, switchMap, takeUntil, throwError } from 'rxjs';
+import { catchError, forkJoin, map, of, Subject, switchMap, takeUntil, throwError } from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { TextformComponent } from "../../components/textform/textform.component";
@@ -37,6 +37,8 @@ import { FormLayoutService } from '../../services/form-layout.service';
 import { TextAreaComponent } from '../../components/text-area/text-area.component';
 import { TextAreaConfigComponent } from '../../configurations/text-area-config/text-area-config.component';
 import { FormInput } from '../../model/FormInput';
+import { MultipleValueService } from '../../services/multiple-value.service';
+import { MultipleValue } from '../../model/MultipleValue';
 
 export interface FoodNode {
   name: string;
@@ -91,7 +93,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formLayoutsToAdd: FormLayout[] = [];
 
   constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-    private matDialog: MatDialog,private formTemplateService: FormTemplateService,private formLayoutService: FormLayoutService) {
+    private matDialog: MatDialog,private formTemplateService: FormTemplateService,
+    private formLayoutService: FormLayoutService, private multipleValueService: MultipleValueService) {
     library.addIcons(faTrashAlt);
   }
 
@@ -345,76 +348,93 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       return layout;
     });
   }
-
-loadFormTemplateWithLayouts(id: string) {
-  this.formTemplateService.getFormTemplateWithFormLayouts(+id)
-    .pipe(
-      takeUntil(this.destroy$),
-      switchMap(formTemplate => {
-        this.editorItems = formTemplate.formLayouts || [];
-        this.formTitle = formTemplate.title ?? '';
-        
-        return this.formTemplateService.getFormInputsByTemplateId(+id);
-      }),
-      catchError(error => {
-        console.error('Error in loading process:', error);
-        return throwError(() => error);
-      })
-    )
-    .subscribe({
-      next: (formInputs: FormInput[]) => {
-        this.populateFormInputsIntoLayouts(formInputs);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error loading form template with layouts and inputs:', error);
-      }
-    });
-} 
-handleSubmit() {
-  console.log('Starting form submission process');
-  const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
-  
-  console.log(`Found ${layoutsToSave.length} new sections to save`);
-  
-  if (layoutsToSave.length > 0) {
-    console.log('Step 1: Saving new form layouts');
-    this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
-      .pipe(takeUntil(this.destroy$))
+   loadFormTemplateWithLayouts(id: string) {
+    this.formTemplateService.getFormTemplateWithFormLayouts(+id)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(formTemplate => {
+          this.editorItems = formTemplate.formLayouts || [];
+          this.formTitle = formTemplate.title ?? '';
+          
+          return this.formTemplateService.getFormInputsByTemplateId(+id);
+        }),
+        catchError(error => {
+          console.error('Error in loading process:', error);
+          return throwError(() => error);
+        })
+      )
       .subscribe({
-        next: (updatedFormTemplate: FormTemplate) => {
-          console.log('Step 1 completed: Form layouts added successfully', updatedFormTemplate);
-          console.log(`Added ${updatedFormTemplate.formLayouts?.length || 0} form layouts`);
-          
-          const sectionItemsMap = new Map();
-          this.editorItems.forEach(item => {
-            if (item.type === 'Section' && item.items && item.items.length) {
-              sectionItemsMap.set(item.title || item.tempId || JSON.stringify(item), item.items);
-            }
-          });
-          
-          this.editorItems = updatedFormTemplate.formLayouts?.map(layout => {
-            const matchingItems = sectionItemsMap.get(layout.title) || [];
-            return {
-              ...layout,
-              items: matchingItems
-            };
-          }) || [];
-          
-          console.log('Updated editorItems with server IDs while preserving items:', this.editorItems);
-          
-          console.log('Proceeding to Step 2: Saving form inputs');
-          this.saveFormInputsToSections();
+        next: (formInputs: FormInput[]) => {
+          this.populateFormInputsIntoLayouts(formInputs);
+          this.loadFormInputsWithMultipleValues(formInputs);
+          this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Step 1 failed: Error adding form layouts:', error);
+          console.error('Error loading form template with layouts and inputs:', error);
         }
       });
-  } else {
-    console.log('No new layouts to save, proceeding directly to saving form inputs');
-    this.saveFormInputsToSections();
   }
-}
+  handleSubmit() {
+    console.log('Starting form submission process');
+    
+    // Add a unique temporary ID to each section that doesn't have an ID yet
+    this.editorItems.forEach(item => {
+      if (!item.id && item.type === 'Section') {
+        item.tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      }
+    });
+    
+    const layoutsToSave = this.editorItems.filter(item => !item.id && item.type === 'Section');
+    
+    console.log(`Found ${layoutsToSave.length} new sections to save`);
+    
+    if (layoutsToSave.length > 0) {
+      console.log('Step 1: Saving new form layouts');
+      this.formTemplateService.addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedFormTemplate: FormTemplate) => {
+            console.log('Step 1 completed: Form layouts added successfully', updatedFormTemplate);
+            
+            // Create a map to maintain the relationship between temp IDs and saved layouts
+            const tempIdToSavedLayoutMap = new Map<string, any>();
+            
+            if (updatedFormTemplate.formLayouts) {
+              updatedFormTemplate.formLayouts.forEach(savedLayout => {
+                const matchingItem = this.editorItems.find(item => 
+                  (item.tempId && savedLayout.title === item.title) || 
+                  (item.tempId && !item.id)
+                );
+                
+                if (matchingItem) {
+                  tempIdToSavedLayoutMap.set(matchingItem.tempId, savedLayout);
+                }
+              });
+            }
+            
+            this.editorItems = this.editorItems.map(item => {
+              if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
+                const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
+                return {
+                  ...savedLayout,
+                  items: item.items || []
+                };
+              }
+              return item;
+            });
+            
+            console.log('Proceeding to Step 2: Saving form inputs');
+            this.saveFormInputsToSections();
+          },
+          error: (error) => {
+            console.error('Step 1 failed: Error adding form layouts:', error);
+          }
+        });
+    } else {
+      console.log('No new layouts to save, proceeding directly to saving form inputs');
+      this.saveFormInputsToSections();
+    }
+  }
 
 saveFormInputsToSections() {
   console.log('Step 2: Starting to save form inputs to sections');
@@ -427,6 +447,7 @@ saveFormInputsToSections() {
   console.log('Current editorItems structure:', JSON.stringify(this.editorItems, null, 2));
 
   const formInputRequests: any[] = [];
+  const multiChoiceItems: {item: any, layoutId: number}[] = [];
   
   this.editorItems.forEach((section, index) => {
     console.log(`Processing section ${index}:`, section);
@@ -461,17 +482,24 @@ saveFormInputsToSections() {
         }
         
         const itemConfig = item.config || {};
+        const itemTitle = itemConfig.label || itemConfig.groupLabel || itemConfig.title || '';
         
         const formInputRequest = {
           formInput: {
             type: item.type,
-            title: itemConfig.label || itemConfig.groupLabel || itemConfig.labelText || '',
-            config: JSON.stringify(itemConfig)
+            title: itemTitle, 
+            config: JSON.stringify(itemConfig),
+            required: itemConfig.isRequired || itemConfig.required || false
           },
           formLayoutId: layoutId
         };
         
         formInputRequests.push(formInputRequest);
+        
+        if (item.type === 'CHECKBOX' || item.type === 'SELECT_BOX' || item.type === 'RADIO_BUTTON') {
+          multiChoiceItems.push({item, layoutId});
+        }
+        
         console.log(`Added form input request of type "${item.type}" to queue`);
       });
     } else {
@@ -492,6 +520,9 @@ saveFormInputsToSections() {
       next: (savedInputs) => {
         console.log('Step 2 completed: Form inputs saved successfully', savedInputs);
         console.log(`Saved ${savedInputs.length} form inputs`);
+        
+        this.processMultiChoiceItems(multiChoiceItems, savedInputs);
+        
         console.log('Final step: Reloading form template with layouts');
         this.loadFormTemplateWithLayouts(this.templateId);
       },
@@ -568,9 +599,9 @@ saveFormInputsToSections() {
     });
   }
 
-  getOptionsArray(options: string | string[]): string[] {
+  getOptionsArray(options: string | string[] | any[]): string[] {
     if (Array.isArray(options)) {
-      return options;
+      return options.map(opt => typeof opt === 'string' ? opt : JSON.stringify(opt));
     }
     if (typeof options === 'string') {
       return options.split(',').map(option => option.trim()).filter(option => option.length > 0);
@@ -619,6 +650,235 @@ saveFormInputsToSections() {
   hasFormLayout(): boolean {
     return this.editorItems.some(item => item.type === 'FormLayout');
   }
+
+  private processMultiChoiceItems(multiChoiceItems: {item: any, layoutId: number}[], savedInputs: any[]) {
+    console.log('Processing multi-choice items:', multiChoiceItems);
+    
+    multiChoiceItems.forEach(({item, layoutId}) => {
+      const itemTitle = item.config.label || item.config.groupLabel || item.config.title || '';
+      
+      const savedInput = savedInputs.find(input => 
+        input.type === item.type && 
+        input.title === itemTitle
+      );
+      
+      if (!savedInput) {
+        console.error('No matching saved input found for multi-choice item:', item);
+        console.error('Item title:', itemTitle);
+        console.error('Available saved inputs:', savedInputs);
+        return;
+      }
+      
+      let options: any[] = [];
+      
+      if (item.type === 'CHECKBOX' || item.type === 'RADIO_BUTTON') {
+        options = Array.isArray(item.config.options) 
+          ? item.config.options.map((opt: any) => {
+              if (typeof opt === 'string' && (opt.startsWith('{') || opt.includes('label'))) {
+                try {
+                  return JSON.parse(opt);
+                } catch (e) {
+                  return { 
+                    label: opt,
+                    value: opt
+                  };
+                }
+              }
+              else if (typeof opt === 'object') {
+                return {
+                  label: opt.label || '',
+                  value: opt.value || opt.label || ''
+                };
+              }
+              else {
+                return {
+                  label: opt,
+                  value: opt
+                };
+              }
+            }
+          )
+          : [];
+      } else if (item.type === 'SELECT_BOX') {
+        options = this.getOptionsArray(item.config.options);
+      }
+      
+      if (options.length > 0) {
+        const valuesForBackend = item.type === 'SELECT_BOX' 
+          ? options 
+          : options.map(opt => {
+              if (typeof opt === 'string') {
+                return opt;
+              }
+              return JSON.stringify(opt);
+            });
+        
+        const multipleValue = {
+          valeurs: valuesForBackend,
+          formInput: {
+            id: savedInput.id
+          }
+        };
+        
+        console.log(`Saving multiple values for ${item.type}:`, multipleValue);
+        
+        this.multipleValueService.createMultipleValue(multipleValue)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (result) => {
+              console.log('Multiple values saved successfully:', result);
+            },
+            error: (error) => {
+              console.error('Error saving multiple values:', error);
+            }
+          });
+      }
+    });
+  }
+
+private loadFormInputsWithMultipleValues(inputs: FormInput[]) {
+  const multiChoiceInputs = inputs.filter(input => 
+    input.type === 'CHECKBOX' || 
+    input.type === 'SELECT_BOX' || 
+    input.type === 'RADIO_BUTTON'
+  );
+  
+  if (multiChoiceInputs.length === 0) {
+    return;
+  }
+  
+  // Create an array of observables for each multi-choice input
+  const requests = multiChoiceInputs.map(input => 
+    this.multipleValueService.getMultipleValuesByFormInputId(input.id).pipe(
+      map(values => ({input, values})),
+      catchError(error => {
+        console.error(`Error loading multiple values for input ${input.id}:`, error);
+        return of({input, values: []});
+      })
+    )
+  );
+  
+  // Execute all requests in parallel
+  forkJoin(requests)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (results) => {
+        results.forEach(({input, values}) => {
+          input.multipleValues = values as MultipleValue[];
+          
+          this.updateEditorItemWithMultipleValues(input);
+        });
+        
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading multiple values:', error);
+      }
+    });
+}
+
+private updateEditorItemWithMultipleValues(input: FormInput) {
+  this.editorItems.forEach(section => {
+    if (section.type === 'Section' && section.items) {
+      section.items.forEach((item: any) => {
+        if (item.id === input.id) {
+          if (!item.config) {
+            item.config = {};
+          }
+          
+          const values = input.multipleValues && input.multipleValues[0] ? 
+            input.multipleValues[0].valeurs : [];
+          
+          if (input.type === 'CHECKBOX' || input.type === 'RADIO_BUTTON') {
+            item.config.options = values.map((val: string) => {
+              try {
+                if (typeof val === 'string' && val.startsWith('{')) {
+                  return JSON.parse(val);
+                }
+                return val;
+              } catch (e) {
+                console.error('Error parsing value:', val, e);
+                return val;
+              }
+            });
+          } else if (input.type === 'SELECT_BOX') {
+            item.config.options = values.join(',');
+          }
+        }
+      });
+    }
+  });
+}
+
+collectFormValues(): any {
+  const formValues: any = {};
+  
+  this.editorItems.forEach(section => {
+    if (section.type === 'Section' && section.items) {
+      section.items.forEach((item: any) => {
+        if (!item.type) return;
+        
+        const inputId = item.id.toString();
+        
+        switch (item.type) {
+          case 'CHECKBOX':
+            formValues[inputId] = this.getSelectedCheckboxValues(item);
+            break;
+          case 'RADIO_BUTTON':
+            formValues[inputId] = this.getSelectedRadioValue(item);
+            break;
+          case 'SELECT_BOX':
+            formValues[inputId] = this.getSelectedSelectValue(item);
+            break;
+      
+          }
+      });
+    }
+  });
+  
+  return formValues;
+}
+
+private getSelectedCheckboxValues(item: any): any[] {
+  if (!item.config || !item.config.options) {
+    return [];
+  }
+  
+  return item.config.options
+    .filter((option: any) => {
+      if (typeof option === 'string' && option.includes('checked')) {
+        try {
+          const parsed = JSON.parse(option);
+          return parsed.checked === true;
+        } catch (e) {
+          return false;
+        }
+      }
+      return typeof option === 'object' && option.checked === true;
+    })
+    .map((option: any) => {
+      if (typeof option === 'string') {
+        try {
+          return JSON.parse(option).value;
+        } catch (e) {
+          return option;
+        }
+      }
+      return option.value;
+    });
+}
+
+
+
+private getSelectedRadioValue(id: number): string {
+  return '';
+}
+
+private getSelectedSelectValue(id: number): string {
+  return '';
+}
+
+
 
   
 }

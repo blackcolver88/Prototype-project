@@ -1,8 +1,14 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray } from '@angular/forms';
+import { Component, Inject, inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { CheckboxComponent } from '../../components/checkbox/checkbox.component';
 import { CommonModule } from "@angular/common";
-import { DialogRef } from "@angular/cdk/dialog";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+
+interface Option {
+  label: string;
+  value: string;
+  checked: boolean;
+}
 
 @Component({
   selector: 'app-checkbox-config',
@@ -11,22 +17,32 @@ import { DialogRef } from "@angular/cdk/dialog";
   standalone: true,
   imports: [CheckboxComponent, ReactiveFormsModule, CommonModule]
 })
-export class CheckboxConfigComponent {
+
+export class CheckboxConfigComponent implements OnInit {
   checkboxForm: FormGroup;
   private dialogRef = inject(DialogRef);
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,  @Inject(DIALOG_DATA) public data: any) {
     this.checkboxForm = this.fb.group({
-      groupLabel: ['Checkbox Group'],
+      // groupLabel: ['Checkbox Group'],
+       title: ['', Validators.required],
+      
       name: [''],
       isRequired: [false],
       isDisabled: [false],
-      labelPosition: ['right'],
       options: this.fb.array([])
     });
 
     // Add default option
     this.addOption();
+  }
+  ngOnInit() {
+    if (this.data && this.data.item && this.data.item.config) {
+      this.checkboxForm.patchValue({
+        title: this.data.item.config.title || '',
+        name: this.data.item.config.name || '',
+        isRequired: this.data.item.config.isRequired || false,  });
+    }
   }
 
   get options() {
@@ -45,14 +61,19 @@ export class CheckboxConfigComponent {
   removeOption(index: number) {
     this.options.removeAt(index);
   }
-
-  save(): void {
+    save(): void {
     const formData = this.checkboxForm.value;
     const configuredItem = {
       ...formData,
       type: 'CHECKBOX',
-      name: formData.groupLabel,
-      config: formData
+      config: {
+        label: formData.title,
+        options: formData.options.map((option: Option) => ({
+          label: option.label,
+          value: option.value,
+          checked: option.checked
+        }))
+      },
     };
     this.dialogRef.close(configuredItem);
   }

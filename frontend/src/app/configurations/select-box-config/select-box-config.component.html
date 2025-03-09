@@ -2,8 +2,8 @@
     <form [formGroup]="selectBoxForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
 
       <div class="space-y-2">
-        <label for="labelText" class="block font-semibold">Label Text</label>
-        <input id="labelText" formControlName="labelText" type="text" class="w-full border border-gray-300 p-2 rounded" />
+        <label for="title" class="block font-semibold">Label Text</label>
+        <input id="title" formControlName="title" type="text" class="w-full border border-gray-300 p-2 rounded" />
       </div>
 
       <div class="space-y-2">
@@ -33,7 +33,7 @@
   <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-select-box
-      [label]="selectBoxForm.value.labelText"
+      [label]="selectBoxForm.value.title"
       [options]="getOptionsArray(selectBoxForm.value.options)"
     ></app-select-box>
   </div>

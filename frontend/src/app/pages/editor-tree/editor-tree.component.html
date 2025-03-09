@@ -103,7 +103,7 @@
 
                     <!-- Checkbox Group -->
                     <ng-container *ngIf="sectionItem?.type === 'CHECKBOX'">
-                      <app-checkbox [groupLabel]="sectionItem.config.groupLabel"
+                      <app-checkbox [groupLabel]="sectionItem.config.label"
                                   [name]="sectionItem.config.name" 
                                   [options]="sectionItem.config.options">
                       </app-checkbox>
@@ -127,7 +127,7 @@
                     <!-- Radio Group -->
                     <ng-container *ngIf="sectionItem?.type === 'RADIO_BUTTON'">
                       <app-radio-button
-                        [groupLabel]="sectionItem.config.groupLabel"
+                        [groupLabel]="sectionItem.config.label"
                         [name]="sectionItem.config.name"
                         [options]="sectionItem.config.options"
                         [isRequired]="sectionItem.config.isRequired"
@@ -139,7 +139,7 @@
                     <!-- Select Box -->
                     <ng-container *ngIf="sectionItem?.type === 'SELECT_BOX'">
                       <app-select-box
-                        [label]="sectionItem.config.labelText"
+                        [label]="sectionItem.config.label"
                         [options]="getOptionsArray(sectionItem.config.options)">
                       </app-select-box>
                     </ng-container>
@@ -191,7 +191,7 @@
               <!-- Password Field -->
               <ng-container *ngIf="item?.type === 'PASSWORD'">
                 <app-password [label]="item.config.label" 
-                [placeholder]="item.config.placeholder">
+                         [placeholder]="item.config.placeholder">
                 </app-password>
               </ng-container>
 

@@ -1,8 +1,8 @@
 <div class="flex flex-col md:flex-row md:space-x-8 p-4">
   <form [formGroup]="checkboxForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
     <div class="space-y-2">
-      <label for="groupLabel" class="block font-semibold">Group Label</label>
-      <input id="groupLabel" formControlName="groupLabel" type="text" class="w-full border border-gray-300 p-2 rounded" />
+      <label for="title" class="block font-semibold">Group Label</label>
+      <input id="title" formControlName="title" type="text" class="w-full border border-gray-300 p-2 rounded" />
     </div>
 
     <div class="space-y-2">
@@ -44,7 +44,7 @@
   <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-checkbox
-      [groupLabel]="checkboxForm.get('groupLabel')?.value"
+      [groupLabel]="checkboxForm.get('title')?.value"
       [options]="checkboxForm.get('options')?.value"
       [name]="checkboxForm.get('name')?.value"
       [isRequired]="checkboxForm.get('isRequired')?.value"
