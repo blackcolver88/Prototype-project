@@ -43,8 +43,6 @@ export class FormTemplateService {
     return this.http.get<FormTemplate>(`${this.baseUrl}/${formTemplateId}/form-layouts`);
   }
 
-
-
   getFormInputsByTemplateId(templateId: number): Observable<FormInput[]> {
     return this.http.get<FormInput[]>(`${this.baseUrl}/${templateId}/form-inputs`)
       .pipe(
@@ -59,17 +57,23 @@ export class FormTemplateService {
       );
   }
 
-addMultipleFormInputsToTemplate(templateId: number, formInputRequests: any[]): Observable<FormInput[]> {
-  return this.http.post<FormInput[]>(`${this.baseUrl}/${templateId}/bulk-form-inputs`, formInputRequests)
-    .pipe(
-      catchError(error => {
-        console.error('Error adding multiple form inputs:', error);
-        return throwError(() => error);
-      })
-    );
-}
+  addMultipleFormInputsToTemplate(templateId: number, formInputRequests: any[]): Observable<FormInput[]> {
+    return this.http.post<FormInput[]>(`${this.baseUrl}/${templateId}/bulk-form-inputs`, formInputRequests)
+      .pipe(
+        catchError(error => {
+          console.error('Error adding multiple form inputs:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 
-  // addFormInputToTemplate(templateId: number, formInput: any): Observable<any> {
-  //   return this.http.post<any>(`${this.baseUrl}/${templateId}/form-inputs`, formInput);
-  // }
+  updateFormLayoutsOrder(templateId: number, sectionOrder: any[]): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${templateId}/form-layouts/order`, sectionOrder)
+      .pipe(
+        catchError(error => {
+          console.error('Error updating form layout order:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 }

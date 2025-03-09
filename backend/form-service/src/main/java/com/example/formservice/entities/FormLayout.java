@@ -19,7 +19,8 @@ public class FormLayout {
     @Enumerated(EnumType.STRING)
     private FormLayoutType type;
 
-
+    @Column(name = "ordinal_position")
+    private Integer ordinalPosition;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -36,5 +37,13 @@ public class FormLayout {
     @JoinColumn(name = "form_template_id")
     @JsonIgnore
     private FormTemplate formTemplate;
+
+    public Integer getOrdinalPosition() {
+        return ordinalPosition;
+    }
+
+    public void setOrdinalPosition(Integer ordinalPosition) {
+        this.ordinalPosition = ordinalPosition;
+    }
 }
 

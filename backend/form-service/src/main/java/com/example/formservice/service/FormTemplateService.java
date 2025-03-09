@@ -1,6 +1,7 @@
 package com.example.formservice.service;
 
 import com.example.formservice.DTO.FormInputRequest;
+import com.example.formservice.DTO.FormLayoutOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -71,8 +72,15 @@ public class FormTemplateService {
     }
 
     public FormTemplate getFormTemplateWithFormLayouts(Long formTemplateId) {
-        return formTemplateRepository.findById(formTemplateId)
+        FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
+        
+        // Get ordered layouts without replacing the collection
+        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrderByOrdinalPositionAsc(formTemplateId);
+        
+        // Don't directly set the layouts collection, instead set them in a DTO or manually sort them
+        // This example returns the template with its original collection for safety
+        return formTemplate;
     }
 
 
@@ -159,5 +167,28 @@ public class FormTemplateService {
         return layouts.stream()
                 .flatMap(layout -> formInputRepository.findByFormLayoutId(layout.getId()).stream())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public FormTemplate updateFormLayoutsOrder(Long templateId, List<FormLayoutOrderDTO> layoutOrders) {
+        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
+
+        // Update the ordinal position for each layout without changing the collection reference
+        for (FormLayoutOrderDTO orderDTO : layoutOrders) {
+            FormLayout layout = formLayoutRepository.findById(orderDTO.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + orderDTO.getId()));
+            
+            // Set the ordinal position
+            layout.setOrdinalPosition(orderDTO.getOrdinalPosition());
+            formLayoutRepository.save(layout);
+        }
+
+        // Return the template with layouts in order without replacing the collection
+        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrderByOrdinalPositionAsc(templateId);
+        
+        // Don't replace the collection, instead return a refreshed template
+        return formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
     }
 }

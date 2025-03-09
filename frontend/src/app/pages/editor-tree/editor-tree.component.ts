@@ -117,6 +117,12 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   onEditorDrop(event: CdkDragDrop<any[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      
+      // Check if we need to update section order in the database
+      const reorderedSections = this.editorItems.filter(item => item.id && item.type === 'Section');
+      if (reorderedSections.length > 1) {
+        this.updateSectionOrder(reorderedSections);
+      }
       return;
     }
     
@@ -621,5 +627,23 @@ saveFormInputsToSections() {
     return this.editorItems.some(item => item.type === 'FormLayout');
   }
 
-  
+  private updateSectionOrder(orderedSections: any[]): void {
+    const sectionOrder = orderedSections.map((section, index) => ({
+      id: section.id,
+      ordinalPosition: index,
+      title: section.title,
+      type: section.type
+    }));
+    
+    this.formTemplateService.updateFormLayoutsOrder(+this.templateId, sectionOrder)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Order updated successfully, no need to reload
+        },
+        error: (error) => {
+          console.error('Error updating section order:', error);
+        }
+      });
+  }
 }
