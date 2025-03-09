@@ -10,7 +10,7 @@ public interface FormLayoutRepository extends JpaRepository<FormLayout, Long> {
 
     List<FormLayout> findByFormTemplateId(Long templateId);
     Optional<FormInput> findFormInputById(Long id);
-
+    List<FormLayout> findByFormTemplateIdOrderByOrdinalPositionAsc(Long templateId);
 
 }
 
