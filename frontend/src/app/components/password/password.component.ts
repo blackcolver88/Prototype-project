@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 export class PasswordComponent {
 
   @Input() placeholder: string = 'Password';
-  @Input() label: string = 'Password';
+  @Input() label: string = 'Password'; // This will be used to display the custom label
 
   isPasswordVisible: boolean = false;
 
