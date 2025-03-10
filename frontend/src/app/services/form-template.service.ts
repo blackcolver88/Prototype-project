@@ -76,4 +76,14 @@ export class FormTemplateService {
         })
       );
   }
+
+  updateFormInputsOrder(templateId: number, inputOrders: any[]): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${templateId}/form-inputs/order`, inputOrders)
+      .pipe(
+        catchError(error => {
+          console.error('Error updating form input order:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 }

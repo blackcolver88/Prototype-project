@@ -17,6 +17,9 @@ export interface FormInput {
   title: string;
   type: string;
   required: boolean;
+  ordinalPosition?: number;
+  config?: string;
+  option?: string;
   formLayout: {
     id: number;
     title: string;

@@ -20,7 +20,7 @@ public class FormLayout {
     private FormLayoutType type;
 
     @Column(name = "ordinal_position")
-    private Integer ordinalPosition;
+    private Integer ordinalPosition = 0;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")

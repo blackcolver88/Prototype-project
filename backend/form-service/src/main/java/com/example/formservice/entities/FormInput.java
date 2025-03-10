@@ -20,6 +20,8 @@ public class FormInput {
 
     private boolean required;
     
+    @Column(name = "ordinal_position")
+    private Integer ordinalPosition = 0;
 
     @ManyToOne
     @JoinColumn(name = "form_layout_id")
@@ -30,8 +32,6 @@ public class FormInput {
     private FormValue formValue;
 
     @OneToMany(mappedBy = "formInput", cascade = CascadeType.ALL)
-    @JsonManagedReference  // Add this annotation to manage the reference
+    @JsonManagedReference
     private List<MultipleValue> multipleValues;
-
-
 }
