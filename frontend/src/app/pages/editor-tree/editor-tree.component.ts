@@ -12,7 +12,7 @@ import { SectionConfigComponent } from "../../configurations/section-config/sect
 import { CdkStepperModule } from "@angular/cdk/stepper";
 import { BasicdatepickerConfigComponent } from "../../configurations/basicdatepicker-config/basicdatepicker-config.component";
 import { HttpClientModule } from "@angular/common/http";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { ChangeDetectorRef } from '@angular/core';
 import { catchError, forkJoin, map, of, Subject, switchMap, takeUntil, throwError } from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -93,10 +93,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   formTemplateId: number | undefined;
   formLayoutsToAdd: FormLayout[] = [];
 
-  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary,
-
-    private matDialog: MatDialog,private formTemplateService: FormTemplateService,
-    private formLayoutService: FormLayoutService,
+  constructor(private route: ActivatedRoute, private cdr: ChangeDetectorRef,private library: FaIconLibrary, 
+    private router: Router,private matDialog: MatDialog,private formTemplateService: FormTemplateService,
+     private formLayoutService: FormLayoutService,
     private formInputService: FormInputService, private multipleValueService: MultipleValueService) {
     library.addIcons(faTrashAlt);
   }
@@ -434,6 +433,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
             
             console.log('Proceeding to Step 2: Saving form inputs');
             this.saveFormInputsToSections();
+            this.router.navigate(['/form-template']);
+
           },
           error: (error) => {
             console.error('Step 1 failed: Error adding form layouts:', error);
@@ -442,6 +443,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     } else {
       console.log('No new layouts to save, proceeding directly to saving form inputs');
       this.saveFormInputsToSections();
+      this.router.navigate(['/form-template']); 
+
     }
   }
 
