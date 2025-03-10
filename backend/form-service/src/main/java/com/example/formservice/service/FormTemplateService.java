@@ -2,6 +2,7 @@ package com.example.formservice.service;
 
 import com.example.formservice.DTO.FormInputRequest;
 import com.example.formservice.DTO.FormLayoutOrderDTO;
+import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -75,11 +76,31 @@ public class FormTemplateService {
         FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
         
-        // Get ordered layouts without replacing the collection
-        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrderByOrdinalPositionAsc(formTemplateId);
+        // Get the layouts in order but don't set them directly on the template
+        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
         
-        // Don't directly set the layouts collection, instead set them in a DTO or manually sort them
-        // This example returns the template with its original collection for safety
+        // Create a new list with references to the original layouts in the proper order
+        List<FormLayout> orderedList = new ArrayList<>();
+        
+        // Ensure the ordered layouts are properly populated
+        for (FormLayout layout : orderedLayouts) {
+            formTemplate.getFormLayouts().stream()
+                .filter(fl -> fl.getId().equals(layout.getId()))
+                .findFirst()
+                .ifPresent(orderedList::add);
+        }
+        
+        // Sort the actual collection rather than replacing it
+        // This won't trigger orphan removal
+        formTemplate.getFormLayouts().sort((a, b) -> {
+            Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
+            Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
+            if (posA.equals(posB)) {
+                return a.getId().compareTo(b.getId()); // Secondary sort by ID
+            }
+            return posA.compareTo(posB);
+        });
+        
         return formTemplate;
     }
 
@@ -163,32 +184,71 @@ public class FormTemplateService {
             return List.of(); // Return empty list if no layouts found
         }
 
-        // Collect all form inputs from all layouts
+        // Collect all form inputs from all layouts in the correct order
         return layouts.stream()
-                .flatMap(layout -> formInputRepository.findByFormLayoutId(layout.getId()).stream())
+                .flatMap(layout -> formInputRepository.findByFormLayoutIdOrdered(layout.getId()).stream())
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public FormTemplate updateFormLayoutsOrder(Long templateId, List<FormLayoutOrderDTO> layoutOrders) {
+        // Check if template exists
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        // Update the ordinal position for each layout without changing the collection reference
+        // Update the ordinal position for each layout
         for (FormLayoutOrderDTO orderDTO : layoutOrders) {
             FormLayout layout = formLayoutRepository.findById(orderDTO.getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + orderDTO.getId()));
+            
+            // Verify the layout belongs to this template
+            if (!layout.getFormTemplate().getId().equals(templateId)) {
+                throw new IllegalArgumentException("FormLayout does not belong to the specified template");
+            }
             
             // Set the ordinal position
             layout.setOrdinalPosition(orderDTO.getOrdinalPosition());
             formLayoutRepository.save(layout);
         }
-
-        // Return the template with layouts in order without replacing the collection
-        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrderByOrdinalPositionAsc(templateId);
         
-        // Don't replace the collection, instead return a refreshed template
-        return formTemplateRepository.findById(templateId)
+        // Sort the template's layouts in memory before returning
+        FormTemplate result = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
+        
+        result.getFormLayouts().sort((a, b) -> {
+            Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
+            Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
+            if (posA.equals(posB)) {
+                return a.getId().compareTo(b.getId());
+            }
+            return posA.compareTo(posB);
+        });
+        
+        return result;
+    }
+
+    @Transactional
+    public List<FormInput> updateFormInputsOrder(Long templateId, List<FormInputOrderDTO> inputOrders) {
+        // Check if template exists
+        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
+
+        // Update the ordinal position for each input
+        for (FormInputOrderDTO orderDTO : inputOrders) {
+            FormInput input = formInputRepository.findById(orderDTO.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("FormInput not found with id: " + orderDTO.getId()));
+            
+            // Verify the input belongs to the correct layout
+            if (!input.getFormLayout().getFormTemplate().getId().equals(templateId)) {
+                throw new IllegalArgumentException("FormInput does not belong to the specified template");
+            }
+            
+            // Set the ordinal position
+            input.setOrdinalPosition(orderDTO.getOrdinalPosition());
+            formInputRepository.save(input);
+        }
+        
+        // Return all updated inputs for this template
+        return getFormInputsByTemplateId(templateId);
     }
 }

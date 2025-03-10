@@ -2,6 +2,7 @@ package com.example.formservice.controller;
 
 import com.example.formservice.DTO.FormInputRequest;
 import com.example.formservice.DTO.FormLayoutOrderDTO;
+import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -91,6 +92,14 @@ public class FormTemplateController {
             @RequestBody List<FormLayoutOrderDTO> layoutOrders) {
         FormTemplate updatedTemplate = formTemplateService.updateFormLayoutsOrder(templateId, layoutOrders);
         return ResponseEntity.ok(updatedTemplate);
+    }
+
+    @PutMapping("/{templateId}/form-inputs/order")
+    public ResponseEntity<List<FormInput>> updateFormInputsOrder(
+            @PathVariable Long templateId,
+            @RequestBody List<FormInputOrderDTO> inputOrders) {
+        List<FormInput> updatedInputs = formTemplateService.updateFormInputsOrder(templateId, inputOrders);
+        return ResponseEntity.ok(updatedInputs);
     }
 
 }
