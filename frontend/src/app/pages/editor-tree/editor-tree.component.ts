@@ -519,6 +519,8 @@ saveFormInputsToSections() {
         
         // Reload the template to get the updated structure
         this.loadFormTemplateWithLayouts(this.templateId);
+              this.router.navigate(['/form-template']);
+
       },
       error: (error) => {
         console.error('Error saving form inputs:', error);
