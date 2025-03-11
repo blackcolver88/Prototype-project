@@ -386,10 +386,17 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   handleSubmit() {
     console.log('Starting form submission process');
     
+    // Create a map to store the relationship between temp sections and their items
+    const sectionItemsMap = new Map<string, any[]>();
+    
     // Add a unique temporary ID to each section that doesn't have an ID yet
     this.editorItems.forEach(item => {
       if (!item.id && item.type === 'Section') {
         item.tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // Store the items array for this section
+        if (item.items) {
+          sectionItemsMap.set(item.tempId, [...item.items]);
+        }
       }
     });
     
@@ -409,29 +416,33 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
             const tempIdToSavedLayoutMap = new Map<string, any>();
             
             if (updatedFormTemplate.formLayouts) {
-              updatedFormTemplate.formLayouts.forEach(savedLayout => {
-                const matchingItem = this.editorItems.find(item => 
-                  (item.tempId && savedLayout.title === item.title) || 
-                  (item.tempId && !item.id)
-                );
-                
-                if (matchingItem) {
-                  tempIdToSavedLayoutMap.set(matchingItem.tempId, savedLayout);
+              // Sort layouts by creation order to maintain correspondence
+              const sortedLayouts = [...updatedFormTemplate.formLayouts]
+                .sort((a, b) => a.id - b.id);
+              
+              layoutsToSave.forEach((originalLayout, index) => {
+                if (originalLayout.tempId && sortedLayouts[index]) {
+                  tempIdToSavedLayoutMap.set(originalLayout.tempId, sortedLayouts[index]);
                 }
               });
             }
             
+            // Update editorItems with saved section IDs while preserving their items
             this.editorItems = this.editorItems.map(item => {
               if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
                 const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
+                const originalItems = sectionItemsMap.get(item.tempId) || [];
+                
                 return {
                   ...savedLayout,
-                  items: item.items || []
+                  items: originalItems,
+                  type: 'Section' // Ensure type is preserved
                 };
               }
               return item;
             });
             
+            console.log('Updated editorItems after section save:', this.editorItems);
             console.log('Proceeding to Step 2: Saving form inputs');
             this.saveFormInputsToSections();
           },
@@ -453,90 +464,61 @@ saveFormInputsToSections() {
     return;
   }
 
-  console.log('Current editorItems structure:', JSON.stringify(this.editorItems, null, 2));
-
   const formInputRequests: any[] = [];
   const multiChoiceItems: {item: any, layoutId: number}[] = [];
   
-  this.editorItems.forEach((section, index) => {
-    console.log(`Processing section ${index}:`, section);
-    
+  // Process sections in their current order
+  this.editorItems.forEach((section, sectionIndex) => {
     if (section.type === 'Section') {
       const layoutId = section.id;
-      console.log(`Section ID ${layoutId} found`);
       
       if (!section.items || !section.items.length) {
-        console.log(`Section ${layoutId} has no items`);
         return;
       }
       
-      console.log(`Section ${layoutId} has ${section.items.length} items`);
-      
+      // Process items in their current order within each section
       section.items.forEach((item: any, itemIndex: number) => {
-        console.log(`Processing item ${itemIndex} in section ${layoutId}:`, item);
-        
-        if (item.type === 'Section') {
-          console.log('Skipping nested section');
-          return;
-        }
-        
-        if (!item.type) {
-          console.log('Item missing type property, skipping');
-          return;
-        }
-        
-        if (item.id) {
-          console.log(`Item ${itemIndex} already has ID ${item.id}, skipping`);
+        if (!item.type || item.type === 'Section' || item.id) {
           return;
         }
         
         const itemConfig = item.config || {};
         const itemTitle = itemConfig.label || itemConfig.groupLabel || itemConfig.title || '';
         
-        const formInputRequest = {
+        formInputRequests.push({
           formInput: {
             type: item.type,
-            title: itemTitle, 
+            title: itemTitle,
             config: JSON.stringify(itemConfig),
-            required: itemConfig.isRequired || itemConfig.required || false
+            required: itemConfig.isRequired || itemConfig.required || false,
+            ordinalPosition: itemIndex // Preserve item order within section
           },
           formLayoutId: layoutId
-        };
-        
-        formInputRequests.push(formInputRequest);
+        });
         
         if (item.type === 'CHECKBOX' || item.type === 'SELECT_BOX' || item.type === 'RADIO_BUTTON') {
           multiChoiceItems.push({item, layoutId});
         }
-        
-        console.log(`Added form input request of type "${item.type}" to queue`);
       });
-    } else {
-      console.log(`Item at index ${index} is not a section:`, section);
     }
   });
   
   if (formInputRequests.length === 0) {
-    console.log('No form inputs to save, process completed');
     return;
   }
-  
-  console.log(`Step 2: Saving ${formInputRequests.length} form inputs:`, formInputRequests);
   
   this.formTemplateService.addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (savedInputs) => {
-        console.log('Step 2 completed: Form inputs saved successfully', savedInputs);
-        console.log(`Saved ${savedInputs.length} form inputs`);
-        
+        console.log('Form inputs saved successfully:', savedInputs);
         this.processMultiChoiceItems(multiChoiceItems, savedInputs);
         
-        console.log('Final step: Reloading form template with layouts');
+        // Reload the template to get the updated structure
         this.loadFormTemplateWithLayouts(this.templateId);
       },
       error: (error) => {
-        console.error('Step 2 failed: Error saving form inputs:', error);
+        console.error('Error saving form inputs:', error);
       }
     });
 }
