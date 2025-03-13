@@ -449,14 +449,14 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
             });
             
             this.saveFormInputsToSections();
-            this.router.navigate(['/form-template']);
+            // this.router.navigate(['/form-template']);
 
           },
           error: (error) => console.error('Error saving sections:', error)
         });
     } else {
       this.saveFormInputsToSections();
-      this.router.navigate(['/form-template']); 
+      // this.router.navigate(['/form-template']); 
 
     }
   }
@@ -510,7 +510,7 @@ saveFormInputsToSections() {
         console.log('Form inputs saved successfully:', savedInputs);
         this.processMultiChoiceItems(multiChoiceItems, savedInputs);
         this.loadFormTemplateWithLayouts(this.templateId);
-              this.router.navigate(['/form-template']);
+              // this.router.navigate(['/form-template']);
 
       },
       error: (error) => console.error('Error saving form inputs:', error)
