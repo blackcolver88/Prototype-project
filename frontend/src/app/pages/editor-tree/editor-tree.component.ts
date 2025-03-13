@@ -653,17 +653,20 @@ saveFormInputsToSections() {
                 } catch (e) {
                   return {
                     label: opt,
+                    value:opt,
                   };
                 }
               }
               else if (typeof opt === 'object') {
                 return {
                   label: opt.label || '',
-                };
+                  value: opt.value || opt.label || ''
+                                };
               }
               else {
                 return {
                   label: opt,
+                  value:opt,
                 };
               }
             }
