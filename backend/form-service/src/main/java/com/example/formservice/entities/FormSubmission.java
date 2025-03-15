@@ -1,4 +1,5 @@
 package com.example.formservice.entities;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.ArrayList;
@@ -17,9 +18,11 @@ public class FormSubmission {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("formSubmissions")  // Ignore the formSubmissions property in User
     private User user;
 
     @OneToMany(mappedBy = "formSubmission", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("formSubmission")  // Ignore the formSubmission property in FormValue
     private List<FormValue> formValues = new ArrayList<>();
 
 }
