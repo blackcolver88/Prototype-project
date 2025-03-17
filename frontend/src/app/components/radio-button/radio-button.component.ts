@@ -22,10 +22,10 @@ export class RadioButtonComponent {
   @Input() isDisabled: boolean = false;
   @Input() selectedOption: string = '';
 
-  @Output() optionChange = new EventEmitter<string>();
+  @Output() valueChange = new EventEmitter<string>();
 
   onOptionChange(selectedValue: string) {
-    this.selectedOption = selectedValue;
-    this.optionChange.emit(this.selectedOption);
+    this.selectedOption = selectedValue; // Make sure to update the internal state
+    this.valueChange.emit(selectedValue);
   }
 }

@@ -22,9 +22,12 @@ export class CheckboxComponent {
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
 
-  @Output() optionChange = new EventEmitter<CheckboxOption[]>();
+  @Output() valueChange = new EventEmitter<string[]>();
 
-  onOptionChange() {
-    this.optionChange.emit(this.options);
+  onCheckboxChange(optionValue: string, isChecked: boolean) {
+    const selectedLabels = this.options
+      .filter(opt => opt.checked)
+      .map(opt => opt.label); 
+    this.valueChange.emit(selectedLabels);
   }
 }

@@ -10,16 +10,17 @@
         type="radio"
         [name]="name"
         [value]="option.value"
-        [checked]="selectedOption === option.value"
+        [checked]="selectedOption === option.label"
+        [required]="isRequired"
         [disabled]="isDisabled"
-        class="bg-gray-100 border-gray-300 rounded-full focus:ring-2"
+        class="bg-gray-100 border-gray-300 rounded-full focus:ring-2 mr-2"
         [ngStyle]="{
           'cursor': isDisabled ? 'not-allowed' : 'pointer'
         }"
-        (change)="onOptionChange(option.value)"
+        (change)="onOptionChange(option.label)"
       >
       <label
-        class="font-medium select-none"
+        class="font-medium select-none ml-1"
         [ngClass]="{
           'cursor-pointer': !isDisabled,
           'cursor-not-allowed': isDisabled,

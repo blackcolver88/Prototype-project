@@ -18,6 +18,8 @@ public class FormValue {
     @JsonIgnoreProperties("formValue")  // Ignore the formValue property in FormInput
     private List<FormInput> formInputs= new ArrayList<>();
 
+
+
     @ManyToOne
     @JoinColumn(name = "form_submission_id")
     @JsonIgnoreProperties("formValues")  // Ignore the formValues property in FormSubmissio

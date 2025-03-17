@@ -15,6 +15,9 @@
         pattern="[0-9]*"
       title="Please enter a valid phone number."
       (keypress)="allowOnlyNumbers($event)"
+      [value]="value"
+      (input)="onInputChange($event)"
+
       />
 
     </div>

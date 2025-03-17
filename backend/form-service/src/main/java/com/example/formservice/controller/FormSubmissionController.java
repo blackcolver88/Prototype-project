@@ -76,7 +76,12 @@ public class FormSubmissionController {
             List<FormValue> values = new ArrayList<>();
             for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
                 FormValue value = new FormValue();
-                value.setValue(valueRequest.getValue());
+
+                List<String> allValues = valueRequest.getValues();
+                if (!allValues.isEmpty()) {
+                    value.setValue(String.join(",", allValues)); // Convertir la liste en une chaîne séparée par des virgules
+                }
+
                 value.setFormSubmission(submission);
                 values.add(value);
             }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-text-area',
@@ -10,4 +10,13 @@ export class TextAreaComponent {
   @Input() label: string = 'Text Area';
   @Input() placeholder: string = 'Enter text here';
   @Input() required: boolean = false;
+  @Output() valueChange = new EventEmitter<string>();
+  
+  value: string = '';
+  
+  onInputChange(event: any) {
+    this.value = event.target.value;
+    this.valueChange.emit(this.value);
+  }
+
 }

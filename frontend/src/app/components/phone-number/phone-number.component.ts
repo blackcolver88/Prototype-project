@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { FormsModule } from '@angular/forms';
 @Component({
@@ -11,6 +11,14 @@ import { FormsModule } from '@angular/forms';
 export class PhoneNumberComponent {
   @Input() placeholder: string = 'Phone Number';
   @Input() label: string = 'Phone Number';
+  @Output() valueChange = new EventEmitter<string>();
+  
+  value: string = '';
+  
+  onInputChange(event: any) {
+    this.value = event.target.value;
+    this.valueChange.emit(this.value);
+  }
 
   allowOnlyNumbers(event: KeyboardEvent): void {
     const charCode = event.charCode;

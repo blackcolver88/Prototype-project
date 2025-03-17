@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FormSubmission} from "../model/FormSubmission";
+import { FormValueRequest } from '../model/FormValueRequest';
 
 
 @Injectable({
@@ -9,7 +10,7 @@ import {FormSubmission} from "../model/FormSubmission";
 })
 export class FormSubmissionService {
 
-  private baseUrl = 'http://localhost:8080/api/form-layouts';
+  private baseUrl = 'http://localhost:8081/api/form-submissions';
 
   constructor(public http: HttpClient) {}
 
@@ -31,5 +32,16 @@ export class FormSubmissionService {
 
   deleteFormSubmission(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+   getUserFormSubmissions(userId: number): Observable<FormSubmission[]> {
+    return this.http.get<FormSubmission[]>(`${this.baseUrl}/user/${userId}`);
+    
+  }
+
+  submitForm(userId: number, formId: number, formValues: FormValueRequest[]): Observable<FormSubmission> {
+    const payload = { formValues: formValues };
+    // return this.http.post<FormSubmission>(`${this.baseUrl}/${userId}/${formId}`, payload);
+    return this.http.post<FormSubmission>(`${this.baseUrl}/1/${formId}`, payload);
+
   }
 }

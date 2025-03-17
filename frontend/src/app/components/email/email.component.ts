@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,6 +14,16 @@ export class EmailComponent {
   @Input() type: 'text' | 'number' = 'text';
   @Input() email: string = '';
   @Input() placeholder: string = 'Enter your email';
+  @Input() required: boolean = false;
+  @Output() valueChange = new EventEmitter<string>();
+    
+    value: string = '';
+    
+    onInputChange(event: any) {
+      this.value = event.target.value;
+      this.valueChange.emit(this.value);
+    }
+  
 
   get isEmailInvalid(): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

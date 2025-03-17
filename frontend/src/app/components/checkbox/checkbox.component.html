@@ -15,7 +15,7 @@
         [ngStyle]="{
           'cursor': isDisabled ? 'not-allowed' : 'pointer'
         }"
-        (change)="onOptionChange()"
+        (change)="onCheckboxChange(option.value, option.checked)"
       >
       <label
         class="font-medium select-none"

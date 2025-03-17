@@ -1,19 +1,18 @@
 <div class="email-field-holder">
-
   <label
     for="textInput"
     class="block text-sm font-medium"
-
-
   >
     {{ label }}
   </label>
-
-  <input
+<input
     type ="text"
     id="textInput"
     placeholder="{{ placeholder }}"
     [(ngModel)]="textName"
+    [required]="required"
+    [value]="value"
+    (input)="onInputChange($event)"
     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize"
     rows="4"
   />
