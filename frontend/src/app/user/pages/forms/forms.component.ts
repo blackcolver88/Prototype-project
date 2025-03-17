@@ -21,8 +21,8 @@ rowData: FormTemplate[] = [];
     { field: "id", headerName: "ID" },
     { field: "title", headerName: "Title" },
     {
-      field: "Repondre",
-      headerName: "Repondre",
+      field: "Respond",
+      headerName: "Respond",
       cellRenderer: (params: any) => {
         return `<div class="flex items-center">
                 <button class="icon-button" onclick="handleIconClick('${params.data.id}')">
