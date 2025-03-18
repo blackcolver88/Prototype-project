@@ -208,7 +208,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private createStandaloneSection(targetIndex: number): void {
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
-      height: '80vh',
+      height: '50vh',
       data: {
         item: { name: 'Section' },
         autoCreate: false
@@ -310,7 +310,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private openDialog(configComponent: any, draggedItem: any, index: number) {
     const dialogRef = this.dialog.open(configComponent, {
       width: '70vw',
-      height: '80vh',
+      height: '55vh',
       data: { item: draggedItem },
       disableClose: false,
       panelClass: 'custom-dialog-container',
