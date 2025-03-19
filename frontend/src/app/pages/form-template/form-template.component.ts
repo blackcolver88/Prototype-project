@@ -94,6 +94,7 @@ export class FormTemplateComponent implements OnInit {
     dialogRef.closed.subscribe((value: unknown) => {
       const result = value as FormTemplate | undefined;
       if (result) {
+        // Add the new form template to the rowData array
         this.rowData = [...this.rowData, result];
         this.changeDetector.detectChanges();
       }

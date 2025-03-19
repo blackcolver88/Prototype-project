@@ -33,8 +33,8 @@ export class FormTemplateCreateComponent {
     if (this.formTemplate.title) {
       this.titleRequired = false;
 
-      this.formTemplate.icon = '../../../assets/icons/adjustment.svg';
-      this.formTemplate.icon2='../../../assets/icons/trash.svg'
+      this.formTemplate.icon = '../../../assets/icons/customise.svg';
+      this.formTemplate.icon2 = '../../../assets/icons/delete.svg';
       this.formTemplateService.createFormTemplate({
         title: this.formTemplate.title,
         formLayouts: this.formTemplate.formLayouts
@@ -42,11 +42,10 @@ export class FormTemplateCreateComponent {
         next: (response) => {
           console.log('Form template created successfully', response);
 
-
           const result: FormTemplate = {
             ...response,
             icon: this.formTemplate.icon,
-            icon2:this.formTemplate.icon2
+            icon2: this.formTemplate.icon2
           };
 
           this.dialogRef.close(result);
@@ -59,7 +58,6 @@ export class FormTemplateCreateComponent {
       this.titleRequired = true;
     }
   }
-
 
   closeDialog() {
     this.dialogRef.close();
