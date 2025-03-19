@@ -1,0 +1,16 @@
+
+<div *ngIf="!loading && submissions.length === 0">
+    No answers found for this form.
+</div>
+
+<div *ngIf="!loading && submissions.length > 0">
+  <h3>Responses for this user and form:</h3>
+  <ul>
+    <li *ngFor="let submission of submissions">
+      <strong>Date :</strong> {{ submission.date | date }}
+      <div *ngFor="let value of submission.formValues">
+        <strong>Valeur :</strong> {{ value.value }}
+      </div>
+    </li>
+  </ul>
+</div>

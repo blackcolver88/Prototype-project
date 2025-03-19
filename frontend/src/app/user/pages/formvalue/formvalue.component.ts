@@ -17,7 +17,6 @@ import { BasicDatepickerComponent } from "../../../components/basic-datepicker/b
 import { TextAreaComponent } from '../../../components/text-area/text-area.component';
 import { PasswordComponent } from '../../../components/password/password.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { FormTemplateService } from '../../../services/form-template.service';
 import { MultipleValueService } from '../../../services/multiple-value.service';
 import { catchError, forkJoin, map, of, Subject, switchMap, takeUntil, throwError } from 'rxjs';
@@ -45,10 +44,11 @@ export class FormvalueComponent {
   editorItems: any[] = [];
   userId: number = 1; 
   formValues: Map<number, any> = new Map();
-  submitting: boolean = false;
-  submissionResult: any = null;
   validationErrors: string[] = [];
   showValidationErrors: boolean = false;
+  isFormSubmitted: boolean = false; 
+  submissionMessage: string = ''; 
+
 
   onInputChange(event: any) {
     this.valueChange.emit(event.target.value);
@@ -57,7 +57,6 @@ export class FormvalueComponent {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private matDialog: MatDialog,
     private formTemplateService: FormTemplateService,
     private cdr: ChangeDetectorRef, 
     private multipleValueService: MultipleValueService, 
@@ -68,7 +67,20 @@ export class FormvalueComponent {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.templateId = params.get('id')!;
       this.loadFormTemplateWithLayouts(this.templateId);
+      this.checkFormSubmissionStatus();
+
     });
+  }
+
+  checkFormSubmissionStatus() {
+    this.formSubmissionService
+      .checkIfSubmissionExists(this.userId, +this.templateId)
+      .subscribe((exists) => {
+        if (exists) {
+          this.isFormSubmitted = true;
+          this.submissionMessage = 'You have already submitted this form.';
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -273,29 +285,35 @@ export class FormvalueComponent {
   }
 
   submitForm() {
-    if (!this.validateForm()) {
+    if (this.isFormSubmitted) {
+      alert('You have already submitted this form.');
+      console.warn('You have already submitted this form.');
       return;
     }
-    
-    this.submitting = true;
-    const formValues: FormValueRequest[] = this.collectFormValues();
-    
-    this.formSubmissionService.submitForm(this.userId, +this.templateId, formValues)
+    if (!this.validateForm()) {
+      return; 
+    }
+    const formValues = this.collectFormValues();
+    this.formSubmissionService
+      .submitForm(this.userId, +this.templateId, formValues)
       .subscribe({
         next: (result) => {
-          console.log('Form submitted successfully', result);
-          this.submitting = false;
-          this.submissionResult = result;
-          
-          this.clearForm();
-          this.router.navigate(['/forms']);
+          this.isFormSubmitted = true; 
+          this.router.navigate(['/forms']); 
         },
         error: (error) => {
-          console.error('Error submitting form:', error);
-          this.submitting = false;
-        }
+          console.error('Erreur lors de la soumission du formulaire :', error);
+        },
       });
   }
+
+
+  disableFormFields() {
+    this.traverseFormItems(this.editorItems, (item) => {
+      item.disabled = this.isFormSubmitted;
+    });
+  }
+
 
   clearForm() {
     this.formValues = new Map();

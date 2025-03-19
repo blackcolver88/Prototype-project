@@ -2,6 +2,8 @@ import {Route} from '@angular/router';
 import {EditorTreeComponent} from "./pages/editor-tree/editor-tree.component";
 import { FormsComponent } from './user/pages/forms/forms.component';
 import { FormvalueComponent } from './user/pages/formvalue/formvalue.component';
+import { FormResponsesComponent } from './user/pages/form-responses/form-responses.component';
+import { FormListComponent } from './user/pages/form-list/form-list.component';
 
 export const routes: Route[] = [
   { path: '', redirectTo: '/form-template', pathMatch: 'full' },
@@ -9,6 +11,10 @@ export const routes: Route[] = [
   { path: 'editor-tree/:id', component: EditorTreeComponent },
   { path: 'forms', component: FormsComponent },
   { path: 'formvalue/:id', component: FormvalueComponent },
+  { path: 'responses/:userId/:formId', component: FormResponsesComponent },
+  { path: 'list', component: FormListComponent },
+
+
 
 
 ];

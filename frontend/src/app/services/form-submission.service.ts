@@ -9,6 +9,7 @@ import { FormValueRequest } from '../model/FormValueRequest';
   providedIn: 'root'
 })
 export class FormSubmissionService {
+ 
 
   private baseUrl = 'http://localhost:8081/api/form-submissions';
 
@@ -42,6 +43,11 @@ export class FormSubmissionService {
     const payload = { formValues: formValues };
     // return this.http.post<FormSubmission>(`${this.baseUrl}/${userId}/${formId}`, payload);
     return this.http.post<FormSubmission>(`${this.baseUrl}/1/${formId}`, payload);
-
+  }
+  getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<FormSubmission[]> {
+    return this.http.get<FormSubmission[]>(`${this.baseUrl}/user/1/form/${formId}`);
+  }
+  checkIfSubmissionExists(userId: number, formId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/check-submission/${userId}/${formId}`);
   }
 }

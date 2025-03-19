@@ -1,0 +1,13 @@
+<div class="form-cards-container">
+    <div *ngFor="let form of forms" class="form-card">
+      <img src="{{ form.img }}" alt="img" class="task-image">
+  
+      <h2>Task: {{ form.task }}</h2>
+  
+      <h3>Title: {{ form.formTitle }}</h3>
+  
+      <p>Date : {{ form.date | date:'medium' }}</p> 
+  
+      <button (click)="showFormResponses(form.id)" class="btn-show">Display</button>
+    </div>
+  </div>
