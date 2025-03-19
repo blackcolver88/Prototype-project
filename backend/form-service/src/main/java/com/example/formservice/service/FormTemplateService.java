@@ -251,4 +251,9 @@ public class FormTemplateService {
         // Return all updated inputs for this template
         return getFormInputsByTemplateId(templateId);
     }
+
+    public String getFormTemplateTitleById(Long idForm) {
+        Optional<FormTemplate> formTemplate = formTemplateRepository.findById(idForm);
+        return formTemplate.map(FormTemplate::getTitle).orElse("Formulaire inconnu");
+    }
 }

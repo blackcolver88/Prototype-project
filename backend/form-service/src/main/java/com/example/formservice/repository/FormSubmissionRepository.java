@@ -1,11 +1,23 @@
 package com.example.formservice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.formservice.entities.FormSubmission;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface FormSubmissionRepository extends JpaRepository<FormSubmission, Long> {
 
+    @Query("SELECT fs FROM FormSubmission fs WHERE fs.user.id = :userId")
     List<FormSubmission> findByUserId(Long userId);
+
+    @Query("SELECT fs FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
+    List<FormSubmission> findByUserIdAndFormId(@Param("userId") Long userId, @Param("formId") Long formId);
+
+    @Query("SELECT CASE WHEN COUNT(fs) > 0 THEN true ELSE false END FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
+    boolean existsByUser_IdAndIdForm(@Param("userId") Long userId, @Param("formId") Long formId);
+
+
+
 
 }

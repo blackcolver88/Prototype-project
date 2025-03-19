@@ -16,6 +16,9 @@ public class FormSubmission {
 
     private LocalDateTime date;
 
+    private Long idForm;
+
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("formSubmissions")  // Ignore the formSubmissions property in User

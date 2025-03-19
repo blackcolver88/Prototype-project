@@ -1,6 +1,7 @@
 package com.example.formservice.service;
 
 import com.example.formservice.entities.FormSubmission;
+import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormSubmissionRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -9,9 +10,11 @@ import java.util.Optional;
 @Service
 public class FormSubmissionService {
     private final FormSubmissionRepository formSubmissionRepository;
+    private final FormInputRepository formInputRepository;
 
-    public FormSubmissionService(FormSubmissionRepository formSubmissionRepository) {
+    public FormSubmissionService(FormSubmissionRepository formSubmissionRepository, FormInputRepository formInputRepository) {
         this.formSubmissionRepository = formSubmissionRepository;
+        this.formInputRepository = formInputRepository;
     }
 
     public List<FormSubmission> findAll() {
@@ -37,6 +40,17 @@ public class FormSubmissionService {
         } else {
             throw new IllegalArgumentException("FormSubmission with id " + id + " does not exist");
         }
+    }
+    public boolean existsByUserIdAndFormId(Long userId, Long formId) {
+        return formSubmissionRepository.existsByUser_IdAndIdForm(userId, formId);
+    }
+
+    public List<FormSubmission> getFormSubmissionsByUserAndForm(Long userId, Long formId) {
+        return formSubmissionRepository.findByUserIdAndFormId(userId, formId);
+    }
+
+    public List<FormSubmission> getFormSubmissionsByUserId(Long userId) {
+        return formSubmissionRepository.findByUserId(userId);
     }
 
 
