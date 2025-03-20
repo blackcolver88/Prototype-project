@@ -1,8 +1,34 @@
 <div class="flex flex-col md:flex-row md:space-x-8 p-4">
-  <form [formGroup]="datepickerForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
+  <form
+    [formGroup]="datepickerForm"
+    class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0"
+  >
     <div class="space-y-2">
       <label for="label" class="block font-semibold">Label</label>
-      <input id="label" formControlName="label" type="text" class="w-full border border-gray-300 p-2 rounded" />
+      <input
+        id="label"
+        formControlName="label"
+        type="text"
+        class="w-full border border-gray-300 p-2 rounded"
+        placeholder="Enter label text"
+      />
+      <div
+        *ngIf="
+          datepickerForm.get('label')?.invalid &&
+          datepickerForm.get('label')?.touched
+        "
+        class="text-red-500"
+      >
+        Label is required
+      </div>
+    </div>
+
+    <!-- Add Required toggle -->
+    <div class="space-y-2">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" formControlName="isRequired" class="rounded" />
+        <span>Required</span>
+      </label>
     </div>
 
     <div class="flex space-x-4 mt-4">
@@ -27,6 +53,7 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-datepicker
       [label]="datepickerForm.get('label')?.value"
+      [isRequired]="datepickerForm.get('isRequired')?.value"
     ></app-datepicker>
   </div>
 </div>

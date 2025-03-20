@@ -1,20 +1,16 @@
 <div class="textarea">
-    <div class="text-field-holder">
-        <label
-          for="textInput"
-          class="block text-sm font-medium"
-      
-      
-        >
-          {{ label }}
-        </label>
-      
-        <textarea
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        [placeholder]="placeholder"
-        [required]="required"
-        [value]="value"
-        (input)="onInputChange($event)"
-        ></textarea>
-      </div>
-    </div>
+  <div class="text-field-holder">
+    <label for="textInput" class="block text-sm font-medium">
+      {{ label }}
+      <span *ngIf="isRequired" class="text-red-500 ml-1">*</span>
+    </label>
+
+    <textarea
+      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      [placeholder]="placeholder"
+      [required]="isRequired"
+      [value]="value"
+      (input)="onInputChange($event)"
+    ></textarea>
+  </div>
+</div>

@@ -1,6 +1,5 @@
 <div class="flex flex-col md:flex-row md:space-x-8 p-4">
   <form [formGroup]="textForm" class="w-full md:w-1/2 space-y-4 mb-4 md:mb-0">
-
     <div class="space-y-2">
       <label for="label" class="block font-semibold">Label</label>
       <input
@@ -10,7 +9,10 @@
         class="w-full border border-gray-300 p-2 rounded"
         placeholder="Enter label text"
       />
-      <div *ngIf="textForm.get('label')?.invalid && textForm.get('label')?.touched" class="text-red-500">
+      <div
+        *ngIf="textForm.get('label')?.invalid && textForm.get('label')?.touched"
+        class="text-red-500"
+      >
         Label is required.
       </div>
     </div>
@@ -26,8 +28,12 @@
       />
       <div *ngIf="textForm.get('textName')?.touched" class="text-red-500">
         Field Name is required.
-        <span *ngIf="textForm.get('textName')?.errors?.['email']">Please enter a valid email.</span>
-        <span *ngIf="textForm.get('textName')?.errors?.['pattern']">Please enter a valid number.</span>
+        <span *ngIf="textForm.get('textName')?.errors?.['email']"
+          >Please enter a valid email.</span
+        >
+        <span *ngIf="textForm.get('textName')?.errors?.['pattern']"
+          >Please enter a valid number.</span
+        >
       </div>
     </div>
 
@@ -47,11 +53,19 @@
       <select
         id="type"
         formControlName="type"
-        class="w-full border border-gray-300 p-2 rounded">
+        class="w-full border border-gray-300 p-2 rounded"
+      >
         <option *ngFor="let type of inputTypes" [value]="type.value">
-          {{type.label}}
+          {{ type.label }}
         </option>
       </select>
+    </div>
+
+    <div class="space-y-2">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" formControlName="isRequired" class="rounded">
+        <span>Required</span>
+      </label>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:space-x-4 mt-4">
@@ -76,34 +90,42 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <ng-container [ngSwitch]="textForm.get('type')?.value">
       <!-- Email Preview -->
-      <app-email *ngSwitchCase="'EMAIL'"
-                 [label]="textForm.get('label')?.value"
-                 [placeholder]="textForm.get('placeholder')?.value"
-                 [email]="textForm.get('textName')?.value">
+      <app-email
+        *ngSwitchCase="'EMAIL'"
+        [label]="textForm.get('label')?.value"
+        [placeholder]="textForm.get('placeholder')?.value"
+        [email]="textForm.get('textName')?.value"
+        [isRequired]="textForm.get('isRequired')?.value"
+      >
       </app-email>
 
       <!-- Phone Number Preview -->
-      <app-phone-number *ngSwitchCase="'number'"
-                        [label]="textForm.get('label')?.value"
-                        [placeholder]="textForm.get('placeholder')?.value"
-                       >
+      <app-phone-number
+        *ngSwitchCase="'number'"
+        [label]="textForm.get('label')?.value"
+        [placeholder]="textForm.get('placeholder')?.value"
+        [isRequired]="textForm.get('isRequired')?.value"
+      >
       </app-phone-number>
 
       <!-- Password Preview -->
-      <app-password *ngSwitchCase="'password'"
-                    [label]="textForm.get('label')?.value"
-                    [placeholder]="textForm.get('placeholder')?.value"
-                  >
-        
+      <app-password
+        *ngSwitchCase="'password'"
+        [label]="textForm.get('label')?.value"
+        [placeholder]="textForm.get('placeholder')?.value"
+        [isRequired]="textForm.get('isRequired')?.value"
+      >
       </app-password>
 
       <!-- Default Text/Number Preview -->
-      <app-textform *ngSwitchDefault
-                    [label]="textForm.get('label')?.value"
-                    [textName]="textForm.get('textName')?.value"
-                    [type]="textForm.get('type')?.value"
-                    [placeholder]="textForm.get('placeholder')?.value"
-                  >
+      <app-textform
+        *ngSwitchDefault
+        [label]="textForm.get('label')?.value"
+        [textName]="textForm.get('textName')?.value"
+        [type]="textForm.get('type')?.value"
+        [placeholder]="textForm.get('placeholder')?.value"
+        [isRequired]="textForm.get('isRequired')?.value"
+      >
       </app-textform>
     </ng-container>
   </div>

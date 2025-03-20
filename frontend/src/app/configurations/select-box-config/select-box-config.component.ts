@@ -1,8 +1,8 @@
-import {Component, Inject, inject, OnInit} from '@angular/core';
+import { Component, Inject, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SelectBoxComponent } from '../../components/select-box/select-box.component';
 import { CommonModule } from '@angular/common';
-import {DIALOG_DATA, DialogRef} from "@angular/cdk/dialog";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 
 @Component({
   selector: 'app-select-box-config',
@@ -14,34 +14,38 @@ import {DIALOG_DATA, DialogRef} from "@angular/cdk/dialog";
 export class SelectBoxConfigComponent implements OnInit {
   selectBoxForm: FormGroup;
   private dialogRef = inject(DialogRef);
-  constructor(private fb: FormBuilder ,  @Inject(DIALOG_DATA) public data: any) {
+
+  constructor(private fb: FormBuilder, @Inject(DIALOG_DATA) public data: any) {
     this.selectBoxForm = this.fb.group({
       type: ['SELECT_BOX'],
       title: ['', Validators.required],
-      // labelText: ['Select an option'],
-      options: ['']
+      options: ['', Validators.required],
+      isRequired: [false]
     });
   }
+
   ngOnInit() {
-    if (this.data && this.data.item && this.data.item.config) {
+    if (this.data?.item?.config) {
       this.selectBoxForm.patchValue({
-        title: this.data.item.config.title || '',
-        options: this.data.item.config.options.join(', ')});
+        title: this.data.item.config.label || '',
+        options: this.data.item.config.options?.join(', ') || '',
+        isRequired: this.data.item.config.isRequired || false
+      });
     }
   }
+
   save(): void {
     const formData = this.selectBoxForm.value;
     const configuredItem = {
-      ...formData,
-      type: 'SELECT_BOX', 
+      type: 'SELECT_BOX',
+      title: formData.title,
+      name: formData.title,
       config: {
-        
         label: formData.title,
         options: this.getOptionsArray(formData.options),
-
-      },
-        };
-    console.log('Form data saved:', formData);
+        isRequired: formData.isRequired
+      }
+    };
     this.dialogRef.close(configuredItem);
   }
 
@@ -50,6 +54,8 @@ export class SelectBoxConfigComponent implements OnInit {
   }
 
   getOptionsArray(optionsString: string): string[] {
-    return optionsString.split(',').map(option => option.trim()).filter(option => option.length > 0);
+    return optionsString.split(',')
+      .map(option => option.trim())
+      .filter(option => option.length > 0);
   }
 }

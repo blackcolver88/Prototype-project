@@ -14,6 +14,7 @@ export class PasswordComponent {
   @Input() label: string = 'Password'; // This will be used to display the custom label
     @Input() required: boolean = false;
     @Output() valueChange = new EventEmitter<string>();
+    @Input() isRequired: boolean = false;
     value: string = '';
     
     onInputChange(event: any) {

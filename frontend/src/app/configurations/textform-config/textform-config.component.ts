@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject,Inject,OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { TextformComponent } from "../../components/textform/textform.component";
-import { DialogRef } from "@angular/cdk/dialog";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
 import {EmailComponent} from '../../components/email/email.component';
 import {PhoneNumberComponent} from '../../components/phone-number/phone-number.component';
 import {PasswordComponent} from '../../components/password/password.component';
@@ -14,7 +14,7 @@ import {PasswordComponent} from '../../components/password/password.component';
   templateUrl: './textform-config.component.html',
   styleUrl: './textform-config.component.scss'
 })
-export class TextformConfigComponent {
+export class TextformConfigComponent implements OnInit {
   textForm: FormGroup;
   private dialogRef = inject(DialogRef);
 
@@ -25,11 +25,14 @@ export class TextformConfigComponent {
     { value: 'password', label: 'Password'}
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+    @Inject(DIALOG_DATA) public data: any 
+  ) {
     this.textForm = this.fb.group({
       label: ['Text Field', Validators.required],
       textName: [''], // No required validator
       type: ['text', Validators.required],
+      isRequired: [false],
       placeholder: ['Enter Text Field here'],
       labelPosition: ['top', Validators.required],
       labelAlignment: ['left', Validators.required]
@@ -82,6 +85,18 @@ export class TextformConfigComponent {
       this.textForm.patchValue({ placeholder }, { emitEvent: false });
     });
   }
+  ngOnInit(): void {
+    if (this.data?.item?.config) {
+      this.textForm.patchValue({
+        label: this.data.item.config.label || '',
+        textName: this.data.item.config.name || '',
+        type: this.data.item.type || 'text',
+        placeholder: this.data.item.config.placeholder || '',
+        isRequired: this.data.item.config.isRequired || false,
+      });
+    }
+    throw new Error('Method not implemented.');
+  }
 
   save(): void {
     if (this.textForm.valid) {
@@ -94,7 +109,9 @@ export class TextformConfigComponent {
         name: formData.label,
         config: {
           ...formData,
-          label: formData.label,        // Make sure label is in config
+          label: formData.label,
+          name: formData.name, // Ensure the name is included in the config
+          isRequired: formData.isRequired,        // Make sure label is in config
           placeholder: formData.placeholder
         }
       };
