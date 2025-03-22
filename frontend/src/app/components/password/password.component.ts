@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-password',
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,FormsModule],
 })
 export class PasswordComponent {
 
@@ -15,7 +16,7 @@ export class PasswordComponent {
     @Input() required: boolean = false;
     @Output() valueChange = new EventEmitter<string>();
     @Input() isRequired: boolean = false;
-    value: string = '';
+    @Input() value: string = '';
     
     onInputChange(event: any) {
       this.value = event.target.value;

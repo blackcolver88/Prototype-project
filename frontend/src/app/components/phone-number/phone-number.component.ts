@@ -14,7 +14,7 @@ export class PhoneNumberComponent {
   @Output() valueChange = new EventEmitter<string>();
   @Input() isRequired: boolean = false;
 
-  value: string = '';
+  @Input() value: string = '';
   
   onInputChange(event: any) {
     this.value = event.target.value;

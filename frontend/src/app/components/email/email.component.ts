@@ -17,7 +17,7 @@ export class EmailComponent {
   @Input() isRequired: boolean = false;
   @Output() valueChange = new EventEmitter<string>();
     
-    value: string = '';
+  @Input() value: string = '';
     
     onInputChange(event: any) {
       this.value = event.target.value;

@@ -44,7 +44,7 @@
                         [label]="sectionItem.config.label"
                         [placeholder]="sectionItem.config.placeholder"
                         [required]="sectionItem.config.required"
-                        
+                        [value]="sectionItem.value"  
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-password>
                     </ng-container>
@@ -55,6 +55,7 @@
                         [label]="sectionItem.config.label" 
                         [type]="sectionItem.config.type" 
                         [placeholder]="sectionItem.config.placeholder"
+                        [value]="sectionItem.value"  
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-email>
                     </ng-container>
@@ -65,6 +66,7 @@
                         [groupLabel]="sectionItem.config.label"
                         [name]="sectionItem.config.name" 
                         [options]="sectionItem.config.options"
+                        [value]="sectionItem.value"
                         (valueChange)="handleCheckboxChange(sectionItem.id, $event)">
                       </app-checkbox>
                     </ng-container>
@@ -74,6 +76,8 @@
                       <app-phone-number 
                         [label]="sectionItem.config.label"
                         [placeholder]="sectionItem.config.placeholder" 
+                        [value]="sectionItem.value"  
+
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-phone-number>
                     </ng-container>
@@ -116,6 +120,7 @@
                     <ng-container *ngIf="sectionItem?.type === 'datepicker'">
                       <app-datepicker 
                         [label]="sectionItem.config.label"
+                        [value]="sectionItem.value"  
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-datepicker>
                     </ng-container>
@@ -124,6 +129,7 @@
                     <ng-container *ngIf="sectionItem?.type === 'basic_datepicker'">
                       <app-basic-datepicker 
                         [label]="sectionItem.config.label"
+                        [value]="sectionItem.value"  
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-basic-datepicker>
                     </ng-container>

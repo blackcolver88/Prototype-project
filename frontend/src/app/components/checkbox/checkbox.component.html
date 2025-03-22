@@ -8,7 +8,9 @@
     <div *ngFor="let option of options" class="flex items-center">
       <input
         type="checkbox"
-        [(ngModel)]="option.checked"
+        [value]="option.value"
+        [checked]="selectedOption === option.label"
+
         [name]="name"
         [disabled]="isDisabled"
         class="bg-gray-100 border-gray-300 rounded focus:ring-2"

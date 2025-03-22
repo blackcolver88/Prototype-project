@@ -12,6 +12,7 @@
         pattern="[0-9]*"
         title="Please enter a valid phone number."
         [required]="isRequired"
+        [(ngModel)]="value"
         (keypress)="allowOnlyNumbers($event)"
         [value]="value"
         (input)="onInputChange($event)"
