@@ -1,16 +1,21 @@
-
 <div class="grid grid-cols-1 gap-4 items-start p-4 relative z-0">
-  <div class="col-span-1 bg-white p-6 rounded-lg shadow-md w-full max-w-4xl mx-auto">
+  <div
+    class="col-span-1 bg-white p-6 rounded-lg shadow-md w-full max-w-4xl mx-auto"
+  >
     <div class="flex justify-center">
       <h2 class="text-xl font-bold text-gray-700 mb-4">Respond</h2>
     </div>
     <div *ngIf="isFormSubmitted" class="text-center text-red-500 mb-4">
       {{ submissionMessage }}
     </div>
-    <h3 *ngIf="formTitle" class="text-lg text-center text-gray-800 mb-4">{{ formTitle }}</h3>
+    <h3 *ngIf="formTitle" class="text-lg text-center text-gray-800 mb-4">
+      {{ formTitle }}
+    </h3>
 
-
-    <div *ngIf="showValidationErrors && validationErrors.length > 0" class="mb-4">
+    <div
+      *ngIf="showValidationErrors && validationErrors.length > 0"
+      class="mb-4"
+    >
       <div *ngFor="let error of validationErrors" class="text-red-500 text-sm">
         {{ error }}
       </div>
@@ -23,69 +28,87 @@
           <ng-container *ngSwitchCase="'Section'">
             <div class="bg-white p-4 rounded-lg shadow-md">
               <div class="flex justify-between items-center mb-2">
-                <h3 class="font-semibold text-gray-700">{{ item.title || 'Section' }}</h3>
+                <h3 class="font-semibold text-gray-700">
+                  {{ item.title || "Section" }}
+                </h3>
               </div>
 
-              <div *ngFor="let sectionItem of item.items" class="mb-2 relative z-0">
+              <div
+                *ngFor="let sectionItem of item.items"
+                class="mb-2 relative z-0"
+              >
                 <div class="bg-white p-3 rounded shadow-sm relative">
                   <!-- Text Field -->
                   <ng-container *ngIf="sectionItem?.type === 'TEXTFIELD'">
-                    <app-textform 
-                      [label]="sectionItem.config.label" 
+                    <app-textform
+                      [label]="sectionItem.config.label"
                       [textName]="sectionItem.config.textName"
-                      [type]="sectionItem.config.type" 
+                      [type]="sectionItem.config.type"
                       [placeholder]="sectionItem.config.placeholder"
-                      [required]="sectionItem.config.required"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-textform>
                   </ng-container>
 
                   <!-- Password Field -->
                   <ng-container *ngIf="sectionItem?.type === 'PASSWORD'">
-                    <app-password 
+                    <app-password
                       [label]="sectionItem.config.label"
                       [placeholder]="sectionItem.config.placeholder"
-                      [required]="sectionItem.config.required"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-password>
                   </ng-container>
 
                   <!-- Email -->
                   <ng-container *ngIf="sectionItem?.type === 'EMAIL'">
-                    <app-email 
-                      [label]="sectionItem.config.label" 
-                      [type]="sectionItem.config.type" 
+                    <app-email
+                      [label]="sectionItem.config.label"
+                      [type]="sectionItem.config.type"
                       [placeholder]="sectionItem.config.placeholder"
-                      [required]="sectionItem.config.required"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-email>
                   </ng-container>
 
                   <!-- Checkbox Group -->
                   <ng-container *ngIf="sectionItem?.type === 'CHECKBOX'">
-                    <app-checkbox 
+                    <app-checkbox
                       [groupLabel]="sectionItem.config.label"
-                      [name]="sectionItem.config.name" 
+                      [name]="sectionItem.config.name"
+                      [isRequired]="sectionItem.config.isRequired"
                       [options]="sectionItem.config.options"
-                      (valueChange)="handleCheckboxChange(sectionItem.id, $event)">
+                      (valueChange)="
+                        handleCheckboxChange(sectionItem.id, $event)
+                      "
+                    >
                     </app-checkbox>
                   </ng-container>
 
                   <!-- Phone Number -->
                   <ng-container *ngIf="sectionItem?.type === 'NUMBER'">
-                    <app-phone-number 
+                    <app-phone-number
                       [label]="sectionItem.config.label"
-                      [placeholder]="sectionItem.config.placeholder" 
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      [placeholder]="sectionItem.config.placeholder"
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-phone-number>
                   </ng-container>
 
                   <!-- Text Area -->
                   <ng-container *ngIf="sectionItem?.type === 'textarea'">
-                    <app-text-area 
-                      [label]="sectionItem.config.label" 
-                      [placeholder]="sectionItem.config.placeholder || 'Enter text here'"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                    <app-text-area
+                      [label]="sectionItem.config.label"
+                      [placeholder]="
+                        sectionItem.config.placeholder || 'Enter text here'
+                      "
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-text-area>
                   </ng-container>
 
@@ -98,7 +121,8 @@
                       [isRequired]="sectionItem.config.isRequired"
                       [isDisabled]="sectionItem.config.isDisabled"
                       [selectedOption]="sectionItem.value"
-                      (valueChange)="handleRadioChange(sectionItem.id, $event)">
+                      (valueChange)="handleRadioChange(sectionItem.id, $event)"
+                    >
                     </app-radio-button>
                   </ng-container>
 
@@ -108,23 +132,33 @@
                       [label]="sectionItem.config.label"
                       [options]="getOptionsArray(sectionItem.config.options)"
                       [value]="sectionItem.value"
-                      (valueChange)="handleSelectBoxChange(sectionItem.id, $event)">
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="
+                        handleSelectBoxChange(sectionItem.id, $event)
+                      "
+                    >
                     </app-select-box>
                   </ng-container>
 
                   <!-- Date Picker -->
                   <ng-container *ngIf="sectionItem?.type === 'datepicker'">
-                    <app-datepicker 
+                    <app-datepicker
                       [label]="sectionItem.config.label"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                      [isRequired]="sectionItem.config.isRequired"
+                    >
                     </app-datepicker>
                   </ng-container>
 
                   <!-- Basic Date Picker -->
-                  <ng-container *ngIf="sectionItem?.type === 'basic_datepicker'">
-                    <app-basic-datepicker 
+                  <ng-container
+                    *ngIf="sectionItem?.type === 'basic_datepicker'"
+                  >
+                    <app-basic-datepicker
                       [label]="sectionItem.config.label"
-                      (valueChange)="handleInputChange(sectionItem.id, $event)">
+                      [isRequired]="sectionItem.config.isRequired"
+                      (valueChange)="handleInputChange(sectionItem.id, $event)"
+                    >
                     </app-basic-datepicker>
                   </ng-container>
                 </div>
@@ -137,27 +171,30 @@
             <div class="bg-white p-3 rounded shadow-sm relative">
               <!-- Text Field -->
               <ng-container *ngIf="item?.type === 'TEXTFIELD'">
-                <app-textform 
-                  [label]="item.config.label" 
+                <app-textform
+                  [label]="item.config.label"
                   [textName]="item.config.textName"
-                  [type]="item.config.type" 
-                  [placeholder]="item.config.placeholder">
+                  [type]="item.config.type"
+                  [placeholder]="item.config.placeholder"
+                >
                 </app-textform>
               </ng-container>
 
               <!-- Password Field -->
               <ng-container *ngIf="item?.type === 'PASSWORD'">
-                <app-password 
+                <app-password
                   [label]="item.config.label"
-                  [placeholder]="item.config.placeholder">
+                  [placeholder]="item.config.placeholder"
+                >
                 </app-password>
               </ng-container>
 
               <!-- Email -->
               <ng-container *ngIf="item?.type === 'EMAIL'">
-                <app-email 
-                  [label]="item.config.label" 
-                  [placeholder]="item.config.placeholder">
+                <app-email
+                  [label]="item.config.label"
+                  [placeholder]="item.config.placeholder"
+                >
                 </app-email>
               </ng-container>
 
@@ -167,23 +204,23 @@
                   [groupLabel]="item.config.label"
                   [name]="item.config.name"
                   [options]="item.config.options"
-                  (valueChange)="handleInputChange(item.id, $event)">
+                  (valueChange)="handleInputChange(item.id, $event)"
+                >
                 </app-checkbox>
               </ng-container>
 
               <!-- Phone Number -->
               <ng-container *ngIf="item?.type === 'NUMBER'">
-                <app-phone-number 
+                <app-phone-number
                   [label]="item.config.label"
-                  [placeholder]="item.config.placeholder">
+                  [placeholder]="item.config.placeholder"
+                >
                 </app-phone-number>
               </ng-container>
 
               <!-- Text Area -->
               <ng-container *ngIf="item?.type === 'textarea'">
-                <app-text-area 
-                  [label]="item.label">
-                </app-text-area>
+                <app-text-area [label]="item.label"> </app-text-area>
               </ng-container>
 
               <!-- Radio Group -->
@@ -195,7 +232,8 @@
                   [isRequired]="item.config.isRequired"
                   [isDisabled]="item.config.isDisabled"
                   [selectedOption]="item.config.selectedOption"
-                  (valueChange)="handleInputChange(item.id, $event)">
+                  (valueChange)="handleInputChange(item.id, $event)"
+                >
                 </app-radio-button>
               </ng-container>
 
@@ -204,21 +242,19 @@
                 <app-select-box
                   [label]="item.config.labelText"
                   [options]="getOptionsArray(item.config.options)"
-                  (valueChange)="handleInputChange(item.id, $event)">
+                  (valueChange)="handleInputChange(item.id, $event)"
+                >
                 </app-select-box>
               </ng-container>
 
               <!-- Date Picker -->
               <ng-container *ngIf="item?.type === 'datepicker'">
-                <app-datepicker 
-                  [label]="item.config.label">
-                </app-datepicker>
+                <app-datepicker [label]="item.config.label"> </app-datepicker>
               </ng-container>
 
               <!-- Basic Date Picker -->
               <ng-container *ngIf="item?.type === 'basic_datepicker'">
-                <app-basic-datepicker 
-                  [label]="item.config.label">
+                <app-basic-datepicker [label]="item.config.label">
                 </app-basic-datepicker>
               </ng-container>
 
@@ -226,7 +262,8 @@
               <ng-container *ngIf="item?.type === 'button'">
                 <app-button
                   [label]="item.config.label"
-                  [type]="item.config.type">
+                  [type]="item.config.type"
+                >
                 </app-button>
               </ng-container>
             </div>
@@ -235,19 +272,19 @@
       </div>
     </ng-template>
 
-    <ng-container *ngTemplateOutlet="recursiveSection; context: { items: editorItems }">
+    <ng-container
+      *ngTemplateOutlet="recursiveSection; context: { items: editorItems }"
+    >
     </ng-container>
-
 
     <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
       <app-button
         label="Submit"
         type="submit"
         (click)="submitForm()"
-        class="text-white bg-green-500 hover:bg-green-600 p-2 rounded">
+        class="text-white bg-green-500 hover:bg-green-600 p-2 rounded"
+      >
       </app-button>
     </div>
-
-
   </div>
 </div>

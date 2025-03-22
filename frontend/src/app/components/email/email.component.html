@@ -4,6 +4,7 @@
     class="block text-sm font-medium"
   >
     {{ label }}
+    <span *ngIf="isRequired" class="text-red-500 ml-1">*</span>
   </label>
 
   <input
@@ -11,7 +12,7 @@
     id="emailInput"
     [(ngModel)]="email"
     placeholder="{{ placeholder }}"
-    [required]="required"
+    [required]="isRequired"
     [value]="value"
     (input)="onInputChange($event)"
     

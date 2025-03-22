@@ -23,6 +23,7 @@ export class DatepickerComponent {
   @Input() fontColor: string = '#000000';
   @Input() fontFamily: string = 'Arial';
   @Input() value: string = '';
+  @Input() isRequired: boolean = false;
   
   @Output() valueChange = new EventEmitter<string>();
   @Output() dateRangeChange = new EventEmitter<{start: Date | null, end: Date | null}>();

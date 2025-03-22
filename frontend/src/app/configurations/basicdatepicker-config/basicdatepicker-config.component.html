@@ -5,6 +5,13 @@
       <input id="label" formControlName="label" type="text" class="w-full border border-gray-300 p-2 rounded" />
     </div>
 
+    <div class="space-y-2">
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" formControlName="isRequired" class="rounded">
+        <span>Required</span>
+      </label>
+    </div>
+
     <div class="flex space-x-4 mt-4">
       <button
         type="submit"
@@ -27,6 +34,8 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-basic-datepicker
       [label]="basicDatepickerForm.get('label')?.value"
+      [isRequired]="basicDatepickerForm.get('isRequired')?.value"
+
     ></app-basic-datepicker>
   </div>
 </div>

@@ -4,13 +4,16 @@
     class="block text-sm font-medium"
   >
     {{ label }}
+    <span *ngIf="isRequired" class="text-red-500 ml-1">*</span>
   </label>
   <input
     [type]="type"
     id="textInput"
-    [placeholder]="placeholder"
+
+    placeholder="{{ placeholder }}"
     [(ngModel)]="value"
-    [required]="required"
+    [required]="isRequired"
+    [value]="value"
     (input)="onInputChange($event)"
     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize"
   />

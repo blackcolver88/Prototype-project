@@ -13,7 +13,7 @@ export class TextformComponent implements OnInit {
   @Input() type: string = 'text';
   @Input() textName: string = '';
   @Input() placeholder: string = 'Enter your email';
-  @Input() required: boolean = false;
+  @Input() isRequired: boolean = false;
   @Input() label: string = 'Text Field';
   @Input() value: string = '';
 

@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { FormsModule } from '@angular/forms';
 
+
+
 @Component({
   selector: 'app-text-area',
-  standalone: true,
   templateUrl: './text-area.component.html',
   styleUrl: './text-area.component.css',
   imports: [CommonModule, FormsModule]
@@ -15,6 +16,7 @@ export class TextAreaComponent implements OnInit {
   @Input() required: boolean = false;
   @Input() value: string = '';
   
+  @Input() isRequired: boolean = false;
   @Output() valueChange = new EventEmitter<string>();
   
   ngOnInit() {

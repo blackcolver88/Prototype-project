@@ -1,26 +1,21 @@
 <div class="phone">
-<div class="phone-number-field-holder">
-
-    <div
-    >
-      <label
-
-      >
+  <div class="phone-number-field-holder">
+    <div>
+      <label>
         {{ label }}
+        <span *ngIf="isRequired" class="text-red-500 ml-1">*</span>
       </label>
       <input
         type="tel"
         id="phoneInput"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         pattern="[0-9]*"
-      title="Please enter a valid phone number."
-      (keypress)="allowOnlyNumbers($event)"
-      [value]="value"
-      (input)="onInputChange($event)"
-
+        title="Please enter a valid phone number."
+        [required]="isRequired"
+        (keypress)="allowOnlyNumbers($event)"
+        [value]="value"
+        (input)="onInputChange($event)"
       />
-
     </div>
-
   </div>
 </div>

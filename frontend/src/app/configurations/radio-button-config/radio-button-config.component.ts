@@ -68,6 +68,7 @@ export class RadioButtonConfigComponent implements OnInit {
       config: {
         label: formData.title,
         name: formData.name, // Ensure the name is included in the config
+        isRequired: formData.isRequired, // Include the isRequired field
         options: formData.options.map((option: Option) => ({
           label: option.label,
           value: option.value,

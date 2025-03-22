@@ -12,7 +12,8 @@ export class PhoneNumberComponent {
   @Input() placeholder: string = 'Phone Number';
   @Input() label: string = 'Phone Number';
   @Output() valueChange = new EventEmitter<string>();
-  
+  @Input() isRequired: boolean = false;
+
   value: string = '';
   
   onInputChange(event: any) {
