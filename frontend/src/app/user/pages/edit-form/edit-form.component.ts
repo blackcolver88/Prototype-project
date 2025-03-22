@@ -136,10 +136,20 @@ export class EditFormComponent {
     
     console.log('Populating form with values:', formValues);
     
+    // Extract all form inputs from the editor tree
     const formInputs: any[] = [];
     this.traverseFormItems(this.editorItems, (item) => {
       if (item.id && item.type && item.type !== 'Section') {
         formInputs.push(item);
+      }
+    });
+    
+    // Create a mapping of form values by their form input IDs if available
+    const formValuesByInputId = new Map();
+    formValues.forEach(formValue => {
+      if (formValue.formInputs && formValue.formInputs.length > 0) {
+        const formInputId = formValue.formInputs[0].id;
+        formValuesByInputId.set(formInputId, formValue);
       }
     });
     
@@ -155,8 +165,6 @@ export class EditFormComponent {
     formValues.forEach((formValue) => {
       const itemId = formValue.id;
       const value = formValue.value;
-      
-      console.log(`Trying to update item ID: ${itemId} with value: ${value}`);
       let itemFound = false;
       
       this.traverseFormItems(this.editorItems, (item) => {
@@ -167,23 +175,40 @@ export class EditFormComponent {
         }
       });
       
-      if (!itemFound) {
-        console.warn(`Item with ID ${itemId} not found in editor items. Trying alternative matching...`);
-        
-        if (formValue.formInputs && formValue.formInputs.length > 0) {
-          const formInputId = formValue.formInputs[0].id;
-          this.traverseFormItems(this.editorItems, (item) => {
-            if (item.id === formInputId) {
-              item.value = value;
-              console.log(`Matched using formInputs. Updated item ${formInputId} with value:`, value);
-              itemFound = true;
-            }
-          });
-        }
+      if (!itemFound && formValue.formInputs && formValue.formInputs.length > 0) {
+        const formInputId = formValue.formInputs[0].id;
+        this.traverseFormItems(this.editorItems, (item) => {
+          if (item.id === formInputId) {
+            item.value = value;
+            console.log(`Matched using formInputs. Updated item ${formInputId} with value:`, value);
+            itemFound = true;
+          }
+        });
+      }
+      
+      if (!itemFound && formValue.name) {
+        this.traverseFormItems(this.editorItems, (item) => {
+          if (item.config && (item.config.label === formValue.name || item.config.textName === formValue.name)) {
+            item.value = value;
+            console.log(`Matched by name. Updated item ${item.id} with value:`, value);
+            itemFound = true;
+          }
+        });
       }
       
       if (!itemFound && formInputs.length > 0) {
-        console.warn(`Still couldn't find a match for value ID ${itemId}. Consider manually mapping values.`);
+        const valueIndex = formValues.findIndex(v => v.id === itemId);
+        
+        if (valueIndex >= 0 && valueIndex < formInputs.length) {
+          const inputByIndex = formInputs[valueIndex];
+          inputByIndex.value = value;
+          console.log(`Matched by index position. Updated item ${inputByIndex.id} with value:`, value);
+          itemFound = true;
+        }
+      }
+      
+      if (!itemFound) {
+        console.warn(`Still couldn't find a match for value ID ${itemId}. Consider adding a manual mapping.`);
       }
     });
     
