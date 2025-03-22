@@ -21,4 +21,7 @@ public class FormValueService {
     public List<FormValue> saveAll(List<FormValue> formValues) {
         return formValueRepository.saveAll(formValues);
     }
+    public List<FormValue> getFormValuesBySubmissionId(Long submissionId) {
+        return formValueRepository.findByFormSubmissionId(submissionId);
+    }
 }

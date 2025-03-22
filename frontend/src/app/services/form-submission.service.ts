@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {catchError, map, Observable, throwError} from "rxjs";
 import {FormSubmission} from "../model/FormSubmission";
 import { FormValueRequest } from '../model/FormValueRequest';
 
@@ -19,17 +19,23 @@ export class FormSubmissionService {
     return this.http.get<FormSubmission[]>(`${this.baseUrl}`);
   }
 
-  getFormSubmissionById(id: number): Observable<FormSubmission> {
-    return this.http.get<FormSubmission>(`${this.baseUrl}/${id}`);
+  getFormSubmissionById(submissionId: number): Observable<FormSubmission> {
+    const url = `${this.baseUrl}/${submissionId}`;
+    return this.http.get<FormSubmission>(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching form submission by ID:', error);
+        return throwError(() => new Error('Failed to load form submission.'));
+      })
+    );
   }
 
   createFormSubmission(formSubmission: { title: any }): Observable<FormSubmission> {
     return this.http.post<FormSubmission>(this.baseUrl, formSubmission);
   }
 
-  updateFormSubmission(id: number, formSubmission:FormSubmission): Observable<FormSubmission> {
-    return this.http.put<FormSubmission>(`${this.baseUrl}/${id}`, formSubmission);
-  }
+  // updateFormSubmission(id: number, formSubmission:FormSubmission): Observable<FormSubmission> {
+  //   return this.http.put<FormSubmission>(`${this.baseUrl}/${id}`, formSubmission);
+  // }
 
   deleteFormSubmission(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
@@ -50,4 +56,42 @@ export class FormSubmissionService {
   checkIfSubmissionExists(userId: number, formId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.baseUrl}/check-submission/${userId}/${formId}`);
   }
+
+  getFormTemplateBySubmissionId(submissionId: number): Observable<any> {
+    const url = `${this.baseUrl}/submission/${submissionId}/template`;
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching form template by submission ID:', error);
+        return throwError(() => new Error('Failed to load form template.'));
+      })
+    );
+  }
+
+  getFormValuesBySubmissionId(submissionId: number): Observable<any[]> {
+    const url = `${this.baseUrl}/submission/${submissionId}/values`;
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        // If the response is an object, convert to array or extract form values
+        if (response && !Array.isArray(response)) {
+          // If there's a formInputs array in the response, use that
+          if (response.formInputs && Array.isArray(response.formInputs)) {
+            return response.formInputs;
+          }
+          return [response];
+        }
+        return response;
+      }),
+      catchError((error) => {
+        console.error('Error fetching form values by submission ID:', error);
+        return throwError(() => new Error('Failed to load form values.'));
+      })
+    );
+  }
+
+  updateFormSubmission(userId: number, submissionId: number, updatedValues: any[]): Observable<any> {
+    console.log('Updating form submission:', { userId, submissionId, updatedValues });
+    const url = `${this.baseUrl}/${userId}/${submissionId}`;
+    return this.http.patch(url, { formValues: updatedValues });
+  }
+  
 }

@@ -8,6 +8,6 @@
   
       <p>Date : {{ form.date | date:'medium' }}</p> 
   
-      <button (click)="showFormResponses(form.id)" class="btn-show">Display</button>
-    </div>
+      <button (click)="showFormResponses(form.id)" class="btn-show">Display</button><br><br>
+      <button (click)="onEditClick(form.id)" class="btn-show">Edit</button>    </div>
   </div>

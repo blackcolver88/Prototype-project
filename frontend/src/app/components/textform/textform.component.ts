@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { CommonModule } from "@angular/common";
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -9,19 +9,24 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './textform.component.css',
   imports: [CommonModule, FormsModule]
 })
-export class TextformComponent {
+export class TextformComponent implements OnInit {
   @Input() type: string = 'text';
   @Input() textName: string = '';
   @Input() placeholder: string = 'Enter your email';
   @Input() required: boolean = false;
   @Input() label: string = 'Text Field';
-    @Output() valueChange = new EventEmitter<string>();
-    
-    value: string = '';
-    
-    onInputChange(event: any) {
-      this.value = event.target.value;
-      this.valueChange.emit(this.value);
-    }
+  @Input() value: string = '';
+
+  @Output() valueChange = new EventEmitter<string>();
   
+  ngOnInit() {
+    if (this.textName && (this.value === undefined || this.value === null)) {
+      this.value = this.textName;
+    }
+  }
+
+  onInputChange(event: any) {
+    this.value = event.target.value;
+    this.valueChange.emit(this.value);
+  }
 }

@@ -10,7 +10,9 @@ import { Router } from '@angular/router';
 })
 export class FormListComponent implements OnInit {
   forms: any[] = [];
-  userId/*: number*/ = 1;  
+  userId/*: number*/ = 1; 
+  formId!: number;
+ 
 
   constructor(private formSubmissionService: FormSubmissionService,private router: Router,) {}
   ngOnInit() {
@@ -35,4 +37,15 @@ export class FormListComponent implements OnInit {
     this.router.navigate(['/responses', this.userId, formId]);
     
   }
+  onEditClick(formId: number | undefined) {
+    if (formId) {
+      this.router.navigate(['/edit', this.userId, formId]);
+      
+    } else {
+      console.error('ID du formulaire non défini');
+    }
+  }
+
+  
+
 }

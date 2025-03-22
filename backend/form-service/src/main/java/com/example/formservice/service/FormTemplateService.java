@@ -6,6 +6,7 @@ import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
+import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormTemplateRepository;
@@ -73,23 +74,16 @@ public class FormTemplateService {
     }
 
     public FormTemplate getFormTemplateWithFormLayouts(Long formTemplateId) {
-        FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
-                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
-        
-        // Get the layouts in order but don't set them directly on the template
-        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
-        
-        // Create a new list with references to the original layouts in the proper order
-        List<FormLayout> orderedList = new ArrayList<>();
-        
-        // Ensure the ordered layouts are properly populated
-        for (FormLayout layout : orderedLayouts) {
-            formTemplate.getFormLayouts().stream()
-                .filter(fl -> fl.getId().equals(layout.getId()))
-                .findFirst()
-                .ifPresent(orderedList::add);
+        Optional<FormTemplate> templateOptional = formTemplateRepository.findById(formTemplateId);
+
+        if (templateOptional.isEmpty()) {
+            throw new ResourceNotFoundException("FormTemplate with id " + formTemplateId + " not found");
         }
-        
+
+        FormTemplate formTemplate = templateOptional.get();
+
+        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
+
         // Sort the actual collection rather than replacing it
         // This won't trigger orphan removal
         formTemplate.getFormLayouts().sort((a, b) -> {
@@ -100,7 +94,7 @@ public class FormTemplateService {
             }
             return posA.compareTo(posB);
         });
-        
+
         return formTemplate;
     }
 

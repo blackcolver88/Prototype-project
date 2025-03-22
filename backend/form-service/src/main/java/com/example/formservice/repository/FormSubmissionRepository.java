@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FormSubmissionRepository extends JpaRepository<FormSubmission, Long> {
 
@@ -16,6 +17,9 @@ public interface FormSubmissionRepository extends JpaRepository<FormSubmission, 
 
     @Query("SELECT CASE WHEN COUNT(fs) > 0 THEN true ELSE false END FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
     boolean existsByUser_IdAndIdForm(@Param("userId") Long userId, @Param("formId") Long formId);
+
+
+
 
 
 

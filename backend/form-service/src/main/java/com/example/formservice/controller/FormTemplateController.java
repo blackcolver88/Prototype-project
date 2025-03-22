@@ -6,8 +6,13 @@ import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
+import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.service.FormTemplateService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,9 +64,23 @@ public class FormTemplateController {
     }
 
     @GetMapping("/{id}/form-layouts")
-    public ResponseEntity<FormTemplate> getFormLayoutsByFormTemplateId(@PathVariable Long id) {
-        FormTemplate formTemplate = formTemplateService.getFormTemplateWithFormLayouts(id);
-        return ResponseEntity.ok(formTemplate);
+    public ResponseEntity<?> getFormLayoutsByFormTemplateId(@PathVariable Long id) {
+        try {
+            FormTemplate formTemplate = formTemplateService.getFormTemplateWithFormLayouts(id);
+            return ResponseEntity.ok(formTemplate);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse() {
+                @Override
+                public HttpStatusCode getStatusCode() {
+                    return null;
+                }
+
+                @Override
+                public ProblemDetail getBody() {
+                    return null;
+                }
+            });
+        }
     }
 
 

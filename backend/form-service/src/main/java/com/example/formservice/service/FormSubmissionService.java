@@ -1,8 +1,10 @@
 package com.example.formservice.service;
 
 import com.example.formservice.entities.FormSubmission;
+import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormSubmissionRepository;
+import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -11,10 +13,12 @@ import java.util.Optional;
 public class FormSubmissionService {
     private final FormSubmissionRepository formSubmissionRepository;
     private final FormInputRepository formInputRepository;
+    private final FormTemplateRepository formTemplateRepository;
 
-    public FormSubmissionService(FormSubmissionRepository formSubmissionRepository, FormInputRepository formInputRepository) {
+    public FormSubmissionService(FormSubmissionRepository formSubmissionRepository, FormInputRepository formInputRepository, FormTemplateRepository formTemplateRepository) {
         this.formSubmissionRepository = formSubmissionRepository;
         this.formInputRepository = formInputRepository;
+        this.formTemplateRepository = formTemplateRepository;
     }
 
     public List<FormSubmission> findAll() {
@@ -53,5 +57,14 @@ public class FormSubmissionService {
         return formSubmissionRepository.findByUserId(userId);
     }
 
+
+    public Optional<FormTemplate> getFormTemplateBySubmissionId(Long submissionId) {
+        Optional<FormSubmission> submission = formSubmissionRepository.findById(submissionId);
+        if (submission.isPresent()) {
+            Long formId = submission.get().getIdForm();
+            return formTemplateRepository.findById(formId);
+        }
+        return Optional.empty();
+    }
 
 }
