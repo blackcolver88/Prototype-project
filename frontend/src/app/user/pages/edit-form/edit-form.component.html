@@ -33,7 +33,6 @@
                         [textName]="sectionItem.config.textName"
                         [type]="sectionItem.config.type" 
                         [placeholder]="sectionItem.config.placeholder"
-                        [required]="sectionItem.config.required"
                         [value]="sectionItem.value"  
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-textform>
@@ -56,7 +55,6 @@
                         [label]="sectionItem.config.label" 
                         [type]="sectionItem.config.type" 
                         [placeholder]="sectionItem.config.placeholder"
-                        [required]="sectionItem.config.required"
                         (valueChange)="handleInputChange(sectionItem.id, $event)">
                       </app-email>
                     </ng-container>
