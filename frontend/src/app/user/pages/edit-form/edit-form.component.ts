@@ -377,14 +377,24 @@ handleInputChange(itemId: number, value: any) {
   this.errorMessage = '';
 }
 
-  handleCheckboxChange(itemId: number, selectedLabels: string[]) {
-    console.log(`Checkbox change for item ${itemId}:`, selectedLabels);
+  handleCheckboxChange(itemId: number, selectedValues: any[]) {
+    console.log(`Checkbox change for item ${itemId}:`, selectedValues);
     
-    this.formValues.set(itemId, selectedLabels);
+    // Extract just the values if they're objects
+    const processedValues = selectedValues.map(val => {
+      if (typeof val === 'object' && val !== null) {
+        return val.value || val.label || val;
+      }
+      return val;
+    });
+    
+    console.log(`Processed checkbox values:`, processedValues);
+    
+    this.formValues.set(itemId, processedValues);
     
     this.traverseFormItems(this.editorItems, (item) => {
       if (item.id === itemId) {
-        item.value = selectedLabels; 
+        item.value = processedValues;
       }
     });
     
@@ -460,17 +470,25 @@ handleInputChange(itemId: number, value: any) {
       if (item.id && item.value !== undefined) {
         console.log(`Collecting value for item ${item.id} (${item.type}):`, item.value);
         
+        // Skip checkbox fields with empty selections
+        if (item.type === 'CHECKBOX' && Array.isArray(item.value) && item.value.length === 0) {
+          console.log(`Skipping empty checkbox value for item ${item.id}`);
+          return;
+        }
+        
         let singleValue = null;
         let multipleValues: string[] = [];
         
-        if (item.type === 'RADIO_BUTTON') {
-          multipleValues = [item.value];
-        } else if (item.type === 'CHECKBOX') {
+        if (item.type === 'CHECKBOX') {
+          // Ensure checkbox values are always treated as arrays
           multipleValues = Array.isArray(item.value) ? item.value : [item.value];
-        } else if (item.type === 'SELECT_BOX') {
+          singleValue = null;
+        } else if (item.type === 'RADIO_BUTTON' || item.type === 'SELECT_BOX') {
           multipleValues = [item.value];
+          singleValue = null;
         } else {
           singleValue = item.value;
+          multipleValues = [];
         }
         
         formValues.push(new FormValueRequest(
@@ -497,42 +515,30 @@ handleInputChange(itemId: number, value: any) {
   }
 
   onSubmit() {
-    if (this.isSubmitting) {
-      return;
-    }
-    
-    this.successMessage = '';
-    this.errorMessage = '';
-    
     if (!this.validateForm()) {
-      window.scrollTo(0, 0);
       return;
     }
-    
-    this.isSubmitting = true;
+
     const formValues = this.collectFormValues();
     
-    console.log('Submitting updated form values:', formValues);
+    // Add detailed logging
+    console.log('Form values being submitted:', JSON.stringify(formValues, null, 2));
     
-    this.formSubmissionService.updateFormSubmission(this.userId, this.submissionId, formValues)
-      .pipe(
-        takeUntil(this.destroy$),
-        catchError(error => {
-          console.error('Error updating form submission:', error);
-          this.errorMessage = 'Une erreur est survenue lors de la mise à jour du formulaire. Veuillez réessayer.';
-          this.isSubmitting = false;
-          window.scrollTo(0, 0);
-          return throwError(() => error);
-        })
-      )
+    this.formSubmissionService
+      .updateFormSubmission(this.userId, +this.templateId, formValues)
       .subscribe({
         next: (response) => {
-          console.log('Form submission updated successfully:', response);
-          this.isSubmitting = false;
-          this.successMessage = 'Le formulaire a été mis à jour avec succès.';
-          window.scrollTo(0, 0);
+          this.successMessage = 'Form updated successfully!';
+          this.errorMessage = '';
+          console.log('Form updated successfully:', response);
         },
-    
+        error: (error) => {
+          this.errorMessage = 'Error updating form submission';
+          this.successMessage = '';
+          console.error('Error updating form submission:', error);
+          console.error('Error response body:', error.error);
+          console.error('Error details:', error.message);
+        }
       });
   }
 }

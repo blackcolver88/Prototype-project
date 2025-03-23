@@ -207,7 +207,6 @@ export class FormvalueComponent {
               input.multipleValues[0].valeurs : [];
   
             if (input.type === 'RADIO_BUTTON') {
-              
               item.config.options = values.map((val: string) => {
                 try {
                   if (typeof val === 'string' && val.startsWith('{')) {
@@ -220,7 +219,6 @@ export class FormvalueComponent {
                 }
               });
             } else if (input.type === 'CHECKBOX') {
-
               item.config.options = values.map((val: string) => {
                 try {
                   if (typeof val === 'string' && val.startsWith('{')) {
@@ -294,6 +292,10 @@ export class FormvalueComponent {
       return; 
     }
     const formValues = this.collectFormValues();
+    
+    // Add detailed logging
+    console.log('Form values being submitted:', JSON.stringify(formValues, null, 2));
+    
     this.formSubmissionService
       .submitForm(this.userId, +this.templateId, formValues)
       .subscribe({
@@ -302,7 +304,9 @@ export class FormvalueComponent {
           this.router.navigate(['/forms']); 
         },
         error: (error) => {
-          console.error('Erreur lors de la soumission du formulaire :', error);
+          console.error('Form submission error:', error);
+          console.error('Error response body:', error.error);
+          console.error('Error details:', error.message);
         },
       });
   }
@@ -332,17 +336,25 @@ export class FormvalueComponent {
       if (item.id && item.value !== undefined) {
         console.log(`Item ${item.id} (${item.type}):`, item.value);
         
-        let singleValue = null;
-        let multipleValues = null;
+        // Skip checkbox fields with empty selections
+        if (item.type === 'CHECKBOX' && Array.isArray(item.value) && item.value.length === 0) {
+          console.log(`Skipping empty checkbox value for item ${item.id}`);
+          return;
+        }
         
-        if (item.type === 'RADIO_BUTTON') {
-          multipleValues = [item.value];
-        } else if (item.type === 'CHECKBOX') {
+        let singleValue = null;
+        let multipleValues: string[] = [];
+        
+        if (item.type === 'CHECKBOX') {
+          // Ensure checkbox values are always treated as arrays
           multipleValues = Array.isArray(item.value) ? item.value : [item.value];
-        } else if (item.type === 'SELECT_BOX') {
+          singleValue = null;
+        } else if (item.type === 'RADIO_BUTTON' || item.type === 'SELECT_BOX') {
           multipleValues = [item.value];
+          singleValue = null;
         } else {
           singleValue = item.value;
+          multipleValues = [];
         }
         
         formValues.push(new FormValueRequest(
@@ -368,14 +380,24 @@ export class FormvalueComponent {
     });
   }
 
-  handleCheckboxChange(itemId: number, selectedLabels: string[]) {
-    console.log(`Checkbox change for item ${itemId}:`, selectedLabels);
+  handleCheckboxChange(itemId: number, selectedValues: any[]) {
+    console.log(`Checkbox change for item ${itemId}:`, selectedValues);
     
-    this.formValues.set(itemId, selectedLabels);
+    // Extract just the values if they're objects
+    const processedValues = selectedValues.map(val => {
+      if (typeof val === 'object' && val !== null) {
+        return val.value || val.label || val;
+      }
+      return val;
+    });
+    
+    console.log(`Processed checkbox values:`, processedValues);
+    
+    this.formValues.set(itemId, processedValues);
     
     this.traverseFormItems(this.editorItems, (item) => {
       if (item.id === itemId) {
-        item.value = selectedLabels; 
+        item.value = processedValues;
       }
     });
     
