@@ -21,8 +21,6 @@ export class CheckboxComponent {
   @Input() name: string = 'checkbox';
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
-  @Input() value: string = '';
-  @Input() selectedOption: string = '';
 
   @Output() valueChange = new EventEmitter<string[]>();
 
@@ -32,5 +30,4 @@ export class CheckboxComponent {
       .map(opt => opt.label); 
     this.valueChange.emit(selectedLabels);
   }
-  
 }
