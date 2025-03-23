@@ -66,7 +66,7 @@
                         [groupLabel]="sectionItem.config.label"
                         [name]="sectionItem.config.name" 
                         [options]="sectionItem.config.options"
-                        [value]="sectionItem.value || []"
+
                         (valueChange)="handleCheckboxChange(sectionItem.id, $event)">
                       </app-checkbox>
                     </ng-container>
