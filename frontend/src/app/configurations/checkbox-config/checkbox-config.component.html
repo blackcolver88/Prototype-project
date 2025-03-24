@@ -16,7 +16,6 @@
       <button type="button" (click)="addOption()" class="text-blue-500 mt-2">+ Add Option</button>
     </div>
 
-
     <div class="space-y-2">
       <label class="flex items-center space-x-2">
         <input type="checkbox" formControlName="isRequired" class="rounded">
@@ -41,7 +40,8 @@
       [options]="checkboxForm.get('options')?.value"
       [name]="checkboxForm.get('name')?.value"
       [isRequired]="checkboxForm.get('isRequired')?.value"
-      [isDisabled]="checkboxForm.get('isDisabled')?.value">
+      [isDisabled]="checkboxForm.get('isDisabled')?.value"
+      [selectedOptions]="selectedOptions">
     </app-checkbox>
   </div>
 </div>

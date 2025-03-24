@@ -1,11 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { FormsModule } from '@angular/forms';
 
 interface CheckboxOption {
   label: string;
   value: string;
-  checked: boolean;
 }
 
 @Component({
@@ -15,19 +14,45 @@ interface CheckboxOption {
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class CheckboxComponent {
+export class CheckboxComponent implements OnInit {
   @Input() groupLabel: string = 'Checkbox Group';
   @Input() options: CheckboxOption[] = [];
-  @Input() name: string = 'checkbox';
+  @Input() name: string = '';
   @Input() isRequired: boolean = false;
   @Input() isDisabled: boolean = false;
+  @Input() selectedOptions: string[] = [];  // Internal state
 
   @Output() valueChange = new EventEmitter<string[]>();
 
-  onCheckboxChange(optionValue: string, isChecked: boolean) {
-    const selectedLabels = this.options
-      .filter(opt => opt.checked)
-      .map(opt => opt.label); 
-    this.valueChange.emit(selectedLabels);
+  ngOnInit() {
+    if (!this.name) {
+      this.name = `checkbox_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Ensure selectedOptions is an array
+    if (!Array.isArray(this.selectedOptions)) {
+      this.selectedOptions = [];
+    }
   }
+
+// In CheckboxComponent
+onCheckboxChange(option: CheckboxOption, event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  const value = option.value.trim();
+  
+  if (!value) return; // Prevent empty values
+
+  let newSelectedOptions = [...this.selectedOptions];
+  
+  if (inputElement.checked) {
+    if (!newSelectedOptions.includes(value)) {
+      newSelectedOptions.push(value);
+    }
+  } else {
+    newSelectedOptions = newSelectedOptions.filter(v => v !== value);
+  }
+
+  this.selectedOptions = newSelectedOptions;
+  this.valueChange.emit(this.selectedOptions);
+}
 }

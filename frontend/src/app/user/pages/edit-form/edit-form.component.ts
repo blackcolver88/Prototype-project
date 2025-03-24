@@ -169,9 +169,14 @@ export class EditFormComponent {
       
       this.traverseFormItems(this.editorItems, (item) => {
         if (item.id === itemId) {
-          item.value = value;
+          // Convert comma-separated string to array for checkboxes
+          if (item.type === 'CHECKBOX' && typeof value === 'string') {
+            item.value = value.split(',').filter(v => v.trim() !== '');
+          } else {
+            item.value = value;
+          }
           itemFound = true;
-          console.log(`Updated item ${itemId} with value:`, value);
+          console.log(`Updated item ${itemId} with value:`, item.value);
         }
       });
       
@@ -455,7 +460,7 @@ handleInputChange(itemId: number, value: any) {
 
   collectFormValues(): FormValueRequest[] {
     const formValues: FormValueRequest[] = [];
-
+  
     this.traverseFormItems(this.editorItems, (item) => {
       if (item.id && item.value !== undefined) {
         console.log(`Collecting value for item ${item.id} (${item.type}):`, item.value);
@@ -466,7 +471,10 @@ handleInputChange(itemId: number, value: any) {
         if (item.type === 'RADIO_BUTTON') {
           multipleValues = [item.value];
         } else if (item.type === 'CHECKBOX') {
-          multipleValues = Array.isArray(item.value) ? item.value : [item.value];
+          // Explicitly type the filter parameters
+          multipleValues = Array.isArray(item.value) 
+            ? item.value.filter((v: string) => v.trim() !== '')
+            : String(item.value).split(',').filter((v: string) => v.trim() !== '');
         } else if (item.type === 'SELECT_BOX') {
           multipleValues = [item.value];
         } else {
@@ -480,7 +488,7 @@ handleInputChange(itemId: number, value: any) {
         ));
       }
     });
-
+  
     return formValues;
   }
 
