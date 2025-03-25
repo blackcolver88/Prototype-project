@@ -173,7 +173,8 @@ export class EditFormComponent {
           itemFound = true;
           console.log(`Updated item ${itemId} with value:`, value);
         }
-      });
+      }
+    );
       
       if (!itemFound && formValue.formInputs && formValue.formInputs.length > 0) {
         const formInputId = formValue.formInputs[0].id;
@@ -535,4 +536,9 @@ handleInputChange(itemId: number, value: any) {
     
       });
   }
+
+  onCancel(): void {
+    this.router.navigate(['/list']);
+    
+}
 }

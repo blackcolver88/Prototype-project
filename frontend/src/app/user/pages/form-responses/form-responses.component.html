@@ -1,16 +1,34 @@
+<div class="popup-content">
+  <h2>Form Submission Details</h2>
 
-<div *ngIf="!loading && submissions.length === 0">
-    No answers found for this form.
-</div>
+  <div *ngIf="loading">
+    Loading submissions...
+  </div>
 
-<div *ngIf="!loading && submissions.length > 0">
-  <h3>Responses for this user and form:</h3>
-  <ul>
-    <li *ngFor="let submission of submissions">
-      <strong>Date :</strong> {{ submission.date | date }}
-      <div *ngFor="let value of submission.formValues">
-        <strong>Valeur :</strong> {{ value.value }}
-      </div>
-    </li>
-  </ul>
+  <div *ngIf="!loading && submissions.length === 0">
+    No answers found for this user and form.
+  </div>
+
+  <div *ngIf="!loading && submissions.length > 0">
+    <h3>Responses for this user and form:</h3>
+    <ul>
+      <li *ngFor="let submission of submissions">
+        <p><strong>Form Title:</strong> {{ submission.formTitle || 'No title available' }}</p>
+
+        <div *ngIf="submission.formValues && submission.formValues.length > 0">
+          
+          <ul>
+            <li *ngFor="let value of submission.formValues">
+           <strong> {{ value.title }}:</strong>   {{ value.value }}
+            </li>
+          </ul>
+        </div>
+        <div *ngIf="!submission.formValues || submission.formValues.length === 0">
+          <strong>No values submitted.</strong>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <button (click)="closeDialog()" class="btn-close">Close</button>
 </div>

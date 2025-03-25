@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {catchError, map, Observable, throwError} from "rxjs";
 import {FormSubmission} from "../model/FormSubmission";
 import { FormValueRequest } from '../model/FormValueRequest';
+import { PaginatedSubmissionsResponse } from '../model/PaginatedSubmissionsResponse';
 
 
 @Injectable({
@@ -91,6 +92,12 @@ getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<Form
     console.log('Updating form submission:', { userId, submissionId, updatedValues });
     const url = `${this.baseUrl}/${userId}/${submissionId}`;
     return this.http.patch(url, { formValues: updatedValues });
+  }
+
+
+  getAdminFormSubmissions(page: number, limit: number): Observable<any> {
+    const offset = (page - 1) * limit;
+    return this.http.get(`${this.baseUrl}/paginated?offset=${offset}&limit=${limit}`);
   }
   
 }
