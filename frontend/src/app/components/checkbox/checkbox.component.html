@@ -5,8 +5,7 @@
   </label>
 
   <div class="space-y-2">
-    <div *ngFor="let option of options" class="flex items-center gap-2">
-      <input
+    <div *ngFor="let option of options; trackBy: trackByValue" class="flex items-center gap-2">      <input
         type="checkbox"
         [name]="name"
         [checked]="selectedOptions ? selectedOptions.includes(option.value) : false"        [disabled]="isDisabled"

@@ -23,6 +23,7 @@ import { MultipleValueService } from '../../../services/multiple-value.service';
 import { FormSubmissionService } from '../../../services/form-submission.service';
 import { FormInput } from '../../../model/FormInput';
 import { MultipleValue } from '../../../model/MultipleValue';
+import { finalize } from 'rxjs/operators'; // Add this import at the top
 
 @Component({
   selector: 'app-edit-form',
@@ -49,7 +50,8 @@ export class EditFormComponent {
   isSubmitting: boolean = false;
   successMessage: string = '';
   errorMessage: string = '';
-   
+  isLoading: boolean = true;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -78,6 +80,7 @@ export class EditFormComponent {
   }
 
   loadFormTemplateWithSubmissionId(submissionId: number) {
+    this.isLoading = true;
     this.formSubmissionService.getFormTemplateBySubmissionId(submissionId)
       .pipe(
         takeUntil(this.destroy$),
@@ -87,11 +90,9 @@ export class EditFormComponent {
           this.formTitle = formTemplate.title ?? '';
           this.templateId = formTemplate.id.toString();
           
-          return this.formTemplateService.getFormInputsByTemplateId(formTemplate.id).pipe(
-            map(formInputs => ({ formTemplate, formInputs }))
-          );
+          return this.formTemplateService.getFormInputsByTemplateId(formTemplate.id);
         }),
-        switchMap(({ formTemplate, formInputs }) => {
+        switchMap(formInputs => {
           console.log('Loaded form inputs:', formInputs);
           this.populateFormInputsIntoLayouts(formInputs);
           
@@ -99,29 +100,35 @@ export class EditFormComponent {
           
           return forkJoin({
             formValues: this.formSubmissionService.getFormValuesBySubmissionId(this.submissionId),
-            multipleValues: multipleValueRequests ? multipleValueRequests : of(null)
-          }).pipe(
-            map(results => ({
-              formTemplate,
-              formInputs,
-              formValues: results.formValues
-            }))
-          );
+            multipleValues: multipleValueRequests || of(null)
+          });
         }),
         catchError(error => {
           console.error('Error in loading process:', error);
           this.errorMessage = 'Erreur lors du chargement du formulaire. Veuillez réessayer.';
           return throwError(() => error);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
-        next: ({ formTemplate, formInputs, formValues }) => {
-          console.log('Form values from submission:', formValues);
-          this.populateFormWithSubmittedValues(formValues);
+        next: (results: { formValues: any[], multipleValues?: any }) => {
+          console.log('Form values from submission:', results.formValues);
+          this.populateFormWithSubmittedValues(results.formValues);
+  
+          this.traverseFormItems(this.editorItems, (item) => {
+            if (item.type === 'CHECKBOX') {
+              item.value = Array.isArray(item.value) 
+                ? item.value.filter((v: string) => v.trim() !== '')
+                : [];
+            }
+          });
           
           this.cdr.detectChanges();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading form template with layouts and inputs:', error);
           this.errorMessage = 'Erreur lors du chargement du formulaire. Veuillez réessayer.';
         }
@@ -133,91 +140,99 @@ export class EditFormComponent {
       console.log('No form values to populate');
       return;
     }
-    
+  
     console.log('Populating form with values:', formValues);
-    
-    // Extract all form inputs from the editor tree
+  
+    // Phase 1: Prepare form items and mappings
     const formInputs: any[] = [];
+    const formValuesByInputId = new Map<number, any>();
+  
+    // First traversal: Collect items and create mappings
     this.traverseFormItems(this.editorItems, (item) => {
+      // Collect form inputs
       if (item.id && item.type && item.type !== 'Section') {
         formInputs.push(item);
       }
-    });
-    
-    // Create a mapping of form values by their form input IDs if available
-    const formValuesByInputId = new Map();
-    formValues.forEach(formValue => {
-      if (formValue.formInputs && formValue.formInputs.length > 0) {
-        const formInputId = formValue.formInputs[0].id;
-        formValuesByInputId.set(formInputId, formValue);
+  
+      // Pre-process checkboxes immediately
+      if (item.type === 'CHECKBOX') {
+        item.value = typeof item.value === 'string'
+          ? item.value.split(',').filter((v: string) => v.trim() !== '')
+          : [];
       }
     });
-    
-    if (formValues.length === 1 && formInputs.length === 1) {
-      const formValue = formValues[0];
-      const formInput = formInputs[0];
-      
-      console.log(`Auto-matching form value ID ${formValue.id} to form input ID ${formInput.id}`);
-      formInput.value = formValue.value;
-      return;
-    }
-    
-    formValues.forEach((formValue) => {
+  
+    // Create form value mappings
+    formValues.forEach(formValue => {
+      if (formValue.formInputs?.length) {
+        formValuesByInputId.set(formValue.formInputs[0].id, formValue);
+      }
+    });
+  
+    // Phase 2: Apply form values using multiple strategies
+    formValues.forEach(formValue => {
       const itemId = formValue.id;
       const value = formValue.value;
       let itemFound = false;
-      
-      this.traverseFormItems(this.editorItems, (item) => {
+  
+      // Strategy 1: Direct ID match
+      this.traverseFormItems(this.editorItems, item => {
         if (item.id === itemId) {
-          // Convert comma-separated string to array for checkboxes
-          if (item.type === 'CHECKBOX' && typeof value === 'string') {
-            item.value = value.split(',').filter(v => v.trim() !== '');
-          } else {
-            item.value = value;
-          }
+          this.applyFormValue(item, value);
           itemFound = true;
-          console.log(`Updated item ${itemId} with value:`, item.value);
         }
       });
-      
-      if (!itemFound && formValue.formInputs && formValue.formInputs.length > 0) {
+  
+      // Strategy 2: Form input ID match
+      if (!itemFound && formValue.formInputs?.length) {
         const formInputId = formValue.formInputs[0].id;
-        this.traverseFormItems(this.editorItems, (item) => {
+        this.traverseFormItems(this.editorItems, item => {
           if (item.id === formInputId) {
-            item.value = value;
-            console.log(`Matched using formInputs. Updated item ${formInputId} with value:`, value);
+            this.applyFormValue(item, value);
             itemFound = true;
           }
         });
       }
-      
+  
+      // Strategy 3: Name-based matching
       if (!itemFound && formValue.name) {
-        this.traverseFormItems(this.editorItems, (item) => {
-          if (item.config && (item.config.label === formValue.name || item.config.textName === formValue.name)) {
-            item.value = value;
-            console.log(`Matched by name. Updated item ${item.id} with value:`, value);
+        this.traverseFormItems(this.editorItems, item => {
+          if (item.config && [item.config.label, item.config.textName].includes(formValue.name)) {
+            this.applyFormValue(item, value);
             itemFound = true;
           }
         });
       }
-      
-      if (!itemFound && formInputs.length > 0) {
-        const valueIndex = formValues.findIndex(v => v.id === itemId);
-        
+  
+      // Strategy 4: Positional matching (fallback)
+      if (!itemFound) {
+        const valueIndex = formValues.findIndex((v: any) => v.id === itemId);
         if (valueIndex >= 0 && valueIndex < formInputs.length) {
-          const inputByIndex = formInputs[valueIndex];
-          inputByIndex.value = value;
-          console.log(`Matched by index position. Updated item ${inputByIndex.id} with value:`, value);
+          this.applyFormValue(formInputs[valueIndex], value);
           itemFound = true;
         }
       }
-      
+  
       if (!itemFound) {
-        console.warn(`Still couldn't find a match for value ID ${itemId}. Consider adding a manual mapping.`);
+        console.warn(`No match found for value ID ${itemId} (${formValue.name || 'unnamed'})`);
       }
     });
-    
+  
     this.cdr.detectChanges();
+  }
+  
+  // New helper method for type-safe value application
+  private applyFormValue(item: any, value: any): void {
+    if (item.type === 'CHECKBOX') {
+      item.value = Array.isArray(value)
+        ? value.filter((v: string) => v.trim() !== '')
+        : typeof value === 'string'
+        ? value.split(',').filter((v: string) => v.trim() !== '')
+        : [];
+    } else {
+      item.value = value;
+    }
+    console.log(`Applied value to ${item.id} (${item.type}):`, item.value);
   }
 
   private loadFormInputsWithMultipleValues(inputs: FormInput[]) {
@@ -382,21 +397,18 @@ handleInputChange(itemId: number, value: any) {
   this.errorMessage = '';
 }
 
-  handleCheckboxChange(itemId: number, selectedLabels: string[]) {
-    console.log(`Checkbox change for item ${itemId}:`, selectedLabels);
-    
-    this.formValues.set(itemId, selectedLabels);
-    
-    this.traverseFormItems(this.editorItems, (item) => {
-      if (item.id === itemId) {
-        item.value = selectedLabels; 
-      }
-    });
-    
-    this.showValidationErrors = false;
-    this.successMessage = '';
-    this.errorMessage = '';
-  }
+handleCheckboxChange(itemId: number, selectedOptions: string[]) {
+  console.log('Checkbox change:', itemId, selectedOptions);
+  
+  this.traverseFormItems(this.editorItems, (item) => {
+    if (item.id === itemId) {
+      item.value = [...selectedOptions]; // Create new array reference
+    }
+  });
+  
+  this.formValues.set(itemId, selectedOptions);
+  this.cdr.detectChanges();
+}
 
   handleRadioChange(itemId: number, selectedValue: string) {
     console.log(`Radio button change for item ${itemId}:`, selectedValue);
@@ -460,22 +472,19 @@ handleInputChange(itemId: number, value: any) {
 
   collectFormValues(): FormValueRequest[] {
     const formValues: FormValueRequest[] = [];
-  
+    
     this.traverseFormItems(this.editorItems, (item) => {
       if (item.id && item.value !== undefined) {
-        console.log(`Collecting value for item ${item.id} (${item.type}):`, item.value);
-        
         let singleValue = null;
         let multipleValues: string[] = [];
         
         if (item.type === 'RADIO_BUTTON') {
           multipleValues = [item.value];
         } else if (item.type === 'CHECKBOX') {
-          // Explicitly type the filter parameters
           multipleValues = Array.isArray(item.value) 
             ? item.value.filter((v: string) => v.trim() !== '')
-            : String(item.value).split(',').filter((v: string) => v.trim() !== '');
-        } else if (item.type === 'SELECT_BOX') {
+            : [];
+        }else if (item.type === 'SELECT_BOX') {
           multipleValues = [item.value];
         } else {
           singleValue = item.value;
@@ -488,7 +497,6 @@ handleInputChange(itemId: number, value: any) {
         ));
       }
     });
-  
     return formValues;
   }
 

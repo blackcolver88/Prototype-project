@@ -13,7 +13,11 @@
           {{ error }}
         </div>
       </div>
-  
+
+      <div *ngIf="isLoading" class="text-center p-4">
+      <span class="text-gray-500">Loading form...</span>
+    </div>
+    <ng-container *ngIf="!isLoading">
       <ng-template #recursiveSection let-items="items">
         <div *ngFor="let item of items" class="mb-4">
           <ng-container [ngSwitch]="item?.type">
@@ -67,7 +71,8 @@
                         [name]="sectionItem.config.name" 
                         [options]="sectionItem.config.options"
                         [selectedOptions]="sectionItem.value"
-                        (valueChange)="handleCheckboxChange(sectionItem.id, $event)">
+                        (valueChange)="handleCheckboxChange(sectionItem.id, $event)"
+                        >
                       </app-checkbox>
                     </ng-container>
   
@@ -255,6 +260,6 @@
       </app-button>
       </div>
   
+    </ng-container>
+</div>
   
-    </div>
-  </div>
