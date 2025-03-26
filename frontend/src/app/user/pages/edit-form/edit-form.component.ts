@@ -443,60 +443,73 @@ handleCheckboxChange(itemId: number, selectedOptions: string[]) {
   validateForm(): boolean {
     this.validationErrors = [];
     let isValid = true;
-    
-    const requiredFields: any[] = [];
+  
     this.traverseFormItems(this.editorItems, (item) => {
-      if (item.config && item.config.required === true) {
-        requiredFields.push({
-          id: item.id,
-          label: item.config.label,
-          type: item.type,
-          value: item.value
-        });
+      if (item.config?.required) {
+        const fieldValue = item.value;
+        let isEmpty = false;
+  
+        if (item.type === 'CHECKBOX') {
+          isEmpty = !Array.isArray(fieldValue) || 
+                  fieldValue.length === 0 ||
+                  fieldValue.every(v => typeof v === 'string' && v.trim() === '');
+        } else {
+          isEmpty = fieldValue === undefined || 
+                  fieldValue === null ||
+                  (typeof fieldValue === 'string' && fieldValue.trim() === '');
+        }
+  
+        if (isEmpty) {
+          this.validationErrors.push(`${item.config.label || 'Field'} is required`);
+          isValid = false;
+        }
       }
     });
-    
-    requiredFields.forEach(field => {
-      if (field.value === undefined || field.value === null || field.value === '') {
-        this.validationErrors.push(`${field.label} is required`);
-        isValid = false;
-      } else if (Array.isArray(field.value) && field.value.length === 0) {
-        this.validationErrors.push(`${field.label} is required`);
-        isValid = false;
-      }
-    });
-    
+  
     this.showValidationErrors = !isValid;
     return isValid;
   }
 
   collectFormValues(): FormValueRequest[] {
     const formValues: FormValueRequest[] = [];
-    
+  
     this.traverseFormItems(this.editorItems, (item) => {
-      if (item.id && item.value !== undefined) {
-        let singleValue = null;
+      if (item.id && item.type !== 'Section') {
+        let singleValue: any = null;
         let multipleValues: string[] = [];
-        
-        if (item.type === 'RADIO_BUTTON') {
-          multipleValues = [item.value];
-        } else if (item.type === 'CHECKBOX') {
-          multipleValues = Array.isArray(item.value) 
+  
+        // Always include required fields even if empty
+        const isRequired = item.config?.required === true;
+  
+        if (item.type === 'CHECKBOX') {
+          multipleValues = Array.isArray(item.value)
             ? item.value.filter((v: string) => v.trim() !== '')
             : [];
-        }else if (item.type === 'SELECT_BOX') {
-          multipleValues = [item.value];
-        } else {
-          singleValue = item.value;
+        } 
+        else if (item.type === 'RADIO_BUTTON') {
+          multipleValues = item.value?.trim() ? [item.value.trim()] : [];
+        } 
+        else if (item.type === 'SELECT_BOX') {
+          multipleValues = item.value ? [item.value] : [];
+        } 
+        else {
+          singleValue = typeof item.value === 'string' 
+            ? item.value.trim()
+            : item.value;
         }
-        
-        formValues.push(new FormValueRequest(
-          item.id,
-          singleValue,
-          multipleValues
-        ));
+  
+        // Always include required fields, even with empty values
+        if (isRequired || singleValue !== null || multipleValues.length > 0) {
+          formValues.push(new FormValueRequest(
+            item.id,
+            item.type === 'CHECKBOX' ? null : singleValue,
+            multipleValues.length > 0 ? multipleValues : (isRequired ? [] : null)
+          ));
+        }
       }
     });
+  
+    console.log('Form values payload:', JSON.stringify(formValues, null, 2));
     return formValues;
   }
 
@@ -513,42 +526,43 @@ handleCheckboxChange(itemId: number, selectedOptions: string[]) {
   }
 
   onSubmit() {
-    if (this.isSubmitting) {
-      return;
-    }
+    if (this.isSubmitting) return;
     
     this.successMessage = '';
     this.errorMessage = '';
-    
+  
     if (!this.validateForm()) {
       window.scrollTo(0, 0);
       return;
     }
-    
-    this.isSubmitting = true;
+  
     const formValues = this.collectFormValues();
     
-    console.log('Submitting updated form values:', formValues);
+    // Ensure even empty checkbox arrays are sent as null
+    const cleanedValues = formValues.map(value => ({
+      ...value,
+      multipleValues: value.multipleValues?.length ? value.multipleValues : null
+    }));
+  
+    console.log('Final submission payload:', cleanedValues);
     
-    this.formSubmissionService.updateFormSubmission(this.userId, this.submissionId, formValues)
+    this.isSubmitting = true;
+    
+    this.formSubmissionService.updateFormSubmission(this.userId, this.submissionId, cleanedValues)
       .pipe(
-        takeUntil(this.destroy$),
+        finalize(() => this.isSubmitting = false),
         catchError(error => {
-          console.error('Error updating form submission:', error);
-          this.errorMessage = 'Une erreur est survenue lors de la mise à jour du formulaire. Veuillez réessayer.';
-          this.isSubmitting = false;
+          console.error('Update error:', error.error);
+          this.errorMessage = error.error?.message || 'Update failed. Please check your input.';
           window.scrollTo(0, 0);
           return throwError(() => error);
         })
       )
       .subscribe({
         next: (response) => {
-          console.log('Form submission updated successfully:', response);
-          this.isSubmitting = false;
-          this.successMessage = 'Le formulaire a été mis à jour avec succès.';
+          this.successMessage = 'Changes saved successfully!';
           window.scrollTo(0, 0);
-        },
-    
+        }
       });
   }
 }
