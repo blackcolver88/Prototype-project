@@ -531,7 +531,7 @@ handleInputChange(itemId: number, value: any) {
           console.log('Form submission updated successfully:', response);
           this.isSubmitting = false;
           this.successMessage = 'Le formulaire a été mis à jour avec succès.';
-          window.scrollTo(0, 0);
+          this.router.navigate(['/list']);
         },
     
       });

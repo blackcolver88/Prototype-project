@@ -59,4 +59,12 @@ public class FormInputService {
                 .collect(Collectors.toList());
     }
 
+    public String getFormInputTitleById(Long formInputId) {
+        Optional<String> titleOptional = formInputRepository.findTitleById(formInputId);
+        return titleOptional.orElse("N/A");
+    }
+
+
+
+
 }

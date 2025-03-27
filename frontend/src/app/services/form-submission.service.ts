@@ -51,7 +51,8 @@ export class FormSubmissionService {
     return this.http.post<FormSubmission>(`${this.baseUrl}/${userId}/${formId}`, payload);
 }
 getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<FormSubmission[]> {
-  return this.http.get<FormSubmission[]>(`${this.baseUrl}/user/${userId}/form/${formId}`);
+  const url = `${this.baseUrl}/user/${userId}/form/${formId}`;
+  return this.http.get<FormSubmission[]>(url);
 }
   checkIfSubmissionExists(userId: number, formId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.baseUrl}/check-submission/${userId}/${formId}`);

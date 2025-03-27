@@ -23,20 +23,14 @@ public class FormSubmissionService {
     private final FormSubmissionRepository formSubmissionRepository;
     private final FormInputRepository formInputRepository;
     private final FormTemplateRepository formTemplateRepository;
-    private final FormTemplateService formTemplateService;
     private final FormValueRepository formValueRepository;
-    private final FormInputService formInputService;
 
     public FormSubmissionService(FormSubmissionRepository formSubmissionRepository, FormInputRepository formInputRepository,
                                  FormTemplateRepository formTemplateRepository,
-                                 FormTemplateService formTemplateService, FormValueRepository formValueRepository,
-    FormInputService formInputService
-    , FormValueService formValueService) {
+                                  FormValueRepository formValueRepository) {
         this.formSubmissionRepository = formSubmissionRepository;
         this.formInputRepository = formInputRepository;
         this.formTemplateRepository = formTemplateRepository;
-        this.formTemplateService = formTemplateService;
-        this.formInputService = formInputService;
         this.formValueRepository = formValueRepository;
 
 
@@ -103,6 +97,8 @@ public class FormSubmissionService {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("date").descending());
         return formSubmissionRepository.findAll(pageable);
     }
+
+
 
 
 

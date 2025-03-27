@@ -17,12 +17,4 @@ public interface FormSubmissionRepository extends JpaRepository<FormSubmission, 
 
     @Query("SELECT CASE WHEN COUNT(fs) > 0 THEN true ELSE false END FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
     boolean existsByUser_IdAndIdForm(@Param("userId") Long userId, @Param("formId") Long formId);
-
-
-
-
-
-
-
-
 }

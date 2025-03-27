@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FormInputRepository extends JpaRepository<FormInput, Long> {
-    List<FormInput> findByFormLayoutId(Long layoutId);
-    
+
     // Add ordered query methods
     List<FormInput> findByFormLayoutIdOrderByOrdinalPositionAsc(Long layoutId);
 
@@ -25,6 +24,9 @@ public interface FormInputRepository extends JpaRepository<FormInput, Long> {
 
 
 
-
     FormInput findByFormValue(FormValue formValue);
+
+
+    @Query("SELECT fi.title FROM FormInput fi WHERE fi.id = :id")
+    Optional<String> findTitleById(@Param("id") Long id);
 }
