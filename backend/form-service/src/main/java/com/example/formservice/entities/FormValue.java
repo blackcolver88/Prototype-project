@@ -14,15 +14,13 @@ public class FormValue {
 
     private String value;
 
+
     @OneToMany(mappedBy = "formValue", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("formValue")  // Ignore the formValue property in FormInput
     private List<FormInput> formInputs= new ArrayList<>();
-
-
 
     @ManyToOne
     @JoinColumn(name = "form_submission_id")
     @JsonIgnoreProperties("formValues")  // Ignore the formValues property in FormSubmissio
     private FormSubmission formSubmission;
-
 }

@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {catchError, map, Observable, throwError} from "rxjs";
 import {FormSubmission} from "../model/FormSubmission";
 import { FormValueRequest } from '../model/FormValueRequest';
+import { PaginatedSubmissionsResponse } from '../model/PaginatedSubmissionsResponse';
 
 
 @Injectable({
@@ -50,7 +51,8 @@ export class FormSubmissionService {
     return this.http.post<FormSubmission>(`${this.baseUrl}/${userId}/${formId}`, payload);
 }
 getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<FormSubmission[]> {
-  return this.http.get<FormSubmission[]>(`${this.baseUrl}/user/${userId}/form/${formId}`);
+  const url = `${this.baseUrl}/user/${userId}/form/${formId}`;
+  return this.http.get<FormSubmission[]>(url);
 }
   checkIfSubmissionExists(userId: number, formId: number): Observable<boolean> {
     return this.http.get<boolean>(`${this.baseUrl}/check-submission/${userId}/${formId}`);
@@ -91,6 +93,12 @@ getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<Form
     console.log('Updating form submission:', { userId, submissionId, updatedValues });
     const url = `${this.baseUrl}/${userId}/${submissionId}`;
     return this.http.patch(url, { formValues: updatedValues });
+  }
+
+
+  getAdminFormSubmissions(page: number, limit: number): Observable<any> {
+    const offset = (page - 1) * limit;
+    return this.http.get(`${this.baseUrl}/paginated?offset=${offset}&limit=${limit}`);
   }
   
 }

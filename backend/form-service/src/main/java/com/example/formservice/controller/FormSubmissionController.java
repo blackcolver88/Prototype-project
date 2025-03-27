@@ -1,27 +1,23 @@
 package com.example.formservice.controller;
 
 import com.example.formservice.DTO.FormSubmissionDTO;
+import com.example.formservice.DTO.FormValueDTO;
 import com.example.formservice.DTO.FormValueRequest;
 import com.example.formservice.DTO.FormValuesWrapper;
-import com.example.formservice.entities.FormSubmission;
-import com.example.formservice.entities.FormTemplate;
-import com.example.formservice.entities.FormValue;
-import com.example.formservice.entities.User;
+import com.example.formservice.entities.*;
 import com.example.formservice.repository.FormTemplateRepository;
 import com.example.formservice.repository.FormValueRepository;
-import com.example.formservice.service.FormSubmissionService;
-import com.example.formservice.service.FormTemplateService;
-import com.example.formservice.service.FormValueService;
-import com.example.formservice.service.UserService;
+import com.example.formservice.service.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,17 +29,21 @@ public class FormSubmissionController {
     private final FormTemplateService formTemplateService;
     private final FormTemplateRepository formRepository;
     private final FormValueService formValueService;
+    private final FormInputService formInputService;
 
     public FormSubmissionController(FormSubmissionService formSubmissionService,
                                     UserService userService,
                                     FormTemplateService formTemplateService,
                                     FormTemplateRepository formRepository,
-                                    FormValueService formValueService) {
+                                    FormValueService formValueService,
+                                    FormInputService formInputService
+                                    ) {
         this.formSubmissionService = formSubmissionService;
         this.userService = userService;
         this.formTemplateService = formTemplateService;
         this.formRepository = formRepository;
         this.formValueService = formValueService;
+        this.formInputService = formInputService;
     }
 
     @GetMapping
@@ -78,7 +78,6 @@ public class FormSubmissionController {
             @PathVariable Long formId,
             @RequestBody FormValuesWrapper formValuesWrapper) {
 
-      
         Optional<User> user = userService.getUserById(userId);
         Optional<FormTemplate> form = formRepository.findById(formId);
 
@@ -89,55 +88,49 @@ public class FormSubmissionController {
                         .body("Vous avez déjà soumis ce formulaire.");
             }
 
-            
             FormSubmission submission = new FormSubmission();
             submission.setUser(user.get());
             submission.setDate(LocalDateTime.now());
-            submission.setIdForm(formId); // Définir l'ID du formulaire
+            submission.setIdForm(formId);
 
-            // Traiter les valeurs du formulaire
-            List<FormValue> values = new ArrayList<>();
-            for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
-                FormValue value = new FormValue();
+            // Process form values
+            List<FormValue> values = formValuesWrapper.getFormValues().stream()
+                    .filter(valueRequest -> !valueRequest.getValues().isEmpty())
+                    .map(valueRequest -> {
+                        FormValue value = new FormValue();
+                        value.setValue(String.join(",", valueRequest.getValues()));
+                        value.setFormSubmission(submission);
+                        return value;
+                    })
+                    .collect(Collectors.toList());
 
-                List<String> allValues = valueRequest.getValues();
-                if (!allValues.isEmpty()) {
-                    value.setValue(String.join(",", allValues));
-                }
-
-                value.setFormSubmission(submission); // Associer la valeur à la soumission
-                values.add(value);
-            }
-
-            // Définir les valeurs du formulaire dans la soumission
+            // Set form values and save submission
             submission.setFormValues(values);
-
-            // Enregistrer la soumission
             FormSubmission savedSubmission = formSubmissionService.save(submission);
-            return ResponseEntity.ok(savedSubmission); // Retourner la soumission enregistrée
+
+            return ResponseEntity.ok(savedSubmission);
         }
 
- 
         return ResponseEntity.notFound().build();
     }
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<FormSubmissionDTO>> getUserFormSubmissions(@PathVariable Long userId) {
         Optional<User> user = userService.getUserById(userId);
         if (user.isPresent()) {
-          
+
             List<FormSubmission> submissions = formSubmissionService.getFormSubmissionsByUserId(userId);
 
             List<FormSubmissionDTO> submissionDTOs = new ArrayList<>();
 
             for (FormSubmission submission : submissions) {
-                
+
            String formTitle = formTemplateService.getFormTemplateTitleById(submission.getIdForm());
 
-              
+
                 FormSubmissionDTO dto = new FormSubmissionDTO(
                         submission.getId(),
                         submission.getDate(),
-                        submission.getUser().getTask(), 
+                        submission.getUser().getTask(),
                         formTitle,
                         submission.getFormValues().stream()
                                 .map(FormValue::getValue) // Valeurs des champs remplis
@@ -152,17 +145,22 @@ public class FormSubmissionController {
         return ResponseEntity.notFound().build();
     }
     @GetMapping("/user/{userId}/form/{formId}")
-    public ResponseEntity<List<FormSubmission>> getFormSubmissionsByUserAndForm(
+    public ResponseEntity<List<FormSubmissionDTO>> getFormSubmissionsByUserAndForm(
             @PathVariable Long userId,
             @PathVariable Long formId) {
-
         List<FormSubmission> submissions = formSubmissionService.getFormSubmissionsByUserAndForm(userId, formId);
 
         if (submissions.isEmpty()) {
-            return ResponseEntity.noContent().build(); 
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(submissions);
+        String formTitle = formTemplateService.getFormTemplateTitleById(formId);
+
+        List<FormSubmissionDTO> submissionDTOs = submissions.stream()
+                .map(submission -> FormSubmissionDTO.fromFormSubmission(submission, formTitle, formInputService))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(submissionDTOs);
     }
 
     @GetMapping("/check-submission/{userId}/{formId}")
@@ -254,5 +252,39 @@ public class FormSubmissionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error retrieving form values: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<Map<String, Object>> getAdminFormSubmissions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int limit) {
+
+        // Récupérer les soumissions paginées depuis le service
+        Page<FormSubmission> submissionPage = formSubmissionService.getAllFormSubmissions(page, limit);
+
+        // Mapper les soumissions vers des DTOs
+        List<FormSubmissionDTO> submissionDTOs = submissionPage.getContent().stream()
+                .map(submission -> {
+                    String formTitle = formTemplateService.getFormTemplateTitleById(submission.getIdForm());
+
+                    return new FormSubmissionDTO(
+                            submission.getId(),
+                            submission.getDate(),
+                            submission.getUser().getTask(),
+                            formTitle,
+                            submission.getFormValues().stream()
+                                    .map(FormValue::getValue)
+                                    .collect(Collectors.toList())
+                    );
+                })
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", submissionDTOs);
+        response.put("currentPage", submissionPage.getNumber());
+        response.put("totalItems", submissionPage.getTotalElements());
+        response.put("totalPages", submissionPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 }

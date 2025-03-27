@@ -4,6 +4,7 @@ export interface FormSubmission {
   templateId: number | null;
   id?: number;
   date?: string;
+  formTitle?: string;
   user?:User
   formValues?: FormValue[];
 }

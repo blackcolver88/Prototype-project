@@ -1,0 +1,44 @@
+.admin-submission-container {
+    padding: 20px;
+  }
+  
+  .submission-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .submission-table th,
+  .submission-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .submission-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .btn-show, .btn-edit {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .btn-show {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+  }
+  
+  .btn-edit {
+    background-color: #007bff;
+    color: white;
+    border: none;
+  }

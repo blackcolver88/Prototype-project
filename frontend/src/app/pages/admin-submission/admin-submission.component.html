@@ -1,0 +1,33 @@
+<div class="admin-submission-container">
+  
+    <table class="submission-table">
+      <thead>
+        <tr>
+          <th>Forms title</th>
+          <th>User</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let submission of submissions">
+          <td>{{ submission.formTitle || 'Formulaire inconnu' }}</td>
+          <td>{{ submission.task || 'Tâche inconnue' }}</td>
+          <td>{{ submission.date | date:'medium' }}</td>
+          <td>
+            <button (click)="showFormResponses(submission.id)" class="btn-show">Détails</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <div class="pagination-container">
+      <pagination-controls
+        [id]="'custom-id'"
+        [itemsPerPage]="itemsPerPage"
+        [totalItems]="totalItems"
+        [maxSize]="5"
+        (pageChange)="onPageChange($event)">
+      </pagination-controls>
+    </div>
+  </div>

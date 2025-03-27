@@ -5,6 +5,7 @@ import { FormvalueComponent } from './user/pages/formvalue/formvalue.component';
 import { FormResponsesComponent } from './user/pages/form-responses/form-responses.component';
 import { FormListComponent } from './user/pages/form-list/form-list.component';
 import { EditFormComponent } from './user/pages/edit-form/edit-form.component';
+import { AdminSubmissionComponent } from './pages/admin-submission/admin-submission.component';
 
 export const routes: Route[] = [
   { path: '', redirectTo: '/form-template', pathMatch: 'full' },
@@ -14,5 +15,8 @@ export const routes: Route[] = [
   { path: 'formvalue/:id', component: FormvalueComponent },
   { path: 'responses/:userId/:formId', component: FormResponsesComponent },
   { path: 'list', component: FormListComponent },
-  { path: 'edit/:userId/:submissionId', component: EditFormComponent }
+  { path: 'edit/:userId/:submissionId', component: EditFormComponent },
+  { path: 'list_submissions', component: AdminSubmissionComponent },
+
+
 ];

@@ -13,7 +13,11 @@
           {{ error }}
         </div>
       </div>
-  
+
+      <div *ngIf="isLoading" class="text-center p-4">
+      <span class="text-gray-500">Loading form...</span>
+    </div>
+    <ng-container *ngIf="!isLoading">
       <ng-template #recursiveSection let-items="items">
         <div *ngFor="let item of items" class="mb-4">
           <ng-container [ngSwitch]="item?.type">
@@ -66,8 +70,9 @@
                         [groupLabel]="sectionItem.config.label"
                         [name]="sectionItem.config.name" 
                         [options]="sectionItem.config.options"
-
-                        (valueChange)="handleCheckboxChange(sectionItem.id, $event)">
+                        [selectedOptions]="sectionItem.value"
+                        (valueChange)="handleCheckboxChange(sectionItem.id, $event)"
+                        >
                       </app-checkbox>
                     </ng-container>
   
@@ -173,6 +178,7 @@
                     [groupLabel]="item.config.label"
                     [name]="item.config.name"
                     [options]="item.config.options"
+                    [selectedOptions]="item.config.selectedOption"
                     (valueChange)="handleInputChange(item.id, $event)">
                   </app-checkbox>
                 </ng-container>
@@ -245,15 +251,25 @@
       </ng-container>
   
   
-      <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
+      <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4 gap-4">
         <app-button
-        label="Submit"
-        type="submit"
-        class="text-white bg-green-500 hover:bg-green-600 p-2 rounded"
-        (click)="onSubmit()">
-      </app-button>
-      </div>
-  
-  
+            label="Save"
+            type="submit"
+            class="text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md transition-all duration-200 shadow hover:shadow-md"
+            (click)="onSubmit()">
+        </app-button>
+    
+        <app-button
+            label="Cancel"
+            type="reset"
+           class="text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-md transition-all duration-200 shadow hover:shadow-md"
+            (click)="onCancel()">
+        </app-button>
     </div>
-  </div>
+
+  
+      
+  
+    </ng-container>
+</div>
+  
