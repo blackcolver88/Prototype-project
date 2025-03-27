@@ -107,7 +107,8 @@
                     <ng-container *ngIf="sectionItem?.type === 'CHECKBOX'">
                       <app-checkbox [groupLabel]="sectionItem.config.label"
                                   [name]="sectionItem.config.name" 
-                                  [options]="sectionItem.config.options">
+                                  [options]="sectionItem.config.options"
+                                  [selectedOptions]="sectionItem.config.selectedOption">
                       </app-checkbox>
                     </ng-container>
                     
@@ -210,7 +211,8 @@
               <ng-container *ngIf="item?.type === 'CHECKBOX'">
                 <app-checkbox [groupLabel]="item.config.groupLabel"
                             [name]="item.config.name" 
-                            [options]="item.config.options">
+                            [options]="item.config.options"
+                            [selectedOptions]="item.config.selectedOption">
                 </app-checkbox>
               </ng-container>
               

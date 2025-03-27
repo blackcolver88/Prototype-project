@@ -81,6 +81,7 @@
                       [name]="sectionItem.config.name"
                       [isRequired]="sectionItem.config.isRequired"
                       [options]="sectionItem.config.options"
+                      [selectedOptions]="sectionItem.value"
                       (valueChange)="
                         handleCheckboxChange(sectionItem.id, $event)
                       "
@@ -204,6 +205,7 @@
                   [groupLabel]="item.config.label"
                   [name]="item.config.name"
                   [options]="item.config.options"
+                  [selectedOptions]="item.config.selectedOption"
                   (valueChange)="handleInputChange(item.id, $event)"
                 >
                 </app-checkbox>
