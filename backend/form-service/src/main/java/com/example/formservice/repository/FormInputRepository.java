@@ -29,4 +29,7 @@ public interface FormInputRepository extends JpaRepository<FormInput, Long> {
 
     @Query("SELECT fi.title FROM FormInput fi WHERE fi.id = :id")
     Optional<String> findTitleById(@Param("id") Long id);
+
+    List<FormInput> findByFormLayoutId(Long formLayoutId);
+
 }
