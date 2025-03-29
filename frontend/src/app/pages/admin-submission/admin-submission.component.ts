@@ -1,18 +1,17 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormSubmissionService } from '../../services/form-submission.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormResponsesComponent } from '../../user/pages/form-responses/form-responses.component';
-import { NgxPaginationModule, PaginationControlsComponent } from 'ngx-pagination';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-admin-submission',
   standalone: true,
   imports: [
-    NgxPaginationModule, 
+    NgxPaginationModule,
     CommonModule,
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './admin-submission.component.html',
   styleUrls: ['./admin-submission.component.css']
 })
@@ -32,15 +31,13 @@ export class AdminSubmissionComponent implements OnInit {
   }
 
   loadSubmissions() {
-    this.formSubmissionService.getAdminFormSubmissions(this.currentPage, this.itemsPerPage).subscribe(
+    this.formSubmissionService.getAdminFormSubmissions(this.currentPage - 1, this.itemsPerPage).subscribe(
       (response: any) => {
-        console.log('Réponse reçue :', response);
         this.submissions = response.data;
         this.totalItems = response.totalItems;
-        console.log('Données mises à jour :', this.submissions, this.totalItems);
       },
       (error) => {
-        console.error('Erreur lors de la récupération des soumissions :', error);
+        console.error('Error fetching submissions:', error);
       }
     );
   }
@@ -54,26 +51,40 @@ export class AdminSubmissionComponent implements OnInit {
     this.formSubmissionService.getFormSubmissionById(submissionId).subscribe(
       (submission: any) => {
         const dialogData = {
-          userId: submission.user.id, 
-          formId: submission.idForm, 
+          userId: submission.user.id,
+          formId: submission.idForm,
           ...submission
         };
-        console.log('Données transmises à la boîte de dialogue :', dialogData);
-  
         const dialogRef = this.dialog.open(FormResponsesComponent, {
           width: '400px',
           data: dialogData
         });
-  
+
         dialogRef.afterClosed().subscribe(result => {
-          console.log('La boîte de dialogue a été fermée');
+          console.log('Dialog Closed');
         });
       },
       (error) => {
-        console.error('Erreur lors de la récupération de la soumission :', error);
+        console.error('Error fetching submission:', error);
       }
     );
   }
 
+  goPreviousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadSubmissions();
+    }
+  }
 
+  goNextPage() {
+    if (!this.isLastPage()) {
+      this.currentPage++;
+      this.loadSubmissions();
+    }
+  }
+
+  isLastPage(): boolean {
+    return this.currentPage >= Math.ceil(this.totalItems / this.itemsPerPage);
+  }
 }

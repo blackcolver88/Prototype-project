@@ -20,15 +20,7 @@ export class FormSubmissionService {
     return this.http.get<FormSubmission[]>(`${this.baseUrl}`);
   }
 
-  getFormSubmissionById(submissionId: number): Observable<FormSubmission> {
-    const url = `${this.baseUrl}/${submissionId}`;
-    return this.http.get<FormSubmission>(url).pipe(
-      catchError((error) => {
-        console.error('Error fetching form submission by ID:', error);
-        return throwError(() => new Error('Failed to load form submission.'));
-      })
-    );
-  }
+
 
   createFormSubmission(formSubmission: { title: any }): Observable<FormSubmission> {
     return this.http.post<FormSubmission>(this.baseUrl, formSubmission);
@@ -96,9 +88,18 @@ getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<Form
   }
 
 
+
   getAdminFormSubmissions(page: number, limit: number): Observable<any> {
-    const offset = (page - 1) * limit;
-    return this.http.get(`${this.baseUrl}/paginated?offset=${offset}&limit=${limit}`);
+    return this.http.get(`${this.baseUrl}/paginated`, {
+      params: {
+        page: page.toString(),
+        limit: limit.toString()
+      }
+    });
+  }
+
+  getFormSubmissionById(submissionId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/${submissionId}`);
   }
   
 }
