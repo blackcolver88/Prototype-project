@@ -5,6 +5,7 @@ import com.example.formservice.entities.FormSubmission;
 import com.example.formservice.service.FormInputService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,10 @@ public class FormSubmissionDTO {
     private String task;
     private String formTitle;
     private List<FormValueDTO> formValues;
+    @Setter
+    private Long userId;
+    @Setter
+    private Long formId;
 
     public FormSubmissionDTO(Long id, LocalDateTime date, String task, String formTitle, List<String> formValues) {
         this.id = id;
@@ -58,4 +63,5 @@ public class FormSubmissionDTO {
 
         return dto;
     }
+
 }

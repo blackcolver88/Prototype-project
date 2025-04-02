@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
@@ -35,7 +35,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>2023.0.1</version> <!-- Use the latest version compatible with your Spring Boot version -->
+                <version>2023.0.3</version> <!-- Use the latest version compatible with your Spring Boot version -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

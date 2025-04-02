@@ -9,6 +9,9 @@ import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import com.example.formservice.repository.FormValueRepository;
 import com.example.formservice.service.*;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -32,6 +36,11 @@ public class FormSubmissionController {
     private final FormValueService formValueService;
     private final FormInputService formInputService;
     private final FormInputRepository formInputRepository;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
 
     public FormSubmissionController(FormSubmissionService formSubmissionService,
                                     UserService userService,
@@ -85,48 +94,67 @@ public class FormSubmissionController {
         Optional<User> user = userService.getUserById(userId);
         Optional<FormTemplate> form = formRepository.findById(formId);
 
-        if (user.isPresent() && form.isPresent()) {
-            boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
-            if (submissionExists) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("Vous avez déjà soumis ce formulaire.");
-            }
-
-            FormSubmission submission = new FormSubmission();
-            submission.setUser(user.get());
-            submission.setDate(LocalDateTime.now());
-            submission.setIdForm(formId);
-
-            // Process form values
-            List<FormValue> values = new ArrayList<>();
-            List<FormInput> formInputs = formInputRepository.findByFormLayoutId(formId);
-
-            for (int i = 0; i < formValuesWrapper.getFormValues().size(); i++) {
-                FormValueRequest valueRequest = formValuesWrapper.getFormValues().get(i);
-
-                if (valueRequest.getValues().isEmpty()) continue;
-
-                FormValue value = new FormValue();
-                value.setValue(String.join(",", valueRequest.getValues()));
-                value.setFormSubmission(submission);
-
-                if (i < formInputs.size()) {
-                    FormInput correspondingInput = formInputs.get(i);
-                    correspondingInput.setFormValue(value);
-                    value.getFormInputs().add(correspondingInput);
-                }
-
-                values.add(value);
-            }
-
-            // Set form values and save submission
-            submission.setFormValues(values);
-            FormSubmission savedSubmission = formSubmissionService.save(submission);
-
-            return ResponseEntity.ok(savedSubmission);
+        if (user.isEmpty() || form.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
+        if (submissionExists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Vous avez déjà soumis ce formulaire.");
+        }
+
+        FormSubmission submission = new FormSubmission();
+        submission.setUser(user.get());
+        submission.setDate(LocalDateTime.now());
+        submission.setIdForm(formId);
+
+        List<FormValue> values = new ArrayList<>();
+        List<FormInput> formInputs = formInputRepository.findByFormLayoutId(formId);
+
+        for (int i = 0; i < formValuesWrapper.getFormValues().size(); i++) {
+            FormValueRequest valueRequest = formValuesWrapper.getFormValues().get(i);
+            if (valueRequest.getValues().isEmpty()) continue;
+
+            FormValue value = new FormValue();
+            value.setValue(String.join(",", valueRequest.getValues()));
+            value.setFormSubmission(submission);
+
+            if (i < formInputs.size()) {
+                FormInput correspondingInput = formInputs.get(i);
+                correspondingInput.setFormValue(value);
+                value.getFormInputs().add(correspondingInput);
+            }
+            values.add(value);
+        }
+
+        submission.setFormValues(values);
+        FormSubmission savedSubmission = formSubmissionService.save(submission);
+
+        FormSubmissionDTO formSubmissionDTO = new FormSubmissionDTO();
+        formSubmissionDTO.setId(savedSubmission.getId());
+        formSubmissionDTO.setDate(savedSubmission.getDate());
+        formSubmissionDTO.setUserId(user.get().getId());
+        formSubmissionDTO.setTask(user.get().getTask());
+        formSubmissionDTO.setFormId(formId);
+        formSubmissionDTO.setFormValues(values.stream()
+                .map(fv -> new FormValueDTO( // Use standalone FormValueDTO
+                        formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId()),
+                        fv.getValue()))
+                .collect(Collectors.toList()));
+
+        String workflowUrl = discoveryClient.getInstances("workflow-service")
+                .stream()
+                .findFirst()
+                .map(si -> si.getUri() + "/api/workflow/start-process")
+                .orElseThrow(() -> new RuntimeException("workflow-service not found"));
+        try {
+            restTemplate.postForObject(workflowUrl, formSubmissionDTO, String.class);
+        } catch (Exception e) {
+            System.err.println("Failed to notify workflow-service: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(savedSubmission);
     }
 
     private void updateFormInputWithFormValueId(FormSubmission submission) {
