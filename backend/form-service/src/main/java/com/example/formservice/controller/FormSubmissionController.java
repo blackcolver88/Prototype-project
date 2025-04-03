@@ -253,35 +253,78 @@ public class FormSubmissionController {
         }
 
         try {
-            List<FormValue> updatedValues = new ArrayList<>();
-            for (FormValueRequest valueRequest : updatedFormValuesWrapper.getFormValues()) {
-                FormValue value = new FormValue();
+            Map<Long, FormValue> existingValueMap = new HashMap<>();
 
-                // Validation : vérifier que l'ID du champ d'entrée est fourni
+            List<FormValue> originalFormValues = new ArrayList<>();
+            if (submission.getFormValues() != null) {
+                originalFormValues.addAll(submission.getFormValues());
+
+                for (FormValue existingValue : submission.getFormValues()) {
+                    for (FormInput input : existingValue.getFormInputs()) {
+                        existingValueMap.put(input.getId(), existingValue);
+                    }
+                }
+            }
+
+            Set<FormValue> processedValues = new HashSet<>();
+
+            for (FormValueRequest valueRequest : updatedFormValuesWrapper.getFormValues()) {
                 if (valueRequest.getFormInputId() == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("error", "formInputId manquant dans une des valeurs."));
                 }
 
-                // Obtenir les valeurs normalisées
                 List<String> allValues = valueRequest.getValues();
                 if (allValues == null || allValues.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of("error", "Aucune valeur fournie pour le champ avec formInputId=" + valueRequest.getFormInputId()));
                 }
 
-                // Joindre les valeurs en une chaîne séparée par des virgules
-                value.setValue(String.join(",", allValues));
+                Optional<FormInput> formInputOpt = formInputService.getFormInputById(valueRequest.getFormInputId());
+                if (formInputOpt.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "FormInput non trouvé avec ID=" + valueRequest.getFormInputId()));
+                }
+                FormInput formInput = formInputOpt.get();
 
-                // Associer la valeur à la soumission
-                value.setFormSubmission(submission);
-                updatedValues.add(value);
+                FormValue formValue;
+                if (existingValueMap.containsKey(valueRequest.getFormInputId())) {
+                    // Use existing FormValue
+                    formValue = existingValueMap.get(valueRequest.getFormInputId());
+                    // Update the value
+                    formValue.setValue(String.join(",", allValues));
+                } else {
+                    // Create a new FormValue
+                    formValue = new FormValue();
+                    formValue.setValue(String.join(",", allValues));
+                    formValue.setFormSubmission(submission);
+                    formValue.setFormInputs(new ArrayList<>());
+                    formValue.getFormInputs().add(formInput);
+
+                    formInput.setFormValue(formValue);
+                }
+
+                processedValues.add(formValue);
             }
 
-            submission.getFormValues().clear(); 
-            submission.getFormValues().addAll(updatedValues); 
+            if (submission.getFormValues() == null) {
+                submission.setFormValues(new ArrayList<>());
+            } else {
+                List<FormValue> updatedValues = new ArrayList<>();
 
-            // Enregistrer les modifications
+                for (FormValue original : originalFormValues) {
+                    if (processedValues.contains(original)) {
+                        updatedValues.add(original);
+                        processedValues.remove(original);
+                    }
+                }
+
+                updatedValues.addAll(processedValues);
+
+                submission.getFormValues().clear();
+                submission.getFormValues().addAll(updatedValues);
+            }
+
             FormSubmission updatedSubmission = formSubmissionService.save(submission);
 
             return ResponseEntity.ok(updatedSubmission);
