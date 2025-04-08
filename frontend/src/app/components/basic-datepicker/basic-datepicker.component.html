@@ -9,6 +9,7 @@
         type="text"
         placeholder="MM/DD/YYYY"
         [required]="isRequired"
+        [disabled]="isDisabled"
         class="bg-gray-100 outline-none text-gray-900 w-full"
         (input)="onInputChange($event)"
         [(ngModel)]="value"

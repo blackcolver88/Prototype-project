@@ -16,6 +16,7 @@ export class TextformComponent implements OnInit {
   @Input() isRequired: boolean = false;
   @Input() label: string = 'Text Field';
   @Input() value: string = '';
+  @Input() isDisabled: boolean = false; 
 
   @Output() valueChange = new EventEmitter<string>();
   

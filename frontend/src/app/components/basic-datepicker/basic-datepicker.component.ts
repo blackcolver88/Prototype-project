@@ -22,6 +22,7 @@ export class BasicDatepickerComponent {
   @Output() valueChange = new EventEmitter<string>();
   @Output() dateSelected = new EventEmitter<Date>();
   @Input() isRequired: boolean = false;
+  @Input() isDisabled: boolean = false; 
 
   constructor() {
     this.generateCalendar();

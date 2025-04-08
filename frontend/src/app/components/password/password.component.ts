@@ -17,7 +17,7 @@ export class PasswordComponent {
     @Output() valueChange = new EventEmitter<string>();
     @Input() isRequired: boolean = false;
     @Input() value: string = '';
-    
+    @Input() isDisabled: boolean = false; 
     onInputChange(event: any) {
       this.value = event.target.value;
       this.valueChange.emit(this.value);

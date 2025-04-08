@@ -20,7 +20,7 @@ export class CheckboxComponent implements OnInit, OnChanges {
   @Input() options: CheckboxOption[] = [];
   @Input() name: string = '';
   @Input() isRequired: boolean = false;
-  @Input() isDisabled: boolean = false;
+  @Input() isDisabled: boolean = false; 
   @Input() selectedOptions: string | string[] = '';  // Internal state
 
   @Output() valueChange = new EventEmitter<string[]>();

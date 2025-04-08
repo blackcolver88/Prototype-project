@@ -19,7 +19,7 @@ export class RadioButtonComponent implements OnInit {
   @Input() options: RadioOption[] = [];
   @Input() name: string = '';
   @Input() isRequired: boolean = false;
-  @Input() isDisabled: boolean = false;
+  @Input() isDisabled: boolean = false; 
   @Input() selectedOption: string = '';
 
   @Output() valueChange = new EventEmitter<string>();
