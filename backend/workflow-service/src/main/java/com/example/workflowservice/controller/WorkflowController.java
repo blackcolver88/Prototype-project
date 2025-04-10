@@ -57,7 +57,7 @@ public class WorkflowController {
     }
 
     @GetMapping("/submission-status/{formSubmissionId}")
-    public ResponseEntity<String> getSubmissionStatus(@PathVariable Long formSubmissionId) {
+    public ResponseEntity<String> getSubmissionStatus(@PathVariable("formSubmissionId") Long formSubmissionId) {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                 .variableValueEquals("formSubmissionId", formSubmissionId)
                 .singleResult();
