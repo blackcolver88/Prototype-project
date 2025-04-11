@@ -58,6 +58,7 @@
                       [label]="sectionItem.config.label"
                       [placeholder]="sectionItem.config.placeholder"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-password>
@@ -70,6 +71,7 @@
                       [type]="sectionItem.config.type"
                       [placeholder]="sectionItem.config.placeholder"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-email>
@@ -82,6 +84,7 @@
                       [name]="sectionItem.config.name"
                       [isRequired]="sectionItem.config.isRequired"
                       [options]="sectionItem.config.options"
+                      [isDisabled]="isFormSubmitted"
                       [selectedOptions]="sectionItem.value"
                       (valueChange)="
                         handleCheckboxChange(sectionItem.id, $event)
@@ -96,6 +99,7 @@
                       [label]="sectionItem.config.label"
                       [placeholder]="sectionItem.config.placeholder"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-phone-number>
@@ -109,6 +113,7 @@
                         sectionItem.config.placeholder || 'Enter text here'
                       "
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-text-area>
@@ -121,7 +126,7 @@
                       [name]="sectionItem.config.name"
                       [options]="sectionItem.config.options"
                       [isRequired]="sectionItem.config.isRequired"
-                      [isDisabled]="sectionItem.config.isDisabled"
+                      [isDisabled]="isFormSubmitted"
                       [selectedOption]="sectionItem.value"
                       (valueChange)="handleRadioChange(sectionItem.id, $event)"
                     >
@@ -135,6 +140,7 @@
                       [options]="getOptionsArray(sectionItem.config.options)"
                       [value]="sectionItem.value"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="
                         handleSelectBoxChange(sectionItem.id, $event)
                       "
@@ -148,6 +154,7 @@
                       [label]="sectionItem.config.label"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                     >
                     </app-datepicker>
                   </ng-container>
@@ -159,6 +166,7 @@
                     <app-basic-datepicker
                       [label]="sectionItem.config.label"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-basic-datepicker>
