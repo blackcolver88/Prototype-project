@@ -23,7 +23,7 @@ export class SelectBoxComponent {
   @Input() isRequired: boolean = false;
   @Input() value: string = '';
   @Output() valueChange = new EventEmitter<string>();
-
+  @Input() isDisabled: boolean = false; 
   selectedValue: string = '';
 
   onSelectChange() {

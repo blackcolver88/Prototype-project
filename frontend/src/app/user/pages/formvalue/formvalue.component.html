@@ -46,6 +46,7 @@
                       [type]="sectionItem.config.type"
                       [placeholder]="sectionItem.config.placeholder"
                       [isRequired]="sectionItem.config.isRequired"
+                      [isDisabled]="isFormSubmitted"
                       (valueChange)="handleInputChange(sectionItem.id, $event)"
                     >
                     </app-textform>

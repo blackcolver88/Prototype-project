@@ -15,7 +15,7 @@ export class TextAreaComponent implements OnInit {
   @Input() placeholder: string = 'Enter text here';
   @Input() required: boolean = false;
   @Input() value: string = '';
-  
+  @Input() isDisabled: boolean = false; 
   @Input() isRequired: boolean = false;
   @Output() valueChange = new EventEmitter<string>();
   

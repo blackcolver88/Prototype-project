@@ -13,7 +13,7 @@ export class PhoneNumberComponent {
   @Input() label: string = 'Phone Number';
   @Output() valueChange = new EventEmitter<string>();
   @Input() isRequired: boolean = false;
-
+  @Input() isDisabled: boolean = false; 
   @Input() value: string = '';
   
   onInputChange(event: any) {

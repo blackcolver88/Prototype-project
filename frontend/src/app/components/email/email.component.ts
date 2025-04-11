@@ -16,7 +16,8 @@ export class EmailComponent {
   @Input() placeholder: string = 'Enter your email';
   @Input() isRequired: boolean = false;
   @Output() valueChange = new EventEmitter<string>();
-    
+  @Input() isDisabled: boolean = false; 
+
   @Input() value: string = '';
     
     onInputChange(event: any) {
