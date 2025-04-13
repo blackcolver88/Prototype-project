@@ -22,9 +22,6 @@ public class ProcessFormSubmissionDelegate implements JavaDelegate {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         Long formSubmissionId = (Long) execution.getVariable("formSubmissionId");
