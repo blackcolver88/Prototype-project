@@ -4,6 +4,7 @@ import com.example.formservice.DTO.FormSubmissionDTO;
 import com.example.formservice.DTO.FormValueDTO;
 import com.example.formservice.DTO.FormValueRequest;
 import com.example.formservice.DTO.FormValuesWrapper;
+import com.example.formservice.client.WorkflowServiceClient;
 import com.example.formservice.entities.*;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormTemplateRepository;
@@ -36,8 +37,9 @@ public class FormSubmissionController {
     private final FormValueService formValueService;
     private final FormInputService formInputService;
     private final FormInputRepository formInputRepository;
+
     @Autowired
-    private RestTemplate restTemplate;
+    private WorkflowServiceClient workflowServiceClient;
 
     @Autowired
     private DiscoveryClient discoveryClient;
@@ -149,7 +151,7 @@ public class FormSubmissionController {
                 .map(si -> si.getUri() + "/api/workflow/start-process")
                 .orElseThrow(() -> new RuntimeException("workflow-service not found"));
         try {
-            restTemplate.postForObject(workflowUrl, formSubmissionDTO, String.class);
+            workflowServiceClient.startProcess(formSubmissionDTO);
         } catch (Exception e) {
             System.err.println("Failed to notify workflow-service: " + e.getMessage());
         }
