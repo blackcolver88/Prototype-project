@@ -19,7 +19,7 @@ interface Option {
 @Component({
   selector: 'app-checkbox-config',
   templateUrl: './checkbox-config.component.html',
-  styleUrls: ['./checkbox-config.component.scss'],
+  styleUrls: ['./checkbox-config.component.css'],
   standalone: true,
   imports: [CheckboxComponent, ReactiveFormsModule, CommonModule],
 })

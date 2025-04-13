@@ -12,7 +12,7 @@ import {PasswordComponent} from '../../components/password/password.component';
   standalone: true,
   imports: [CommonModule, TextformComponent,EmailComponent,PhoneNumberComponent,PasswordComponent,ReactiveFormsModule],
   templateUrl: './textform-config.component.html',
-  styleUrl: './textform-config.component.scss'
+  styleUrl: './textform-config.component.css'
 })
 export class TextformConfigComponent implements OnInit {
   textForm: FormGroup;

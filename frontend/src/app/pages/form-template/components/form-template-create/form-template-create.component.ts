@@ -14,7 +14,7 @@ import {CommonModule} from "@angular/common";
     CommonModule
   ],
   templateUrl: './form-template-create.component.html',
-  styleUrls: ['./form-template-create.component.scss']
+  styleUrls: ['./form-template-create.component.css']
 })
 export class FormTemplateCreateComponent {
   data = inject(DIALOG_DATA);
