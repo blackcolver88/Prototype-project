@@ -138,11 +138,13 @@ public class FormSubmissionController {
         formSubmissionDTO.setTask(user.get().getTask());
         formSubmissionDTO.setFormId(formId);
         formSubmissionDTO.setFormValues(values.stream()
-                .map(fv -> new FormValueDTO( // Use standalone FormValueDTO
-                        formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId()),
-                        fv.getValue()))
+                .map(fv -> {
+                    String title = fv.getFormInputs() != null && !fv.getFormInputs().isEmpty()
+                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId())
+                            : "Untitled"; 
+                    return new FormValueDTO(title, fv.getValue());
+                })
                 .collect(Collectors.toList()));
-
         String workflowUrl = discoveryClient.getInstances("workflow-service")
                 .stream()
                 .findFirst()
