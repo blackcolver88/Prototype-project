@@ -20,3 +20,8 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/workflow/**
+management:
+  tracing:
+    sampling:
+      probability:
+        1.0
