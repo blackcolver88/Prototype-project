@@ -627,6 +627,12 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     savedInputs: any[],
     onComplete?: () => void
   ) {
+    if (multiChoiceItems.length === 0) {
+      // If there are no multi-choice items, immediately call onComplete
+      if (onComplete) onComplete();
+      return;
+    }
+
     const saveRequests = multiChoiceItems.map(({ item, layoutId }) => {
       const itemTitle =
         item.config.label || item.config.groupLabel || item.config.title || '';
