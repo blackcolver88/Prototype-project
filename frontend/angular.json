@@ -28,15 +28,20 @@
               "src/assets"
 
             ],
-            "styles": [
-              "src/styles.css"
-            ],
+           "styles": [
+            "src/styles.css",
+            "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn.css",
+            "node_modules/bpmn-js/dist/assets/diagram-js.css",
+            "node_modules/bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css"
+          ],
             "scripts": [],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
+              
             }
+            
           },
           "configurations": {
             "production": {
