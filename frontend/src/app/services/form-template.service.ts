@@ -11,7 +11,7 @@ import { FormInput } from '../model/FormInput';
 
 export class FormTemplateService {
 
-  private baseUrl = 'http://localhost:8081/api/form-templates';
+  private baseUrl = 'http://localhost:8222/api/form-templates';
 
   constructor(public http: HttpClient) {}
 

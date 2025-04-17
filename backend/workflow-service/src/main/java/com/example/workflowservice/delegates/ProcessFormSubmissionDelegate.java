@@ -3,6 +3,7 @@ package com.example.workflowservice.delegates;
 import com.example.workflowservice.DTO.FormSubmissionDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Component("processFormSubmission")
 public class ProcessFormSubmissionDelegate implements JavaDelegate {
 
