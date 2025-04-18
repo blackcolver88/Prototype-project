@@ -10,6 +10,8 @@ import { from, Observable } from 'rxjs';
 export class BpmnModelerComponent {
   private bpmnJS: any;
   @ViewChild('bpmnModelerRef', { static: true }) private bpmnModelerRef: ElementRef | undefined;
+  @ViewChild('propertiesRef', { static: true }) private propertiesRef: ElementRef | undefined;
+  
   private xml: string = `<?xml version="1.0" encoding="UTF-8"?>
   <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_02r90y2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.24.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
     <bpmn:process id="Process_1s5zn7v" isExecutable="true" camunda:historyTimeToLive="10">
@@ -62,21 +64,38 @@ export class BpmnModelerComponent {
         </bpmndi:BPMNDiagram>
       </bpmn:definitions>
       `;
+  
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngAfterContentInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       // Import dynamically to avoid SSR issues
-      import('bpmn-js/lib/Modeler').then(({ default: Modeler }) => {
-        import('bpmn-js-token-simulation').then(({ default: TokenSimulationModule }) => {
-          this.bpmnJS = new Modeler({
-            container: this.bpmnModelerRef?.nativeElement,
-            additionalModules: [TokenSimulationModule]
-          });
-          
-          this.bpmnJS.attachTo(this.bpmnModelerRef!.nativeElement);
-          this.importDiagram(this.xml);
+      Promise.all([
+        import('bpmn-js/lib/Modeler'),
+        import('bpmn-js-token-simulation'),
+        import('bpmn-js-properties-panel'),
+        import('@bpmn-io/properties-panel')
+      ]).then(([Modeler, TokenSimulationModule, PropertiesPanelModule, PropertiesPanelStyle]) => {
+        const { default: BpmnModeler } = Modeler;
+        const { default: TokenSimulation } = TokenSimulationModule;
+        const { 
+          BpmnPropertiesPanelModule, 
+          BpmnPropertiesProviderModule 
+        } = PropertiesPanelModule;
+        
+        this.bpmnJS = new BpmnModeler({
+          container: this.bpmnModelerRef?.nativeElement,
+          additionalModules: [
+            TokenSimulation,
+            BpmnPropertiesPanelModule,
+            BpmnPropertiesProviderModule
+          ],
+          propertiesPanel: {
+            parent: this.propertiesRef?.nativeElement
+          }
         });
+        
+        this.importDiagram(this.xml);
       });
     }
   }

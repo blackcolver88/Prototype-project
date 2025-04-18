@@ -1,16 +1,48 @@
-.bpmnModeler-container { 
-    width: 80%;
-    height: 800px;
-    flex-grow: 4;
-} 
-.properties-container{
-    width: 20%;
-}
-.container{
+.container {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
+    width: 100%;
+    height: 800px;
+    border: 1px solid #ccc;
+}
+
+.bpmnModeler-container { 
     width: 80%;
-    height: 80%;
+    height: 100%;
+    flex-grow: 4;
+    border-right: 1px solid #ddd;
+}
+
+.properties-panel-container {
+    width: 20%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #f8f8f8;
+    padding: 10px 0;
+}
+
+:host ::ng-deep .djs-palette {
+    background: white;
+    border-right: 1px solid #ccc;
+}
+
+:host ::ng-deep .bpp-properties-panel {
+    font-size: 12px;
+}
+
+:host ::ng-deep .bpp-properties-header {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+:host ::ng-deep .bpp-properties-tab-bar {
+    border-bottom: 1px solid #ddd;
+}
+
+:host ::ng-deep .bpp-field-description {
+    font-size: 11px;
+    color: #666;
 }
