@@ -250,4 +250,10 @@ public class FormTemplateService {
         Optional<FormTemplate> formTemplate = formTemplateRepository.findById(idForm);
         return formTemplate.map(FormTemplate::getTitle).orElse("Formulaire inconnu");
     }
+
+    @Transactional(readOnly = true)
+    public List<FormLayout> getFormLayoutById(Long formTemplateId) {
+    // This returns layouts for a specific form template
+    return formLayoutRepository.findByFormTemplateId(formTemplateId);
+    }
 }
