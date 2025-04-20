@@ -4,6 +4,7 @@ import com.example.formservice.DTO.FormSubmissionDTO;
 import com.example.formservice.DTO.FormValueDTO;
 import com.example.formservice.DTO.FormValueRequest;
 import com.example.formservice.DTO.FormValuesWrapper;
+import com.example.formservice.client.WorkflowServiceClient;
 import com.example.formservice.entities.*;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormTemplateRepository;
@@ -36,8 +37,9 @@ public class FormSubmissionController {
     private final FormValueService formValueService;
     private final FormInputService formInputService;
     private final FormInputRepository formInputRepository;
+
     @Autowired
-    private RestTemplate restTemplate;
+    private WorkflowServiceClient workflowServiceClient;
 
     @Autowired
     private DiscoveryClient discoveryClient;
@@ -101,7 +103,7 @@ public class FormSubmissionController {
         boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
         if (submissionExists) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Vous avez déjà soumis ce formulaire.");
+                    .body(Map.of("error", "Vous avez déjà soumis ce formulaire."));
         }
 
         FormSubmission submission = new FormSubmission();
@@ -110,27 +112,57 @@ public class FormSubmissionController {
         submission.setIdForm(formId);
 
         List<FormValue> values = new ArrayList<>();
-        List<FormInput> formInputs = formInputRepository.findByFormLayoutId(formId);
+        
+        // Get all form layouts (sections) for this form
+        List<FormLayout> layouts = formTemplateService.getFormLayoutById(formId);
+        
+        // Fetch inputs from all sections and create a unified map
+        List<FormInput> allFormInputs = new ArrayList<>();
+        for (FormLayout layout : layouts) {
+            List<FormInput> sectionInputs = formInputRepository.findByFormLayoutId(layout.getId());
+            allFormInputs.addAll(sectionInputs);
+        }
+        
+        // Create a map for efficient lookup
+        Map<Long, FormInput> formInputsMap = allFormInputs.stream()
+            .collect(Collectors.toMap(FormInput::getId, input -> input));
 
-        for (int i = 0; i < formValuesWrapper.getFormValues().size(); i++) {
-            FormValueRequest valueRequest = formValuesWrapper.getFormValues().get(i);
-            if (valueRequest.getValues().isEmpty()) continue;
+        // Log total input count for debugging
+        System.out.println("Total form inputs found across all sections: " + allFormInputs.size());
+
+        for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
+            if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty()) {
+                continue;
+            }
+            
+            // Skip if formInputId is missing
+            if (valueRequest.getFormInputId() == null) {
+                continue;
+            }
+
+            // Find corresponding input by ID instead of by index
+            FormInput correspondingInput = formInputsMap.get(valueRequest.getFormInputId());
+            if (correspondingInput == null) {
+                // Input not found for this form, skip it
+                System.out.println("Warning: No FormInput found for ID: " + valueRequest.getFormInputId());
+                continue;
+            }
 
             FormValue value = new FormValue();
             value.setValue(String.join(",", valueRequest.getValues()));
             value.setFormSubmission(submission);
-
-            if (i < formInputs.size()) {
-                FormInput correspondingInput = formInputs.get(i);
-                correspondingInput.setFormValue(value);
-                value.getFormInputs().add(correspondingInput);
-            }
+            
+            // Set up bidirectional relationship between FormValue and FormInput
+            value.getFormInputs().add(correspondingInput);
+            correspondingInput.setFormValue(value);
+            
             values.add(value);
         }
 
         submission.setFormValues(values);
         FormSubmission savedSubmission = formSubmissionService.save(submission);
 
+        // Rest of the method remains the same
         FormSubmissionDTO formSubmissionDTO = new FormSubmissionDTO();
         formSubmissionDTO.setId(savedSubmission.getId());
         formSubmissionDTO.setDate(savedSubmission.getDate());
@@ -140,23 +172,23 @@ public class FormSubmissionController {
         formSubmissionDTO.setFormValues(values.stream()
                 .map(fv -> {
                     String title = fv.getFormInputs() != null && !fv.getFormInputs().isEmpty()
-                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId())
-                            : "Untitled"; 
+                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId()) : "Untitled";
                     return new FormValueDTO(title, fv.getValue());
                 })
                 .collect(Collectors.toList()));
-        String workflowUrl = discoveryClient.getInstances("workflow-service")
-                .stream()
-                .findFirst()
-                .map(si -> si.getUri() + "/api/workflow/start-process")
-                .orElseThrow(() -> new RuntimeException("workflow-service not found"));
+
         try {
-            restTemplate.postForObject(workflowUrl, formSubmissionDTO, String.class);
+            String workflowUrl = discoveryClient.getInstances("workflow-service")
+                    .stream()
+                    .findFirst()
+                    .map(si -> si.getUri() + "/api/workflow/start-process")
+                    .orElseThrow(() -> new RuntimeException("workflow-service not found"));
+            workflowServiceClient.startProcess(formSubmissionDTO);
         } catch (Exception e) {
             System.err.println("Failed to notify workflow-service: " + e.getMessage());
         }
 
-        return ResponseEntity.ok(savedSubmission);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedSubmission);
     }
 
     private void updateFormInputWithFormValueId(FormSubmission submission) {

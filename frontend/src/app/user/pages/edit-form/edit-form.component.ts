@@ -140,87 +140,39 @@ export class EditFormComponent {
       console.log('No form values to populate');
       return;
     }
-  
-    console.log('Populating form with values:', formValues);
-  
-    // Phase 1: Prepare form items and mappings
-    const formInputs: any[] = [];
+
+    console.log('Populating form with', formValues.length, 'values');
+    
+    // Create a map of form values by input ID for quick lookup
     const formValuesByInputId = new Map<number, any>();
-  
-    // First traversal: Collect items and create mappings
-    this.traverseFormItems(this.editorItems, (item) => {
-      // Collect form inputs
-      if (item.id && item.type && item.type !== 'Section') {
-        formInputs.push(item);
-      }
-  
-      // Pre-process checkboxes immediately
-      if (item.type === 'CHECKBOX') {
-        item.value = typeof item.value === 'string'
-          ? item.value.split(',').filter((v: string) => v.trim() !== '')
-          : [];
-      }
-    });
-  
-    // Create form value mappings
+    
     formValues.forEach(formValue => {
       if (formValue.formInputs?.length) {
-        formValuesByInputId.set(formValue.formInputs[0].id, formValue);
+        const inputId = formValue.formInputs[0].id;
+        formValuesByInputId.set(inputId, formValue);
+        console.log(`Mapped value for input ID ${inputId}:`, formValue.value);
       }
     });
-  
-    // Phase 2: Apply form values using multiple strategies
-    formValues.forEach(formValue => {
-      const itemId = formValue.id;
-      const value = formValue.value;
-      let itemFound = false;
-  
-      // Strategy 1: Direct ID match
-      this.traverseFormItems(this.editorItems, item => {
-        if (item.id === itemId) {
-          this.applyFormValue(item, value);
-          itemFound = true;
+    
+    // Count populated fields for validation
+    let fieldsPopulated = 0;
+    
+    // Traverse all sections and their inputs
+    this.traverseFormItems(this.editorItems, (item) => {
+      if (item.id && item.type !== 'Section') {
+        const formValue = formValuesByInputId.get(item.id);
+        if (formValue) {
+          this.applyFormValue(item, formValue.value);
+          fieldsPopulated++;
         }
-      });
-  
-      // Strategy 2: Form input ID match
-      if (!itemFound && formValue.formInputs?.length) {
-        const formInputId = formValue.formInputs[0].id;
-        this.traverseFormItems(this.editorItems, item => {
-          if (item.id === formInputId) {
-            this.applyFormValue(item, value);
-            itemFound = true;
-          }
-        });
-      }
-  
-      // Strategy 3: Name-based matching
-      if (!itemFound && formValue.name) {
-        this.traverseFormItems(this.editorItems, item => {
-          if (item.config && [item.config.label, item.config.textName].includes(formValue.name)) {
-            this.applyFormValue(item, value);
-            itemFound = true;
-          }
-        });
-      }
-  
-      // Strategy 4: Positional matching (fallback)
-      if (!itemFound) {
-        const valueIndex = formValues.findIndex((v: any) => v.id === itemId);
-        if (valueIndex >= 0 && valueIndex < formInputs.length) {
-          this.applyFormValue(formInputs[valueIndex], value);
-          itemFound = true;
-        }
-      }
-  
-      if (!itemFound) {
-        console.warn(`No match found for value ID ${itemId} (${formValue.name || 'unnamed'})`);
       }
     });
-  
+    
+    console.log(`Populated ${fieldsPopulated} out of ${formValuesByInputId.size} form fields`);
+    
     this.cdr.detectChanges();
   }
-  
+
   // New helper method for type-safe value application
   private applyFormValue(item: any, value: any): void {
     if (item.type === 'CHECKBOX') {

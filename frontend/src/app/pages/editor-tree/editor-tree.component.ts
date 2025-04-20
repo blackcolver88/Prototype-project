@@ -14,7 +14,7 @@ import { BasicdatepickerConfigComponent } from '../../configurations/basicdatepi
 import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
-import { catchError, forkJoin, map, of, Subject,switchMap, takeUntil, throwError,} from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, Subject,switchMap, takeUntil, throwError,} from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { TextformComponent } from '../../components/textform/textform.component';
@@ -392,20 +392,16 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   handleSubmit() {
     console.log('Starting form submission process');
-    // Create a map to store the relationship between temp sections and their items
     const sectionItemsMap = new Map<string, any[]>();
-    // First, identify new sections and assign them temporary IDs
+
+    // Assign temporary IDs to new sections and map their items
     this.editorItems.forEach((item) => {
       if (!item.id && item.type === 'Section') {
-        // Create a unique tempId that won't conflict with existing section IDs
-        item.tempId = `temp_${Date.now()}_${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
+        item.tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         if (item.items) {
-          // Store a deep copy of the items array with section reference
           const itemsWithSection = item.items.map((formItem: any) => ({
             ...formItem,
-            tempSectionId: item.tempId, // Add reference to parent section
+            tempSectionId: item.tempId,
           }));
           sectionItemsMap.set(item.tempId, itemsWithSection);
         }
@@ -416,67 +412,71 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       (item) => !item.id && item.type === 'Section'
     );
 
-    if (layoutsToSave.length > 0) {
-      this.formTemplateService
-        .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updatedFormTemplate: FormTemplate) => {
-            // Create mapping between temp IDs and saved section IDs
-            const tempIdToSavedLayoutMap = new Map<string, any>();
+    const saveSections$ = layoutsToSave.length > 0
+      ? this.formTemplateService
+          .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+          .pipe(
+            takeUntil(this.destroy$),
+            map((updatedFormTemplate: FormTemplate) => {
+              const tempIdToSavedLayoutMap = new Map<string, any>();
+              if (updatedFormTemplate.formLayouts) {
+                const newLayouts = updatedFormTemplate.formLayouts
+                  .filter(
+                    (layout) =>
+                      !this.editorItems.some((existing) => existing.id === layout.id)
+                  )
+                  .sort((a, b) => a.id - b.id);
 
-            if (updatedFormTemplate.formLayouts) {
-              // Get only the newly added layouts
-              const newLayouts = updatedFormTemplate.formLayouts
-                .filter(
-                  (layout) =>
-                    !this.editorItems.some(
-                      (existing) => existing.id === layout.id
-                    )
-                )
-                .sort((a, b) => a.id - b.id);
-
-              layoutsToSave.forEach((originalLayout, index) => {
-                if (originalLayout.tempId && newLayouts[index]) {
-                  tempIdToSavedLayoutMap.set(
-                    originalLayout.tempId,
-                    newLayouts[index]
-                  );
-                }
-              });
-            }
-
-            // Update editorItems with new section IDs while preserving their items
-            this.editorItems = this.editorItems.map((item) => {
-              if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
-                const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
-                const originalItems = sectionItemsMap.get(item.tempId) || [];
-
-                return {
-                  ...savedLayout,
-                  type: 'Section',
-                  items: originalItems.map((origItem) => ({
-                    ...origItem,
-                    tempSectionId: undefined,
-                    targetSectionId: savedLayout.id, // Add target section ID for saving
-                  })),
-                };
+                layoutsToSave.forEach((originalLayout, index) => {
+                  if (originalLayout.tempId && newLayouts[index]) {
+                    tempIdToSavedLayoutMap.set(
+                      originalLayout.tempId,
+                      newLayouts[index]
+                    );
+                  }
+                });
               }
-              return item;
-            });
 
-            this.saveFormInputsToSections();
-            // this.router.navigate(['/form-template']);
-          },
-          error: (error) => console.error('Error saving sections:', error),
-        });
-    } else {
-      this.saveFormInputsToSections();
-      // this.router.navigate(['/form-template']);
-    }
+              this.editorItems = this.editorItems.map((item) => {
+                if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
+                  const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
+                  const originalItems = sectionItemsMap.get(item.tempId) || [];
+
+                  return {
+                    ...savedLayout,
+                    type: 'Section',
+                    items: originalItems.map((origItem) => ({
+                      ...origItem,
+                      tempSectionId: undefined,
+                      targetSectionId: savedLayout.id,
+                    })),
+                  };
+                }
+                return item;
+              });
+            })
+          )
+      : of(null);
+
+    const saveFormInputs$ = new Subject<void>();
+
+    (saveSections$ as Observable<void>).subscribe({
+      next: () => {
+        this.saveFormInputsToSections(() => saveFormInputs$.next());
+      },
+      error: (error: any) => console.error('Error saving sections:', error),
+    });
+
+    (saveFormInputs$ as Observable<void>).subscribe({
+      next: () => {
+        console.log('All sections and form inputs saved successfully.');
+        this.router.navigate(['/form-template']);
+      },
+      error: (error) => console.error('Error saving form inputs:', error),
+    });
   }
 
-  saveFormInputsToSections() {
+  saveFormInputsToSections(onComplete?: () => void) {
     const formInputRequests: any[] = [];
     const multiChoiceItems: { item: any; layoutId: number }[] = [];
 
@@ -485,14 +485,11 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         const layoutId = section.id;
 
         section.items.forEach((item: any, itemIndex: number) => {
-          // Skip if item already has an ID or is not a form input
           if (item.id || !item.type || item.type === 'Section') {
             return;
           }
 
-          // Use the targetSectionId if available, otherwise use current section's ID
           const targetLayoutId = item.targetSectionId || layoutId;
-
           const itemConfig = item.config || {};
           const itemTitle =
             itemConfig.label || itemConfig.groupLabel || itemConfig.title || '';
@@ -516,6 +513,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     });
 
     if (formInputRequests.length === 0) {
+      if (onComplete) onComplete();
       return;
     }
 
@@ -525,11 +523,12 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (savedInputs) => {
           console.log('Form inputs saved successfully:', savedInputs);
-          this.processMultiChoiceItems(multiChoiceItems, savedInputs);
-          this.loadFormTemplateWithLayouts(this.templateId);
-          // this.router.navigate(['/form-template']);
+          this.processMultiChoiceItems(multiChoiceItems, savedInputs, onComplete);
         },
-        error: (error) => console.error('Error saving form inputs:', error),
+        error: (error) => {
+          console.error('Error saving form inputs:', error);
+          if (onComplete) onComplete();
+        },
       });
   }
 
@@ -625,11 +624,16 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   }
   private processMultiChoiceItems(
     multiChoiceItems: { item: any; layoutId: number }[],
-    savedInputs: any[]
+    savedInputs: any[],
+    onComplete?: () => void
   ) {
-    console.log('Processing multi-choice items:', multiChoiceItems);
+    if (multiChoiceItems.length === 0) {
+      // If there are no multi-choice items, immediately call onComplete
+      if (onComplete) onComplete();
+      return;
+    }
 
-    multiChoiceItems.forEach(({ item, layoutId }) => {
+    const saveRequests = multiChoiceItems.map(({ item, layoutId }) => {
       const itemTitle =
         item.config.label || item.config.groupLabel || item.config.title || '';
 
@@ -638,42 +642,24 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       );
 
       if (!savedInput) {
-        console.error(
-          'No matching saved input found for multi-choice item:',
-          item
-        );
-        console.error('Item title:', itemTitle);
-        console.error('Available saved inputs:', savedInputs);
-        return;
+        console.error('No matching saved input found for multi-choice item:', item);
+        return of(null);
       }
 
       let options: any[] = [];
-
       if (item.type === 'CHECKBOX' || item.type === 'RADIO_BUTTON') {
         options = Array.isArray(item.config.options)
           ? item.config.options.map((opt: any) => {
-              if (
-                typeof opt === 'string' &&
-                (opt.startsWith('{') || opt.includes('label'))
-              ) {
+              if (typeof opt === 'string' && (opt.startsWith('{') || opt.includes('label'))) {
                 try {
                   return JSON.parse(opt);
                 } catch (e) {
-                  return {
-                    label: opt,
-                    value: opt,
-                  };
+                  return { label: opt, value: opt };
                 }
               } else if (typeof opt === 'object') {
-                return {
-                  label: opt.label || '',
-                  value: opt.value || opt.label || '',
-                };
+                return { label: opt.label || '', value: opt.value || opt.label || '' };
               } else {
-                return {
-                  label: opt,
-                  value: opt,
-                };
+                return { label: opt, value: opt };
               }
             })
           : [];
@@ -685,35 +671,37 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         const valuesForBackend =
           item.type === 'SELECT_BOX'
             ? options
-            : options.map((opt) => {
-                if (typeof opt === 'string') {
-                  return opt;
-                }
-                return JSON.stringify(opt);
-              });
+            : options.map((opt) => (typeof opt === 'string' ? opt : JSON.stringify(opt)));
 
         const multipleValue = {
           valeurs: valuesForBackend,
-          formInput: {
-            id: savedInput.id,
-          },
+          formInput: { id: savedInput.id },
         };
 
-        console.log(`Saving multiple values for ${item.type}:`, multipleValue);
-
-        this.multipleValueService
-          .createMultipleValue(multipleValue)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (result) => {
-              console.log('Multiple values saved successfully:', result);
-            },
-            error: (error) => {
-              console.error('Error saving multiple values:', error);
-            },
-          });
+        return this.multipleValueService.createMultipleValue(multipleValue).pipe(
+          takeUntil(this.destroy$),
+          catchError((error) => {
+            console.error('Error saving multiple values:', error);
+            return of(null);
+          })
+        );
       }
+
+      return of(null);
     });
+
+    forkJoin(saveRequests)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('All multiple values saved successfully.');
+          if (onComplete) onComplete();
+        },
+        error: (error) => {
+          console.error('Error processing multiple-choice items:', error);
+          if (onComplete) onComplete();
+        },
+      });
   }
 
   private loadFormInputsWithMultipleValues(inputs: FormInput[]) {
