@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class MultipleValueService {
 
-  private apiUrl = 'http://localhost:8222/api/multiple-values';
+  private apiUrl = 'http://localhost:8222/form-service/api/multiple-values';
 
   constructor(private http: HttpClient) { }
 
