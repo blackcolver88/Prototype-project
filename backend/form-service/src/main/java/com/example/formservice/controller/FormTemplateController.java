@@ -1,6 +1,7 @@
 package com.example.formservice.controller;
 
 import com.example.formservice.DTO.FormInputRequest;
+import com.example.formservice.DTO.FormLayoutDTO;
 import com.example.formservice.DTO.FormLayoutOrderDTO;
 import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
@@ -119,6 +120,28 @@ public class FormTemplateController {
             @RequestBody List<FormInputOrderDTO> inputOrders) {
         List<FormInput> updatedInputs = formTemplateService.updateFormInputsOrder(templateId, inputOrders);
         return ResponseEntity.ok(updatedInputs);
+    }
+
+    @PostMapping("/form-layouts/{sectionId}/subsections")
+    public ResponseEntity<FormLayout> addSubsectionToSection(
+            @PathVariable Long sectionId,
+            @RequestBody FormLayout subsection) {
+        FormLayout savedSubsectionDto = formTemplateService.addSubsectionToSection(sectionId, subsection);
+        return ResponseEntity.ok(savedSubsectionDto);
+    }
+
+    @GetMapping("/form-layouts/{sectionId}/subsections")
+    public ResponseEntity<List<FormLayout>> getSubsectionsBySection(@PathVariable Long sectionId) {
+        List<FormLayout> subsections = formTemplateService.getSubsectionsBySection(sectionId);
+        return ResponseEntity.ok(subsections);
+    }
+
+    @PutMapping("/form-layouts/{sectionId}/subsections/order")
+    public ResponseEntity<FormLayout> updateSubsectionsOrder(
+            @PathVariable Long sectionId,
+            @RequestBody List<FormLayoutOrderDTO> subsectionOrders) {
+        FormLayout updatedSection = formTemplateService.updateSubsectionOrder(sectionId, subsectionOrders);
+        return ResponseEntity.ok(updatedSection);
     }
 
 }

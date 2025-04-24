@@ -1,11 +1,13 @@
 package com.example.formservice.service;
 
 import com.example.formservice.DTO.FormInputRequest;
+import com.example.formservice.DTO.FormLayoutDTO;
 import com.example.formservice.DTO.FormLayoutOrderDTO;
 import com.example.formservice.DTO.FormInputOrderDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
+import com.example.formservice.entities.enums.FormLayoutType;
 import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormLayoutRepository;
@@ -13,10 +15,7 @@ import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,22 +81,18 @@ public class FormTemplateService {
 
         FormTemplate formTemplate = templateOptional.get();
 
-        List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
+        List<FormLayout> allLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
 
-        // Sort the actual collection rather than replacing it
-        // This won't trigger orphan removal
-        formTemplate.getFormLayouts().sort((a, b) -> {
-            Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
-            Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
-            if (posA.equals(posB)) {
-                return a.getId().compareTo(b.getId()); // Secondary sort by ID
-            }
-            return posA.compareTo(posB);
-        });
+        formTemplate.getFormLayouts().clear();
+        formTemplate.getFormLayouts().addAll(
+                allLayouts.stream()
+                        .filter(layout -> layout.getParent() == null)
+                        .sorted(Comparator.comparing(FormLayout::getOrdinalPosition, Comparator.nullsLast(Comparator.naturalOrder())))
+                        .collect(Collectors.toList())
+        );
 
         return formTemplate;
     }
-
 
 
     @Transactional
@@ -255,5 +250,80 @@ public class FormTemplateService {
     public List<FormLayout> getFormLayoutById(Long formTemplateId) {
     // This returns layouts for a specific form template
     return formLayoutRepository.findByFormTemplateId(formTemplateId);
+    }
+
+    @Transactional
+    public FormLayout addSubsectionToSection(Long sectionId, FormLayout subsection) {
+        FormLayout section = formLayoutRepository.findById(sectionId)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found with id: " + sectionId));
+
+        // Verify the parent is a Section
+        if (section.getType() != FormLayoutType.Section) {
+            throw new IllegalArgumentException("Parent layout must be of type Section");
+        }
+
+        subsection.setType(FormLayoutType.Subsection);
+        subsection.setParent(section);
+        subsection.setFormTemplate(section.getFormTemplate());
+
+        int newPosition = section.getChildren().size();
+        subsection.setOrdinalPosition(newPosition);
+
+        FormLayout savedSubsection = formLayoutRepository.save(subsection);
+
+        section.getChildren().add(savedSubsection);
+        formLayoutRepository.save(section);
+
+        return savedSubsection;
+    }
+
+    private FormLayoutDTO mapToDTO(FormLayout formLayout) {
+        FormLayoutDTO dto = new FormLayoutDTO();
+        dto.setId(formLayout.getId());
+        dto.setTitle(formLayout.getTitle());
+        dto.setType(formLayout.getType());
+        dto.setOrdinalPosition(formLayout.getOrdinalPosition());
+        dto.setParentId(formLayout.getParent() != null ? formLayout.getParent().getId() : null);
+
+        if (formLayout.getChildren() != null) {
+            dto.setChildren(formLayout.getChildren().stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
+
+    @Transactional
+    public List<FormLayout> getSubsectionsBySection(Long sectionId) {
+        FormLayout section = formLayoutRepository.findById(sectionId)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found with id: " + sectionId));
+
+        if (section.getType() != FormLayoutType.Section) {
+            throw new IllegalArgumentException("Specified layout is not a Section");
+        }
+
+        return section.getChildren().stream()
+                .sorted(Comparator.comparing(FormLayout::getOrdinalPosition))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public FormLayout updateSubsectionOrder(Long sectionId, List<FormLayoutOrderDTO> subsectionOrders) {
+        FormLayout section = formLayoutRepository.findById(sectionId)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found with id: " + sectionId));
+
+        Map<Long, FormLayout> childrenMap = section.getChildren().stream()
+                .collect(Collectors.toMap(FormLayout::getId, child -> child));
+
+        for (FormLayoutOrderDTO orderDTO : subsectionOrders) {
+            FormLayout subsection = childrenMap.get(orderDTO.getId());
+            if (subsection != null) {
+                subsection.setOrdinalPosition(orderDTO.getOrdinalPosition());
+                formLayoutRepository.save(subsection);
+            }
+        }
+
+        return formLayoutRepository.findById(sectionId).orElseThrow();
     }
 }

@@ -45,5 +45,9 @@ public class FormLayoutController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @PostMapping("/sections/{sectionId}/subsections")
+    public FormLayout addSubsectionToSection(@PathVariable Long sectionId, @RequestBody FormLayout subsection) {
+        return formLayoutService.addSubsectionToSection(sectionId, subsection);
+    }
+    
 }

@@ -2,11 +2,11 @@ package com.example.formservice.entities;
 import com.example.formservice.entities.enums.FormLayoutType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
-
 @Data
 @Entity
 public class FormLayout {
@@ -24,18 +24,20 @@ public class FormLayout {
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
+    @JsonBackReference 
     private FormLayout parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference 
     private List<FormLayout> children = new ArrayList<>();
 
     @OneToMany(mappedBy = "formLayout", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
+    @JsonIgnore 
     private List<FormInput> formInputs = new ArrayList<>();
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "form_template_id")
-    @JsonIgnore
+    @JsonIgnore 
     private FormTemplate formTemplate;
 
     public Integer getOrdinalPosition() {
@@ -46,4 +48,3 @@ public class FormLayout {
         this.ordinalPosition = ordinalPosition;
     }
 }
-

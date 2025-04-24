@@ -5,6 +5,7 @@ import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +46,22 @@ public class FormLayoutService {
         }
     }
 
+    public FormLayout addSubsectionToSection(Long sectionId, FormLayout subsection) {
+        Optional<FormLayout> sectionOpt = formLayoutRepository.findById(sectionId);
+        if (sectionOpt.isPresent()) {
+            FormLayout section = sectionOpt.get();
+            if (section.getChildren() == null) {
+                section.setChildren(new ArrayList<>());
+            }
+            subsection.setParent(section);
+            FormLayout savedSubsection = formLayoutRepository.save(subsection);
+            section.getChildren().add(savedSubsection);
+            formLayoutRepository.save(section);
+            return savedSubsection;
+        } else {
+            throw new IllegalArgumentException("Section with id " + sectionId + " does not exist");
+        }
+    }
 
+    
 }
