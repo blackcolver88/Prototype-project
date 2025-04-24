@@ -12,7 +12,7 @@ import { PaginatedSubmissionsResponse } from '../model/PaginatedSubmissionsRespo
 export class FormSubmissionService {
  
 
-  private baseUrl = 'http://localhost:8222/api/form-submissions';
+  private baseUrl = 'http://localhost:8222/form-service/api/form-submissions';
 
   constructor(public http: HttpClient) {}
 
