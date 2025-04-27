@@ -2,7 +2,9 @@
   <!-- Toolbar -->
   <div class="flex justify-between items-center p-2 bg-gray-200 border-b border-gray-300">
     <div class="flex gap-2">
-      <button class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="saveDiagram()">Save</button>
+      <!-- Add or ensure this Save button exists -->
+      <button class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="openSaveProcessModal()">Save</button>
+      <button class="px-2 py-1 bg-teal-500 hover:bg-teal-600 text-white rounded" (click)="openProcessModal()">Open</button>
       <button class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded" (click)="downloadDiagram()">Download</button>
       <button class="px-2 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded" (click)="openDeployModal()">Deploy</button>
       <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded" (click)="validateDiagram()">Validate</button>
@@ -274,6 +276,73 @@
       </div>
       <div class="flex justify-end">
         <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeInstanceStartedModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Process Modal -->
+  <div *ngIf="showOpenProcessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Open Process</h2>
+      
+      <div class="mb-4" *ngIf="!availableProcesses.length">
+        <div class="p-4 bg-yellow-100 text-yellow-700 rounded">
+          No processes available. Deploy a process first.
+        </div>
+      </div>
+      
+      <div *ngIf="availableProcesses.length">
+        <div class="max-h-96 overflow-y-auto border rounded">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let process of availableProcesses" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.key }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.version }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" 
+                    (click)="loadProcess(process.id)">Open</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="flex justify-end mt-6">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeOpenProcessModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Process Modal -->
+  <div *ngIf="showSaveProcessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Save Process</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Process Name</label>
+        <input type="text" [(ngModel)]="saveProcessConfig.name" class="w-full p-2 border rounded" 
+          placeholder="My Process" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Process ID</label>
+        <input type="text" [(ngModel)]="saveProcessConfig.id" class="w-full p-2 border rounded" 
+          placeholder="process_id" />
+        <small class="text-gray-500">Leave empty to keep the current ID</small>
+      </div>
+      <div class="flex justify-end mt-6 gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeSaveProcessModal()">Cancel</button>
+        <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded" 
+          [disabled]="!saveProcessConfig.name"
+          (click)="saveProcessToRepository()">Save</button>
       </div>
     </div>
   </div>

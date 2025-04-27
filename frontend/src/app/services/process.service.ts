@@ -43,10 +43,14 @@ export class ProcessService {
   // Deploy a BPMN process
   deployProcess(xml: string, options: DeploymentOptions): Observable<any> {
     const enhancedXml = this.ensureHistoryTimeToLive(xml);
+    
+    // Ensure the XML has all required Camunda namespaces
+    const processXml = this.ensureProperNamespaces(enhancedXml);
+    
     const formData = new FormData();
     
-    // Add the BPMN XML as a file
-    const blob = new Blob([enhancedXml], { type: 'application/bpmn+xml' });
+    // Add the BPMN XML as a file - use correct MIME type
+    const blob = new Blob([processXml], { type: 'application/bpmn20+xml' });
     
     // Set required options
     formData.append('deployment-name', options.deploymentName || 'Process Deployment');
@@ -69,11 +73,10 @@ export class ProcessService {
       `${options.processId}.bpmn` : 
       `process_${new Date().getTime()}.bpmn`;
     
-    // Important: The file parameter must be named exactly like this
-    formData.append('file', blob, fileName);
+    // Use "data" instead of "file" parameter for consistent behavior
+    formData.append('data', blob, fileName);
     
-    // Log what we're sending
-    console.log('Deploying with options:', options);
+    console.log('Deploying process XML:', processXml.substring(0, 500) + '...');
     
     return this.http.post(`${this.apiUrl}/deployment/create`, formData);
   }
@@ -258,5 +261,17 @@ export class ProcessService {
       map(() => true),
       catchError(() => of(false))
     );
+  }
+
+  // Add this method to ensure all required namespaces
+  private ensureProperNamespaces(xml: string): string {
+    // Check if the XML already has all required namespaces
+    if (!xml.includes('xmlns:camunda="http://camunda.org/schema/1.0/bpmn"')) {
+      return xml.replace(
+        /<bpmn:definitions\s([^>]*)>/,
+        '<bpmn:definitions $1 xmlns:camunda="http://camunda.org/schema/1.0/bpmn">'
+      );
+    }
+    return xml;
   }
 }

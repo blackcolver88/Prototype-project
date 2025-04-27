@@ -117,10 +117,15 @@ export class BpmnModelerComponent {
     <bpmn:startEvent id="StartEvent_1" name="Start">
       <bpmn:outgoing>Flow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:endEvent id="EndEvent_1" name="End">
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="UserTask_1" />
+    <bpmn:userTask id="UserTask_1" name="Review Task" camunda:assignee="demo">
       <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="UserTask_1" targetRef="EndEvent_1" />
+    <bpmn:endEvent id="EndEvent_1" name="End">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="EndEvent_1" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1s5zn7v">
@@ -130,6 +135,10 @@ export class BpmnModelerComponent {
           <dc:Bounds x="182" y="145" width="31" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_1_di" bpmnElement="UserTask_1">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
         <dc:Bounds x="432" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -138,6 +147,10 @@ export class BpmnModelerComponent {
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
         <di:waypoint x="215" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="370" y="120" />
         <di:waypoint x="432" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
@@ -165,6 +178,20 @@ export class BpmnModelerComponent {
   deployments: DeploymentInfo[] = [];
   lastDeploymentResult: DeploymentInfo | null = null;
   lastInstanceResult: InstanceInfo | null = null;
+
+  // Add these properties if they don't exist
+  showSaveProcessModal: boolean = false;
+  saveProcessConfig: {
+    name: string;
+    id: string;
+  } = {
+    name: '',
+    id: ''
+  };
+
+  // Add these properties to the class after the existing properties
+  showOpenProcessModal: boolean = false;
+  availableProcesses: any[] = [];
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -583,21 +610,22 @@ export class BpmnModelerComponent {
 
   private prepareVariablesForStart(): Record<string, any> {
     const result: Record<string, any> = {};
+    
+    // Add the initiator variable that's being referenced in the BPMN
+    result['initiator'] = 'demo';
+    
+    // Process other variables as before
     this.startInstanceConfig.variables.forEach((variable) => {
-      if (!variable.name.trim()) return;
-      let value: any = variable.value;
+      let processedValue: any = variable.value;
       switch (variable.type) {
-        case 'integer':
-          value = parseInt(value);
-          break;
         case 'boolean':
-          value = value.toLowerCase() === 'true';
+          processedValue = variable.value.toLowerCase() === 'true';
           break;
         case 'date':
-          if (value) value = new Date(value).toISOString();
+          if (variable.value) processedValue = new Date(variable.value).toISOString();
           break;
       }
-      result[variable.name] = value;
+      result[variable.name] = processedValue;
     });
     return result;
   }
@@ -610,32 +638,42 @@ export class BpmnModelerComponent {
       return;
     }
     
-    console.log('Starting process with ID:', processDefId); // Debug log
-    
     try {
       this.isLoading = true;
       this.showStartInstanceModal = false;
       
-      // Use existing startProcess method with explicit ID
+      // Prepare variables
+      const variables = this.prepareVariablesForStart();
+      console.log(`Starting process ${processDefId} with variables:`, variables);
+      
+      // Use explicit parameters
       const result = await lastValueFrom(
         this.processService.startProcess(
           processDefId,
-          this.startInstanceConfig.businessKey,
-          this.prepareVariablesForStart()
+          this.startInstanceConfig.businessKey || undefined,
+          variables
         )
       );
       
-      console.log('Process instance started:', result); // Debug log
+      console.log('Process instance created:', result);
       
-      // Type assertion for result
-      this.lastInstanceResult = {
-        id: result?.id || '',
-        definitionId: result?.definitionId || result?.processDefinitionId || '',
-        businessKey: result?.businessKey || '',
-      };
+      // REMOVE the instance verification - it's causing the 404 error
+      // const instance = await lastValueFrom(this.processService.getProcessInstance(result.id));
+      
+      // Set the result directly from the creation response
+      if (result && result.id) {
+        this.lastInstanceResult = {
+          id: result.id,
+          definitionId: result.definitionId || processDefId,
+          businessKey: result.businessKey || this.startInstanceConfig.businessKey || '',
+        };
+        
+        this.showInstanceStartedModal = true;
+      } else {
+        throw new Error('Process instance creation failed: Invalid response');
+      }
       
       this.isLoading = false;
-      this.showInstanceStartedModal = true;
     } catch (err) {
       this.isLoading = false;
       this.handleError(err);
@@ -694,16 +732,9 @@ export class BpmnModelerComponent {
 
   async saveDiagram(): Promise<void> {
     if (!this.saveEnabled) return;
-    try {
-      this.isLoading = true;
-      const xml = await this.exportDiagram();
-      await this.diagramService.saveDiagram(xml);
-      this.saveEnabled = false;
-      this.isLoading = false;
-    } catch (err) {
-      this.isLoading = false;
-      this.handleError(err);
-    }
+    
+    // Open the save dialog instead of directly saving
+    this.openSaveProcessModal();
   }
 
   async downloadDiagram(): Promise<void> {
@@ -791,5 +822,186 @@ export class BpmnModelerComponent {
         value: pv.defaultValue || ''
       }));
     }
+  }
+
+  // Add these methods
+  async openProcessModal(): Promise<void> {
+    try {
+      this.isLoading = true;
+      this.availableProcesses = await lastValueFrom(this.diagramService.getDeployedProcesses());
+      this.showOpenProcessModal = true;
+      this.isLoading = false;
+    } catch (err) {
+      this.isLoading = false;
+      this.handleError(err);
+    }
+  }
+
+  closeOpenProcessModal(): void {
+    this.showOpenProcessModal = false;
+  }
+
+  async loadProcess(processDefinitionId: string): Promise<void> {
+    try {
+      this.isLoading = true;
+      this.showOpenProcessModal = false;
+      
+      const xml = await lastValueFrom(this.diagramService.getProcessDefinitionXml(processDefinitionId));
+      
+      if (!xml) {
+        throw new Error('Failed to load process XML');
+      }
+      
+      this.importDiagram(xml)
+        .pipe(take(1))
+        .subscribe({
+          next: (result) => {
+            if (result?.warnings?.length) {
+              console.warn('Warnings when importing BPMN:', result.warnings);
+            }
+            this.isLoading = false;
+            this.saveEnabled = false; // Process was just loaded
+            this.showSuccessNotification('Process loaded successfully');
+          },
+          error: (err) => {
+            this.isLoading = false;
+            this.handleError(err);
+          }
+        });
+    } catch (err) {
+      this.isLoading = false;
+      this.handleError(err);
+    }
+  }
+
+  openSaveProcessModal(): void {
+    // Get current process name and ID from diagram
+    this.saveProcessConfig = {
+      name: this.getProcessNameFromDiagram() || 'My Process',
+      id: this.getProcessIdFromDiagram() || ''
+    };
+    this.showSaveProcessModal = true;
+  }
+
+  closeSaveProcessModal(): void {
+    this.showSaveProcessModal = false;
+  }
+
+  async saveProcessToRepository(): Promise<void> {
+    if (!this.saveProcessConfig.name) {
+      this.handleError(new Error('Process name is required'));
+      return;
+    }
+    
+    try {
+      this.isLoading = true;
+      this.showSaveProcessModal = false;
+      
+      // Get current XML
+      const xml = await this.exportDiagram();
+      
+      // Generate a valid filename
+      const filename = this.saveProcessConfig.id || 
+        this.saveProcessConfig.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      
+      // Update the process name and ID in the XML
+      const updatedXml = this.updateProcessNameAndId(
+        xml, 
+        this.saveProcessConfig.name, 
+        this.saveProcessConfig.id || filename
+      );
+      
+      console.log("Saving process to repository and filesystem...");
+      
+      // First, deploy to Camunda engine
+      const deployResult = await lastValueFrom(
+        this.diagramService.saveAsDeployment(updatedXml, this.saveProcessConfig.name)
+      );
+      console.log("Process deployed:", deployResult);
+      
+      // Then save to filesystem
+      try {
+        const fsResult = await lastValueFrom(
+          this.diagramService.saveToFilesystem(updatedXml, `${filename}.bpmn`)
+        );
+        console.log("Process saved to filesystem:", fsResult);
+      } catch (fsErr) {
+        console.error("Failed to save to filesystem:", fsErr);
+        // Show a warning but continue
+        this.showWarningNotification("Process deployed, but couldn't be saved to filesystem");
+      }
+      
+      this.isLoading = false;
+      this.showSuccessNotification('Process saved successfully');
+      
+      // Import the updated XML back into the modeler
+      this.importDiagram(updatedXml).subscribe();
+    } catch (err) {
+      this.isLoading = false;
+      this.handleError(err);
+    }
+  }
+
+  // Helper methods
+  private getProcessNameFromDiagram(): string {
+    try {
+      const canvas = this.bpmnJS.get('canvas');
+      const rootElement = canvas.getRootElement();
+      return rootElement?.businessObject?.name || '';
+    } catch (err) {
+      console.error('Error getting process name:', err);
+      return '';
+    }
+  }
+
+  updateProcessNameAndId(xml: string, name: string, id: string): string {
+    if (!name && !id) return xml;
+    
+    // Create a temporary DOM parser to modify the XML
+    const parser = new DOMParser();
+    const serializer = new XMLSerializer();
+    const xmlDoc = parser.parseFromString(xml, "application/xml");
+    
+    // Find the process element
+    const processElement = xmlDoc.querySelector('bpmn\\:process, process');
+    if (processElement) {
+      // Update name and ID if provided
+      if (name) {
+        processElement.setAttribute('name', name);
+      }
+      
+      if (id) {
+        const oldId = processElement.getAttribute('id');
+        processElement.setAttribute('id', id);
+        
+        // Update references in the diagram
+        const bpmnPlane = xmlDoc.querySelector('bpmndi\\:BPMNPlane, BPMNPlane');
+        if (bpmnPlane && bpmnPlane.getAttribute('bpmnElement') === oldId) {
+          bpmnPlane.setAttribute('bpmnElement', id);
+        }
+      }
+    }
+    
+    return serializer.serializeToString(xmlDoc);
+  }
+
+  showWarningNotification(message: string): void {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-yellow-500 text-white p-3 rounded shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 3000);
+  }
+
+  showSuccessNotification(message: string): void {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white p-3 rounded shadow-lg z-50';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 3000);
   }
 }
