@@ -50,23 +50,26 @@ export class DiagramService {
   // Add method to save process to filesystem
   saveToFilesystem(xml: string, filename: string): Observable<any> {
     console.log(`Attempting to save file: ${filename}`);
-    console.log(`API URL: ${this.camundaApiUrl}/process-definition/save-to-filesystem`);
     
-    // Log the first 100 chars of XML to verify content
-    console.log(`XML content (first 100 chars): ${xml.substring(0, 100)}...`);
+    // Use the simpler API endpoint
+    const endpoint = 'http://localhost:8222/workflow-service/api/save-process';
     
-    // Use a more verbose HTTP request to catch all errors
-    return this.http.post(`${this.camundaApiUrl}/process-definition/save-to-filesystem`, {
+    return this.http.post(endpoint, {
       xml,
       filename
-    }, {
-      observe: 'response'  // Get full HTTP response
     }).pipe(
-      tap(response => console.log('Save response:', response)),
+      tap(response => {
+        console.log('Save response:', response);
+      }),
       catchError(error => {
-        console.error('Save error details:', error);
-        if (error.error) console.error('Error response body:', error.error);
-        return throwError(() => error);
+        console.error('Error saving to filesystem:', error);
+        let errorMsg = 'Failed to save to filesystem';
+        
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
+        
+        return throwError(() => new Error(errorMsg));
       })
     );
   }

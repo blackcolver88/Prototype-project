@@ -5,84 +5,82 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/engine-rest/process-definition")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api")
 public class ProcessResourceController {
 
     private final Logger logger = LoggerFactory.getLogger(ProcessResourceController.class);
     
-    @Value("${project.base-dir:/home/moemen/prototype project/Prototype-project/backend/workflow-service}")
-    private String projectBaseDir;
+    // Use your fixed project path instead of the dynamic ${user.dir}
+    private final String processesPath = "/home/moemen/prototype project/Prototype-project/backend/workflow-service/src/main/resources/processes";
+    
+    private final String tempDir = System.getProperty("java.io.tmpdir");
 
-    @PostMapping("/save-to-filesystem")
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        logger.info("Test endpoint reached");
+        return ResponseEntity.ok(Map.of("status", "Controller is working"));
+    }
+
+    @PostMapping("/save-process")
     public ResponseEntity<?> saveToFilesystem(@RequestBody Map<String, String> request) {
         String xml = request.get("xml");
         String filename = request.get("filename");
         
-        logger.info("Received save-to-filesystem request for file: {}", filename);
+        logger.info("Received save-process request for file: {}", filename);
+        logger.debug("Using processes directory: {}", processesPath);
 
         if (xml == null || filename == null) {
+            logger.error("Missing required parameters");
             return ResponseEntity.badRequest().body(Map.of("error", "Missing required parameters"));
         }
-
+        
         try {
-            // Create File objects with proper path handling
-            File baseDir = new File(projectBaseDir);
-            File sourcesDir = new File(baseDir, "src/main/resources/processes");
-            File targetDir = new File(baseDir, "target/classes/processes");
+            // Use the fixed processes directory path
+            File sourcesDir = new File(processesPath);
             
-            // Ensure directories exist
-            if (!sourcesDir.exists() && !sourcesDir.mkdirs()) {
-                logger.error("Failed to create source directory: {}", sourcesDir.getAbsolutePath());
-                throw new IOException("Cannot create source directory");
+            // Make sure the directory exists
+            if (!sourcesDir.exists()) {
+                logger.info("Creating directory: {}", sourcesDir.getAbsolutePath());
+                if (!sourcesDir.mkdirs()) {
+                    logger.error("Failed to create directory: {}", sourcesDir.getAbsolutePath());
+                }
             }
             
-            if (!targetDir.exists() && !targetDir.mkdirs()) {
-                logger.error("Failed to create target directory: {}", targetDir.getAbsolutePath());
-                throw new IOException("Cannot create target directory");
-            }
-            
-            // Save to source directory
+            // Save the file to the correct location
             File sourceFile = new File(sourcesDir, filename);
-            logger.info("Writing to source file: {}", sourceFile.getAbsolutePath());
-            
             try (FileWriter writer = new FileWriter(sourceFile)) {
                 writer.write(xml);
-            }
-            
-            // Save to target directory for immediate use
-            File targetFile = new File(targetDir, filename);
-            logger.info("Writing to target file: {}", targetFile.getAbsolutePath());
-            
-            try (FileWriter writer = new FileWriter(targetFile)) {
-                writer.write(xml);
-            }
-            
-            return ResponseEntity.ok(Map.of(
+                logger.info("Successfully saved to: {}", sourceFile.getAbsolutePath());
+                
+                // Also save to target/classes/processes for immediate runtime use
+                String targetPath = processesPath.replace("/src/main/", "/target/classes/");
+                File targetDir = new File(targetPath);
+                if (!targetDir.exists()) {
+                    targetDir.mkdirs();
+                }
+                
+                try (FileWriter targetWriter = new FileWriter(new File(targetDir, filename))) {
+                    targetWriter.write(xml);
+                    logger.info("Also saved to runtime directory: {}", targetDir.getAbsolutePath());
+                }
+                
+                return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Process saved successfully",
-                    "sourcePath", sourceFile.getAbsolutePath(),
-                    "targetPath", targetFile.getAbsolutePath()
-            ));
-            
+                    "message", "File saved successfully",
+                    "path", sourceFile.getAbsolutePath()
+                ));
+            }
         } catch (Exception e) {
-            logger.error("Error saving file to filesystem", e);
-            return ResponseEntity.status(500).body(Map.of(
-                    "error", "Failed to save file: " + e.getMessage(),
-                    "details", e.toString()
+            logger.error("Error saving file", e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                "error", "Failed to save file: " + e.getMessage()
             ));
         }
     }
