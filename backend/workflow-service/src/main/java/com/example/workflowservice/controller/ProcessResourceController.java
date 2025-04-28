@@ -3,12 +3,10 @@ package com.example.workflowservice.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -17,7 +15,6 @@ public class ProcessResourceController {
 
     private final Logger logger = LoggerFactory.getLogger(ProcessResourceController.class);
     
-    // Use your fixed project path instead of the dynamic ${user.dir}
     private final String processesPath = "/home/moemen/prototype project/Prototype-project/backend/workflow-service/src/main/resources/processes";
     
     private final String tempDir = System.getProperty("java.io.tmpdir");
@@ -42,7 +39,6 @@ public class ProcessResourceController {
         }
         
         try {
-            // Use the fixed processes directory path
             File sourcesDir = new File(processesPath);
             
             // Make sure the directory exists

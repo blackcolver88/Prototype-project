@@ -9,7 +9,6 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,9 +35,9 @@ public class ProcessFormSubmissionDelegate implements JavaDelegate {
             throw new RuntimeException("userId is required but not provided in process variables");
         }
 
-        System.out.println("Delegate executing with formSubmissionId: " + formSubmissionId);
-        System.out.println("Available services: " + discoveryClient.getServices());
-        System.out.println("Form-service instances: " + discoveryClient.getInstances("FORM-SERVICE"));
+        log.info("Delegate executing with formSubmissionId: {}", formSubmissionId);
+        log.info("Available services: {}", discoveryClient.getServices());
+        log.info("Form-service instances: {}", discoveryClient.getInstances("FORM-SERVICE"));
 
         List<FormSubmissionDTO.FormValueDTO> formValues = objectMapper.readValue(formValuesJson,
                 new TypeReference<List<FormSubmissionDTO.FormValueDTO>>() {});
@@ -51,7 +50,7 @@ public class ProcessFormSubmissionDelegate implements JavaDelegate {
             // Perform any internal workflow logic here if needed
             execution.setVariable("submissionStatus", "SUCCESS");
         } catch (Exception e) {
-            System.err.println("Failed to process submission: " + e.getMessage());
+            log.error("Failed to process submission: {}", e.getMessage(), e);
             execution.setVariable("submissionStatus", "FAILED");
             throw new RuntimeException("Failed to process submission", e);
         }

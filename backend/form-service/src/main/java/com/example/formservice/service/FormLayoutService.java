@@ -1,7 +1,6 @@
 package com.example.formservice.service;
 
 import com.example.formservice.entities.FormLayout;
-import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
