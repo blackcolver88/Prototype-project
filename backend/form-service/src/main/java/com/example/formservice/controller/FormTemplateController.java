@@ -1,9 +1,6 @@
 package com.example.formservice.controller;
 
-import com.example.formservice.DTO.FormInputRequest;
-import com.example.formservice.DTO.FormLayoutDTO;
-import com.example.formservice.DTO.FormLayoutOrderDTO;
-import com.example.formservice.DTO.FormInputOrderDTO;
+import com.example.formservice.DTO.*;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -122,6 +119,13 @@ public class FormTemplateController {
         return ResponseEntity.ok(updatedInputs);
     }
 
+    @PostMapping("/{formTemplateId}/sections")
+    public ResponseEntity<FormLayout> addSectionToFormTemplate(
+            @PathVariable Long formTemplateId,
+            @RequestBody FormLayout section) {
+        FormLayout savedSection = formTemplateService.addSectionToFormTemplate(formTemplateId, section);
+        return ResponseEntity.ok(savedSection);
+    }
     @PostMapping("/form-layouts/{sectionId}/subsections")
     public ResponseEntity<FormLayout> addSubsectionToSection(
             @PathVariable Long sectionId,
@@ -129,20 +133,19 @@ public class FormTemplateController {
         FormLayout savedSubsectionDto = formTemplateService.addSubsectionToSection(sectionId, subsection);
         return ResponseEntity.ok(savedSubsectionDto);
     }
-
-    @GetMapping("/form-layouts/{sectionId}/subsections")
-    public ResponseEntity<List<FormLayout>> getSubsectionsBySection(@PathVariable Long sectionId) {
-        List<FormLayout> subsections = formTemplateService.getSubsectionsBySection(sectionId);
-        return ResponseEntity.ok(subsections);
+    @PostMapping("/form-layouts/{layoutId}/form-inputs")
+    public ResponseEntity<FormInput> addFormInputToSectionOrSubsection(
+            @PathVariable Long layoutId,
+            @RequestBody FormInput formInput) {
+        FormInput savedFormInput = formTemplateService.addFormInputToSectionOrSubsection(layoutId, formInput);
+        return ResponseEntity.ok(savedFormInput);
     }
 
-    @PutMapping("/form-layouts/{sectionId}/subsections/order")
-    public ResponseEntity<FormLayout> updateSubsectionsOrder(
-            @PathVariable Long sectionId,
-            @RequestBody List<FormLayoutOrderDTO> subsectionOrders) {
-        FormLayout updatedSection = formTemplateService.updateSubsectionOrder(sectionId, subsectionOrders);
-        return ResponseEntity.ok(updatedSection);
+    @GetMapping("/{formTemplateId}/full")
+    public ResponseEntity<FormTemplateDTO> getFullFormTemplate(@PathVariable Long formTemplateId) {
+        FormTemplate fullFormTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
+        FormTemplateDTO dto = new FormTemplateDTO(fullFormTemplate);
+        return ResponseEntity.ok(dto);
     }
-
 }
 

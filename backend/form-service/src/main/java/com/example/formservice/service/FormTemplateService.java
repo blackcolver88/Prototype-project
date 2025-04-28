@@ -326,4 +326,66 @@ public class FormTemplateService {
 
         return formLayoutRepository.findById(sectionId).orElseThrow();
     }
+    @Transactional
+    public FormLayout addSectionToFormTemplate(Long formTemplateId, FormLayout section) {
+        FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + formTemplateId));
+
+        section.setType(FormLayoutType.Section);
+        section.setFormTemplate(formTemplate);
+
+        int newPosition = formTemplate.getFormLayouts().size();
+        section.setOrdinalPosition(newPosition);
+
+        FormLayout savedSection = formLayoutRepository.save(section);
+        formTemplate.getFormLayouts().add(savedSection);
+        formTemplateRepository.save(formTemplate);
+
+        return savedSection;
+    }
+    @Transactional
+    public FormInput addFormInputToSectionOrSubsection(Long layoutId, FormInput formInput) {
+        FormLayout layout = formLayoutRepository.findById(layoutId)
+                .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + layoutId));
+
+        formInput.setFormLayout(layout);
+
+        int newPosition = layout.getFormInputs().size();
+        formInput.setOrdinalPosition(newPosition);
+
+        FormInput savedFormInput = formInputRepository.save(formInput);
+        layout.getFormInputs().add(savedFormInput);
+        formLayoutRepository.save(layout);
+
+        return savedFormInput;
+    }
+
+    @Transactional(readOnly = true)
+    public FormTemplate getFullFormTemplate(Long formTemplateId) {
+        FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + formTemplateId));
+
+        List<FormLayout> sections = formLayoutRepository.findByFormTemplateIdAndParentIsNullOrdered(formTemplateId);
+
+        for (FormLayout section : sections) {
+            loadSubsectionsAndInputs(section);
+        }
+
+        formTemplate.getFormLayouts().clear();
+        formTemplate.getFormLayouts().addAll(sections);
+
+        return formTemplate;
+    }
+
+    private void loadSubsectionsAndInputs(FormLayout layout) {
+        List<FormLayout> subsections = formLayoutRepository.findByParentIdOrdered(layout.getId());
+        layout.setChildren(subsections);
+
+        for (FormLayout subsection : subsections) {
+            loadSubsectionsAndInputs(subsection); 
+        }
+
+        List<FormInput> formInputs = formInputRepository.findByFormLayoutIdOrdered(layout.getId());
+        layout.setFormInputs(formInputs);
+    }
 }
