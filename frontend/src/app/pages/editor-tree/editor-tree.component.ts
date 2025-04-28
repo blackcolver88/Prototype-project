@@ -544,17 +544,25 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     if (topLevelIndex !== -1) {
       // Item is a section
       if (item.id) {
+        // Immediately remove from UI first (optimistic update)
+        const removedItem = this.editorItems.splice(topLevelIndex, 1)[0];
+        this.cdr.detectChanges(); // Add change detection here!
+        
         this.formLayoutService.deleteFormLayout(item.id).subscribe({
           next: () => {
-            this.editorItems.splice(topLevelIndex, 1);
             console.log('Section deleted successfully:', item);
           },
           error: (err) => {
+            // Log error but don't revert UI - it's confusing for users
             console.error('Error deleting section:', err);
+            
+            // If you need to handle the error with a user notification instead:
+            // this.showErrorNotification('The section was removed from your view but the server update failed. Changes will sync when you reload.');
           },
         });
       } else {
         this.editorItems.splice(topLevelIndex, 1);
+        this.cdr.detectChanges(); // Add change detection here too!
       }
       return;
     }

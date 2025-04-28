@@ -86,7 +86,12 @@ export class EditFormComponent {
         takeUntil(this.destroy$),
         switchMap(formTemplate => {
           console.log('Loaded form template:', formTemplate);
-          this.editorItems = formTemplate.formLayouts || [];
+          
+          // Add proper type annotations to the sort parameters
+          this.editorItems = formTemplate.formLayouts
+            ?.sort((a: {ordinalPosition?: number}, b: {ordinalPosition?: number}) => 
+                (a.ordinalPosition || 0) - (b.ordinalPosition || 0)) || [];
+            
           this.formTitle = formTemplate.title ?? '';
           this.templateId = formTemplate.id.toString();
           
@@ -250,11 +255,17 @@ export class EditFormComponent {
     this.editorItems = this.editorItems.map(layout => {
       if (layout.type === 'Section' && layout.id) {
         const layoutInputs = inputsByLayoutId[layout.id] || [];
+        
+        // Add proper type annotations here too
+        const sortedInputs = [...layoutInputs].sort((a: FormInput, b: FormInput) => 
+          (a.ordinalPosition || 0) - (b.ordinalPosition || 0));
+          
         return {
           ...layout,
-          items: layoutInputs.map(input => ({
+          items: sortedInputs.map(input => ({
             id: input.id, 
             type: input.type,
+            ordinalPosition: input.ordinalPosition, // Preserve ordinalPosition
             config: {
               label: input.title,
               textName: input.title,
@@ -268,7 +279,7 @@ export class EditFormComponent {
       return layout;
     });
     
-    console.log('Updated editor items:', this.editorItems);
+    console.log('Updated editor items with proper ordering:', this.editorItems);
   }
 
   private updateEditorItemWithMultipleValues(input: FormInput) {
