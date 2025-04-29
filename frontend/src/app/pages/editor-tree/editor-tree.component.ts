@@ -265,7 +265,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       height: '80vh',
       data: {
         item: { name: 'Section' },
-        autoCreate: false, // Flag to indicate this is an auto-created section
+        autoCreate: false,
       },
       disableClose: false,
       panelClass: 'custom-dialog-container',
