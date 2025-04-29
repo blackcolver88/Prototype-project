@@ -1,11 +1,12 @@
 import { Component, ViewChild, ElementRef, PLATFORM_ID, Inject, EventEmitter, Output } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { from, Observable, Subject } from 'rxjs';
+import { from, Observable, Subject, Subscription } from 'rxjs';
 import { take, catchError, lastValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiagramService } from '../../services/diagram.service';
 import { ProcessService } from '../../services/process.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface ServiceTaskConfig {
   implementation: 'delegateExpression' | 'expression' | 'class';
@@ -196,71 +197,151 @@ export class BpmnModelerComponent {
   // Add this property
   createNewProcess: boolean = true;
 
+  private routeSubscription: Subscription | null = null;
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private diagramService: DiagramService,
-    private processService: ProcessService
-  ) {}
+    private processService: ProcessService,
+    private route: ActivatedRoute
+  ) {
+    // Empty constructor is fine
+  }
 
   ngAfterContentInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.isLoading = true;
-
-      Promise.all([
-        import('bpmn-js/lib/Modeler'),
-        import('bpmn-js-properties-panel'),
-        import('camunda-bpmn-moddle/resources/camunda.json'),
-        import('diagram-js/lib/navigation/keyboard-move'),
-        import('diagram-js/lib/navigation/zoomscroll'),
-      ]).then(([
-        Modeler,
-        PropertiesPanelModule,
-        camundaModdleDescriptor,
-        KeyboardMove,
-        ZoomScroll,
-      ]) => {
-        const { default: BpmnModeler } = Modeler;
-        const { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule } = PropertiesPanelModule;
-
-        this.bpmnJS = new BpmnModeler({
-          container: this.bpmnModelerRef.nativeElement,
-          additionalModules: [
-            BpmnPropertiesPanelModule,
-            BpmnPropertiesProviderModule,
-            KeyboardMove.default,
-            ZoomScroll.default,
-          ],
-          propertiesPanel: {
-            parent: this.propertiesRef.nativeElement,
-          },
-          moddleExtensions: {
-            camunda: camundaModdleDescriptor.default,
-          },
-          keyboard: { bindTo: window },
-        });
-
-        this.setupEventListeners();
-
-        this.importDiagram(this.xml)
-          .pipe(take(1), catchError((err) => {
-            this.handleError(err);
-            return [];
-          }))
-          .subscribe((result) => {
-            if (result?.warnings?.length) {
-              console.warn('Warnings when importing BPMN:', result.warnings);
-            }
-            this.isLoading = false;
-            this.saveEnabled = true;
-          });
-      });
+      this.initializeModeler();
     }
   }
 
   ngOnDestroy(): void {
-    if (isPlatformBrowser(this.platformId) && this.bpmnJS) {
+    // Clean up subscriptions
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
+    }
+    
+    // Destroy the BpmnJS instance if it exists
+    if (this.bpmnJS) {
       this.bpmnJS.destroy();
     }
+  }
+
+  private initializeModeler(): void {
+    this.isLoading = true;
+    
+    // Create a new modeler or destroy existing one if needed
+    if (this.bpmnJS) {
+      this.bpmnJS.destroy();
+      this.bpmnJS = null;
+    }
+
+    // Configure and initialize BPMN.js
+    Promise.all([
+      import('bpmn-js/lib/Modeler'),
+      import('bpmn-js-properties-panel'),
+      import('camunda-bpmn-moddle/resources/camunda.json'),
+      import('diagram-js/lib/navigation/keyboard-move'),
+      import('diagram-js/lib/navigation/zoomscroll'),
+    ]).then(async ([
+      Modeler,
+      PropertiesPanelModule,
+      camundaModdleDescriptor,
+      KeyboardMove,
+      ZoomScroll,
+    ]) => {
+      const { default: BpmnModeler } = Modeler;
+      const { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule } = PropertiesPanelModule;
+
+      this.bpmnJS = new BpmnModeler({
+        container: this.bpmnModelerRef.nativeElement,
+        additionalModules: [
+          BpmnPropertiesPanelModule,
+          BpmnPropertiesProviderModule,
+          KeyboardMove.default,
+          ZoomScroll.default,
+        ],
+        propertiesPanel: {
+          parent: this.propertiesRef.nativeElement,
+        },
+        moddleExtensions: {
+          camunda: camundaModdleDescriptor.default,
+        },
+        keyboard: { bindTo: window },
+      });
+
+      this.setupEventListeners();
+      
+      // Safely check for route parameters
+      let processId = null;
+      if (this.route) {
+        // Get processId from URL if available
+        processId = this.route.snapshot.queryParamMap.get('processId');
+        console.log('Process ID from URL:', processId);
+      } else {
+        console.warn('Route is not available');
+      }
+      
+      // Based on URL parameters, load appropriate diagram
+      if (processId) {
+        this.loadExistingProcess(processId);
+      } else {
+        this.loadNewProcess();
+      }
+    });
+  }
+
+  private async loadExistingProcess(processId: string): Promise<void> {
+    console.log('Loading existing process:', processId);
+    try {
+      const xml = await lastValueFrom(this.diagramService.getProcessDefinitionXml(processId));
+      if (xml) {
+        console.log('Process XML loaded successfully');
+        this.importDiagram(xml)
+          .pipe(take(1))
+          .subscribe({
+            next: (result) => {
+              if (result?.warnings?.length) {
+                console.warn('Warnings when importing BPMN:', result.warnings);
+              }
+              this.isLoading = false;
+              this.saveEnabled = false;
+              console.log('Process loaded into modeler');
+            },
+            error: (err) => {
+              this.handleError(err);
+              this.isLoading = false;
+              // Fall back to a new process if loading fails
+              this.loadNewProcess();
+            }
+          });
+      } else {
+        console.error('No XML content returned for process ID:', processId);
+        this.loadNewProcess();
+      }
+    } catch (err) {
+      console.error('Error loading process by ID:', err);
+      this.loadNewProcess();
+    }
+  }
+
+  private loadNewProcess(): void {
+    console.log('Loading new process template');
+    this.importDiagram(this.xml)
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          if (result?.warnings?.length) {
+            console.warn('Warnings when importing BPMN template:', result.warnings);
+          }
+          this.isLoading = false;
+          this.saveEnabled = false;
+          console.log('New process template loaded');
+        },
+        error: (err) => {
+          this.handleError(err);
+          this.isLoading = false;
+        }
+      });
   }
 
   private setupEventListeners(): void {

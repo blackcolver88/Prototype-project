@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { Observable, of, throwError, forkJoin } from 'rxjs';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -95,6 +95,33 @@ export class DiagramService {
           deploymentId: def.deploymentId,
           processDefinitionId: def.id
         })))
+      );
+  }
+
+  // Get all deployed processes with more details
+  getDeployedProcessesWithDetails(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.camundaApiUrl}/process-definition?latestVersion=true`)
+      .pipe(
+        switchMap(definitions => {
+          if (definitions.length === 0) return of([]);
+          
+          // Add deployment time to each process definition
+          const processesWithDetails = definitions.map(def => {
+            return this.http.get<any>(`${this.camundaApiUrl}/deployment/${def.deploymentId}`).pipe(
+              map(deployment => ({
+                id: def.id,
+                key: def.key,
+                name: def.name || def.key,
+                version: def.version,
+                deploymentId: def.deploymentId,
+                deploymentTime: deployment.deploymentTime || 'Unknown',
+                suspended: def.suspended
+              }))
+            );
+          });
+          
+          return forkJoin(processesWithDetails);
+        })
       );
   }
 }

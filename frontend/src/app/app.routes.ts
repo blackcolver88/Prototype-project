@@ -7,6 +7,8 @@ import { FormListComponent } from './user/pages/form-list/form-list.component';
 import { EditFormComponent } from './user/pages/edit-form/edit-form.component';
 import { AdminSubmissionComponent } from './pages/admin-submission/admin-submission.component';
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
+import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
+
 
 export const routes: Route[] = [
   { path: '', redirectTo: '/form-template', pathMatch: 'full' },
@@ -19,6 +21,7 @@ export const routes: Route[] = [
   { path: 'edit/:userId/:submissionId', component: EditFormComponent },
   { path: 'list_submissions', component: AdminSubmissionComponent },
   { path: 'diagram', component: BpmnModelerComponent },
+  { path: 'processes', component: ProcessesPageComponent },
 
 
 
