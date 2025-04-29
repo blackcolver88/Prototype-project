@@ -59,26 +59,34 @@
     </ng-container>
 
 
-    <ng-template #recursiveSection let-items="items">
+    <ng-template #recursiveSection let-items="items" let-parent="parent">
       <div *ngFor="let item of items" class="mb-4">
         <ng-container [ngSwitch]="item?.type">
           <!-- Section -->
           <ng-container *ngSwitchCase="'Section'">
-            <div cdkDrag class="bg-white p-4 rounded-lg shadow-md">
+            <div cdkDrag class="bg-white p-4 rounded-lg shadow-md" [attr.data-section-id]="item.id">
               <div class="flex justify-between items-center mb-2">
                 <h3 class="font-semibold text-gray-700">{{ item.title || 'Section' }}</h3>
-                <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
-                  <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
-                </button>
+
+              <div class="flex space-x-2">
+        <button (click)="addSubsection(item)" class="text-blue-500 hover:text-blue-700">
+          <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add Subsection
+        </button>
+        <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
+          <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+        </button>
+      </div>
               </div>
               <div cdkDropList
-                  [cdkDropListData]="item.items || []"
-                  (cdkDropListDropped)="onSectionItemDropped($event, item)"
-                  class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg relative z-10">
-                <div *ngFor="let sectionItem of item.items" 
-                    cdkDrag 
-                    class="mb-2 relative z-0">
-                  <div class="bg-white p-3 rounded shadow-sm relative">
+              [cdkDropListData]="item.items || []"
+              (cdkDropListDropped)="onSectionItemDropped($event, item)"
+              class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg relative z-10">
+              <div *ngFor="let sectionItem of item.items" 
+              cdkDrag 
+              class="mb-2 relative z-0">
+              <div class="bg-white p-3 rounded shadow-sm relative">
+                <ng-container [ngSwitch]="sectionItem?.type">
+
                     <!-- Text Field -->
                     <ng-container *ngIf="sectionItem?.type === 'TEXTFIELD'">
                       <app-textform [label]="sectionItem.config.label" 
@@ -167,122 +175,260 @@
                         (buttonClick)="handleButtonClick(sectionItem.config.type)">
                       </app-button>
                     </ng-container>
+                  </ng-container>
 
                     <!-- Delete Button -->
                     <button (click)="removeItem(sectionItem)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">
                       <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- Form  -->
-          <ng-container *ngSwitchDefault>
-            <div class="bg-white p-3 rounded shadow-sm relative">
-              <!-- Text Field -->
-              <ng-container *ngIf="item?.type === 'TEXTFIELD'">
-                <app-textform [label]="item.config.label" 
-                            [textName]="item.config.textName"
-                            [type]="item.config.type" 
-                            [placeholder]="item.config.placeholder"
-                      >
-                </app-textform>
-              </ng-container>
-
-              <!-- Password Field -->
-              <ng-container *ngIf="item?.type === 'PASSWORD'">
-
-                <app-password 
-                  [label]="item.config.label"
-                  [placeholder]="item.config.placeholder">
-                </app-password>
-              </ng-container>
-
-              <!-- Email -->
-              <ng-container *ngIf="item?.type === 'EMAIL'">
-                <app-email [label]="item.config.label" 
-                         [placeholder]="item.config.placeholder">
-                </app-email>
-              </ng-container>
-
-              <!-- Checkbox Group -->
-              <ng-container *ngIf="item?.type === 'CHECKBOX'">
-                <app-checkbox [groupLabel]="item.config.groupLabel"
-                            [name]="item.config.name" 
-                            [options]="item.config.options"
-                            [selectedOptions]="item.config.selectedOption">
-                </app-checkbox>
-              </ng-container>
-              
-              <!-- Phone Number -->
-              <ng-container *ngIf="item?.type === 'NUMBER'">
-                <app-phone-number [label]="item.config.label"
-                                [placeholder]="item.config.placeholder">
-                </app-phone-number>
-              </ng-container>
-
-              <ng-container *ngIf="item?.type === 'textarea'">
-                <app-text-area [label]="item.label">
-                </app-text-area>
-              </ng-container>
-              
-              <!-- Radio Group -->
-              <ng-container *ngIf="item?.type === 'RADIO_BUTTON'">
-                <app-radio-button
-                  [groupLabel]="item.config.groupLabel"
-                  [name]="item.config.name"
-                  [options]="item.config.options"
-                  [isRequired]="item.config.isRequired"
-                  [isDisabled]="item.config.isDisabled"
-                  [selectedOption]="item.config.selectedOption">
-                </app-radio-button>
-              </ng-container>
-              
-              <!-- Select Box -->
-              <ng-container *ngIf="item?.type === 'SELECT_BOX'">
-                <app-select-box
-                  [label]="item.config.labelText"
-                  [options]="getOptionsArray(item.config.options)">
-                </app-select-box>
-              </ng-container>
-              
-              <!-- Date Picker -->
-              <ng-container *ngIf="item?.type === 'datepicker'">
-                <app-datepicker [label]="item.config.label">
-                </app-datepicker>
-              </ng-container>
-
-              <!-- Basic Date Picker -->
-              <ng-container *ngIf="item?.type === 'basic_datepicker'">
-                <app-basic-datepicker [label]="item.config.label">
-                </app-basic-datepicker>
-              </ng-container>
-
-              <!-- Button -->
-              <ng-container *ngIf="item?.type === 'button'">
-                <app-button
-                  [label]="item.config.label"
-                  [type]="item.config.type"
-                  (buttonClick)="handleButtonClick(item.config.type)">
-                </app-button>
-              </ng-container>
-
-              <!-- Delete Button -->
-              <button (click)="removeItem(item)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">
+                </div> 
+      <!--subsection in section-->
+      <div *ngIf="item.children?.length > 0" class="mt-4">     
+        <ng-container *ngFor="let subsection of item.children" class="mt-4">
+          <div *ngIf="subsection.type === 'Subsection'" class="bg-gray-100 p-4 rounded-lg shadow-sm mb-3">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-semibold text-gray-600">{{ subsection.title || 'Subsection' }}</h4>
+              <button (click)="removeItem(subsection)" class="text-red-400 hover:text-red-700">
                 <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
               </button>
+            </div>
+            
+           <div cdkDropList
+     [cdkDropListData]="subsection.items || []"
+     (cdkDropListDropped)="onSubsectionItemDropped($event, subsection)"
+     class="min-h-[30px] p-2 border-2 border-dashed border-gray-100 rounded-lg">
+              
+            <ng-container *ngIf="subsection.items && subsection.items.length > 0; else emptySubsection">
+              <div *ngFor="let subItem of subsection.items" cdkDrag class="mb-2">
+                <div class="bg-white p-3 rounded shadow-sm relative">
+                          
+                    <ng-container [ngSwitch]="subItem?.type">
+                      <!-- Text Field -->
+                      <ng-container *ngSwitchCase="'TEXTFIELD'">
+                        <app-textform 
+                          [label]="subItem.config?.label || 'Text Field'" 
+                          [textName]="subItem.config?.textName || ''"
+                          [type]="subItem.config?.type || 'text'" 
+                          [placeholder]="subItem.config?.placeholder || ''">
+                        </app-textform>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'PASSWORD'">
+                        <app-password 
+                          [label]="subItem.config?.label || 'Password'"
+                          [placeholder]="subItem.config?.placeholder || 'Enter password'">
+                        </app-password>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'EMAIL'">
+                        <app-email 
+                          [label]="subItem.config?.label || 'Email'" 
+                          [placeholder]="subItem.config?.placeholder || 'Enter email'">
+                        </app-email>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'CHECKBOX'">
+                        <app-checkbox 
+                          [groupLabel]="subItem.config?.label || 'Checkbox Group'"
+                          [name]="subItem.config?.name || 'checkbox-group'" 
+                          [options]="subItem.config?.options || []"
+                          [selectedOptions]="subItem.config?.selectedOption || []">
+                        </app-checkbox>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'NUMBER'">
+                        <app-phone-number 
+                          [label]="subItem.config?.label || 'Phone Number'"
+                          [placeholder]="subItem.config?.placeholder || 'Enter phone number'">
+                        </app-phone-number>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'textarea'">
+                        <app-text-area 
+                          [label]="subItem.config?.label || 'Text Area'"
+                          [placeholder]="subItem.config?.placeholder || 'Enter text here'">
+                        </app-text-area>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'RADIO_BUTTON'">
+                        <app-radio-button
+                          [groupLabel]="subItem.config?.label || 'Radio Group'"
+                          [name]="subItem.config?.name || 'radio-group'"
+                          [options]="subItem.config?.options || []"
+                          [isRequired]="subItem.config?.isRequired || false"
+                          [isDisabled]="subItem.config?.isDisabled || false"
+                          [selectedOption]="subItem.config?.selectedOption || null">
+                        </app-radio-button>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'SELECT_BOX'">
+                        <app-select-box
+                          [label]="subItem.config?.label || 'Select Option'"
+                          [options]="getOptionsArray(subItem.config?.options) || []">
+                        </app-select-box>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'datepicker'">
+                        <app-datepicker 
+                          [label]="subItem.config?.label || 'Select Date'">
+                        </app-datepicker>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'basic_datepicker'">
+                        <app-basic-datepicker 
+                          [label]="subItem.config?.label || 'Select Date'">
+                        </app-basic-datepicker>
+                      </ng-container>
+                      
+                      <ng-container *ngSwitchCase="'button'">
+                        <app-button
+                          [label]="subItem.config?.label || 'Button'"
+                          [type]="subItem.config?.type || 'button'"
+                          (buttonClick)="handleButtonClick(subItem.config?.type)">
+                        </app-button>
+                      </ng-container>
+        
+                      <ng-container *ngSwitchDefault>
+                        <div class="text-red-500 p-2 border border-red-200 bg-red-50 rounded">
+                          Unknown field type: {{subItem?.type}}
+                        </div>
+                      </ng-container>
+                    </ng-container>
+        
+                    <button (click)="removeItem(subItem)" 
+                            class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                            aria-label="Remove field">
+                      <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+              
+              <ng-template #emptySubsection>
+                <div class="text-gray-400 text-center py-2">
+                  Drop form inputs here
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+        </div>           
+              </div>            
+            </div>           
+          </ng-container>
+
+      <!-- Form Inputs -->
+          <ng-container *ngSwitchDefault>
+            <div cdkDrag class="bg-white p-3 rounded shadow-sm relative hover:shadow-md transition-shadow duration-200">
+              <button (click)="removeItem(item)" 
+                      class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      aria-label="Remove field">
+                <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+              </button>
+
+              <ng-container [ngSwitch]="item?.type">
+                <!-- Text Field -->
+                <ng-container *ngSwitchCase="'TEXTFIELD'">
+                  <app-textform [label]="item.config?.label || 'Text Field'" 
+                              [textName]="item.config?.textName || ''"
+                              [type]="item.config?.type || 'text'" 
+                              [placeholder]="item.config?.placeholder || ''">
+                  </app-textform>
+                </ng-container>
+
+                <!-- Password Field -->
+                <ng-container *ngSwitchCase="'PASSWORD'">
+                  <app-password 
+                    [label]="item.config?.label || 'Password'"
+                    [placeholder]="item.config?.placeholder || 'Enter password'">
+                  </app-password>
+                </ng-container>
+
+                <!-- Email Field -->
+                <ng-container *ngSwitchCase="'EMAIL'">
+                  <app-email [label]="item.config?.label || 'Email'" 
+                          [placeholder]="item.config?.placeholder || 'Enter email'">
+                  </app-email>
+                </ng-container>
+
+                <!-- Checkbox Group -->
+                <ng-container *ngSwitchCase="'CHECKBOX'">
+                  <app-checkbox [groupLabel]="item.config?.groupLabel || 'Options'"
+                              [name]="item.config?.name || 'checkbox-group'"
+                              [options]="item.config?.options || []"
+                              [selectedOptions]="item.config?.selectedOption || []">
+                  </app-checkbox>
+                </ng-container>
+                
+                <!-- Phone Number -->
+                <ng-container *ngSwitchCase="'NUMBER'">
+                  <app-phone-number [label]="item.config?.label || 'Phone Number'"
+                                  [placeholder]="item.config?.placeholder || 'Enter phone number'">
+                  </app-phone-number>
+                </ng-container>
+
+                <!-- Text Area -->
+                <ng-container *ngSwitchCase="'textarea'">
+                  <app-text-area 
+                    [label]="item.config?.label || 'Text Area'"
+                    [placeholder]="item.config?.placeholder || 'Enter text here'">
+                  </app-text-area>
+                </ng-container>
+                
+                <!-- Radio Group -->
+                <ng-container *ngSwitchCase="'RADIO_BUTTON'">
+                  <app-radio-button
+                    [groupLabel]="item.config?.groupLabel || 'Options'"
+                    [name]="item.config?.name || 'radio-group'"
+                    [options]="item.config?.options || []"
+                    [isRequired]="item.config?.isRequired || false"
+                    [isDisabled]="item.config?.isDisabled || false"
+                    [selectedOption]="item.config?.selectedOption || null">
+                  </app-radio-button>
+                </ng-container>
+                
+                <!-- Select Box -->
+                <ng-container *ngSwitchCase="'SELECT_BOX'">
+                  <app-select-box
+                    [label]="item.config?.label || 'Select Option'"
+                    [options]="getOptionsArray(item.config?.options) || []">
+                  </app-select-box>
+                </ng-container>
+                
+                <!-- Advanced Date Picker -->
+                <ng-container *ngSwitchCase="'datepicker'">
+                  <app-datepicker [label]="item.config?.label || 'Select Date'">
+                  </app-datepicker>
+                </ng-container>
+
+                <!-- Basic Date Picker -->
+                <ng-container *ngSwitchCase="'basic_datepicker'">
+                  <app-basic-datepicker [label]="item.config?.label || 'Select Date'">
+                  </app-basic-datepicker>
+                </ng-container>
+
+                <!-- Button -->
+                <ng-container *ngSwitchCase="'button'">
+                  <app-button
+                    [label]="item.config?.label || 'Button'"
+                    [type]="item.config?.type || 'button'"
+                    (buttonClick)="handleButtonClick(item.config?.type)">
+                  </app-button>
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                  <div class="text-red-500 p-2 border border-red-200 bg-red-50 rounded">
+                    Unknown field type: {{item?.type}}
+                  </div>
+                </ng-container>
+              </ng-container>
             </div>
           </ng-container>
         </ng-container>
       </div>
-    </ng-template>
-
-    <ng-container *ngTemplateOutlet="recursiveSection; context: { items: editorItems }">
-    </ng-container>
-
-    <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
+    </ng-template> 
+    <ng-container *ngTemplateOutlet="recursiveSection; context: { items: editorItems }"></ng-container>
+     <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
       <app-button
         label="Create"
         type="submit"

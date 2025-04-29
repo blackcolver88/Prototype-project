@@ -35,8 +35,7 @@ export class SectionConfigComponent implements OnInit {
 
   onSave(): void {
     if (this.sectionForm.valid) {
-      const formData = this.sectionForm.value;
-      
+      const formData = this.sectionForm.value; 
       this.dialogRef.close({
         type: 'Section',
         title: formData.title,

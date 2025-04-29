@@ -1,0 +1,15 @@
+.SUBSECTION {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .SUBSECTION .cdk-drag {
+    cursor: move;
+  }
+  
+  .SUBSECTION .nested {
+    margin-left: 20px;
+  }

@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, Subject,switchMap, takeUntil, throwError,} from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule} from '@fortawesome/angular-fontawesome';
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { TextformComponent } from '../../components/textform/textform.component';
 import { EmailComponent } from '../../components/email/email.component';
 import { CheckboxComponent } from '../../components/checkbox/checkbox.component';
@@ -38,6 +38,7 @@ import { FormInput } from '../../model/FormInput';
 import { MultipleValueService } from '../../services/multiple-value.service';
 import { MultipleValue } from '../../model/MultipleValue';
 import { FormInputService } from '../../services/form-input.service';
+import { SubsectionConfigComponent } from '../../configurations/subsection-config/subsection-config.component';
 
 export interface FoodNode {
   name: string;
@@ -47,7 +48,9 @@ export interface FoodNode {
 const TREE_DATA: FoodNode[] = [
   {
     name: 'Layout',
-    children: [{ name: 'Section' }],
+    children: [{ name: 'Section' },
+      { name: 'Subsection' },
+    ],
   },
   {
     name: 'Form',
@@ -69,7 +72,7 @@ const TREE_DATA: FoodNode[] = [
   standalone: true,
   imports: [CdkDropList,CdkDrag,CommonModule,CdkTreeModule,DialogModule,CdkDropListGroup,CdkStepperModule,HttpClientModule,FontAwesomeModule,TextformComponent,
     EmailComponent,CheckboxComponent,PhoneNumberComponent,RadioButtonComponent,SelectBoxComponent,DatepickerComponent,ButtonComponent,BasicDatepickerComponent,
-    TextAreaComponent,PasswordComponent,
+    TextAreaComponent,PasswordComponent
   ],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css'],
@@ -100,7 +103,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     private formInputService: FormInputService,
     private multipleValueService: MultipleValueService
   ) {
-    library.addIcons(faTrashAlt);
+    library.addIcons(faTrashAlt, faPlus);
   }
 
   ngOnInit() {
@@ -125,7 +128,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         event.previousIndex,
         event.currentIndex
       );
-
+  
       // Check if we need to update section order in the database
       const reorderedSections = this.editorItems.filter(
         (item) => item.id && item.type === 'Section'
@@ -135,10 +138,10 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       }
       return;
     }
-
+  
     const draggedItem = event.item.data;
     if (!draggedItem) return;
-
+  
     if (event.container.id === this.acquiredItems.id) {
       if (draggedItem.name === 'Section') {
         this.createStandaloneSection(event.currentIndex);
@@ -148,12 +151,15 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           this.editorItems,
           targetIndex
         );
-
+  
         if (nearestSectionIndex !== -1) {
-          this.addItemToSection(
-            draggedItem,
-            this.editorItems[nearestSectionIndex]
-          );
+          const targetSection = this.editorItems[nearestSectionIndex];
+          
+          if (targetSection.children && targetSection.children.length > 0) {
+            this.addItemToSubsection(draggedItem, targetSection.children[0]);
+          } else {
+            this.addItemToSection(draggedItem, targetSection);
+          }
         } else {
           this.createSectionWithItem(draggedItem, targetIndex);
         }
@@ -161,9 +167,28 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     } else {
       const targetSection = this.findSectionFromEvent(event);
       if (targetSection) {
-        this.addItemToSection(draggedItem, targetSection);
+        if (targetSection.children && targetSection.children.length > 0) {
+          this.addItemToSubsection(draggedItem, targetSection.children[0]);
+        } else {
+          this.addItemToSection(draggedItem, targetSection);
+        }
       }
     }
+  }
+
+  private addItemToSubsection(draggedItem: any, subsection: any): void {
+    if (!subsection.items) {
+      subsection.items = [];
+    }
+    
+    this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((itemResult) => {
+        if (itemResult) {
+          subsection.items.push(itemResult);
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   private findNearestSectionIndex(items: any[], targetIndex: number): number {
@@ -244,10 +269,18 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+
   private addItemToSection(draggedItem: any, section: any): void {
     if (!section.items) {
       section.items = [];
     }
+    
+    if (draggedItem.name === 'Subsection') {
+      this.addSubsection(section);
+      return;
+    }
+    
     this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
       .pipe(takeUntil(this.destroy$))
       .subscribe((itemResult) => {
@@ -258,8 +291,10 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       });
   }
 
+
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
     if (draggedItem.name === 'Section') return;
+    
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
       height: '80vh',
@@ -271,7 +306,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       panelClass: 'custom-dialog-container',
       backdropClass: 'custom-dialog-backdrop',
     });
-
+  
     dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe((sectionResult) => {
@@ -279,8 +314,9 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           const section = {
             ...sectionResult,
             items: [],
+            children: [] 
           };
-
+  
           this.openDialog(
             this.getConfigComponent(draggedItem.name),
             draggedItem,
@@ -308,6 +344,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       'Date picker': DatepickerConfigComponent,
       Button: ButtonConfigComponent,
       Section: SectionConfigComponent,
+      Subsection: SubsectionConfigComponent,
     };
     return configMap[itemName];
   }
@@ -334,7 +371,6 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
     const inputsByLayoutId = formInputs.reduce((acc, input) => {
       const layoutId = input.formLayout.id;
-
       if (!acc[layoutId]) {
         acc[layoutId] = [];
       }
@@ -342,24 +378,32 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       return acc;
     }, {} as Record<number, FormInput[]>);
 
-    this.editorItems = this.editorItems.map((layout) => {
-      if (layout.type === 'Section' && layout.id) {
-        const layoutInputs = inputsByLayoutId[layout.id] || [];
-        return {
-          ...layout,
-          items: layoutInputs.map((input) => ({
-            id: input.id, // Include the ID from the database
-            type: input.type,
-            config: {
-              label: input.title,
-              required: input.required,
-            },
-          })),
-        };
+    function assignInputsToLayout(layout: any): any {
+      const layoutInputs = inputsByLayoutId[layout.id] || [];
+      const mappedInputs = layoutInputs.map((input) => ({
+        id: input.id,
+        type: input.type,
+        config: {
+          label: input.title,
+          required: input.required,
+        },
+      }));
+
+      let children = layout.children || [];
+      if (children.length > 0) {
+        children = children.map(assignInputsToLayout);
       }
-      return layout;
-    });
+
+      return {
+        ...layout,
+        items: mappedInputs,
+        children: children,
+      };
+    }
+
+    this.editorItems = this.editorItems.map(assignInputsToLayout);
   }
+
   loadFormTemplateWithLayouts(id: string) {
     this.formTemplateService
       .getFormTemplateWithFormLayouts(+id)
@@ -393,8 +437,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   handleSubmit() {
     console.log('Starting form submission process');
     const sectionItemsMap = new Map<string, any[]>();
-
     // Assign temporary IDs to new sections and map their items
+
     this.editorItems.forEach((item) => {
       if (!item.id && item.type === 'Section') {
         item.tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -537,49 +581,82 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     console.log('All items removed');
   }
 
-  removeItem(item: any) {
-    // First try to find and remove the item from the top level (sections)
-    const topLevelIndex = this.editorItems.indexOf(item);
+addSubsection(section: any): void {
+  const dialogRef = this.dialog.open(SubsectionConfigComponent, {
+    width: '70vw',
+    height: '50vh',
+    data: { item: { name: 'Subsection' } },
+    disableClose: false,
+    panelClass: 'custom-dialog-container',
+    backdropClass: 'custom-dialog-backdrop',
+  });
 
+  dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe((subsectionResult) => {
+    if (subsectionResult) {
+      if (!section.children) {
+        section.children = [];
+      }
+      
+      section.children.push({
+        ...subsectionResult,
+        type: 'Subsection',
+        items: []
+      });
+      
+      this.cdr.detectChanges();
+    }
+  });
+}
+  removeItem(item: any) {
+        // First try to find and remove the item from the top level (sections)
+
+    const topLevelIndex = this.editorItems.indexOf(item);
+  
     if (topLevelIndex !== -1) {
       // Item is a section
       if (item.id) {
-        this.formLayoutService.deleteFormLayout(item.id).subscribe({
-          next: () => {
-            this.editorItems.splice(topLevelIndex, 1);
-            console.log('Section deleted successfully:', item);
-          },
-          error: (err) => {
-            console.error('Error deleting section:', err);
-          },
+        this.formLayoutService.deleteFormLayout(item.id).subscribe(() => {
+          this.editorItems.splice(topLevelIndex, 1);
+          this.cdr.detectChanges();
         });
       } else {
         this.editorItems.splice(topLevelIndex, 1);
+        this.cdr.detectChanges();
       }
       return;
     }
-
-    // If item wasn't found at top level, search through sections for form inputs
+  
     for (const section of this.editorItems) {
-      if (section.type === 'Section' && section.items) {
-        const sectionItemIndex = section.items.indexOf(item);
-        if (sectionItemIndex !== -1) {
-          // Item is a form input inside a section
+      if (section.children) {
+        const subsectionIndex = section.children.indexOf(item);
+        if (subsectionIndex !== -1) {
+          section.children.splice(subsectionIndex, 1);
+          this.cdr.detectChanges();
+          return;
+        }
+        
+        for (const subsection of section.children || []) {
+          if (subsection.items) {
+            const itemIndex = subsection.items.indexOf(item);
+            if (itemIndex !== -1) {
+              subsection.items.splice(itemIndex, 1);
+              this.cdr.detectChanges();
+              return;
+            }
+          }
+        }
+      }
+      
+      if (section.items) {
+        const itemIndex = section.items.indexOf(item);
+        if (itemIndex !== -1) {
           if (item.id) {
-            // Delete form input from database
-            this.formInputService.deleteFormInput(item.id).subscribe({
-              next: () => {
-                section.items.splice(sectionItemIndex, 1);
-                console.log('Form input deleted successfully:', item);
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Error deleting form input:', err);
-              },
+            this.formInputService.deleteFormInput(item.id).subscribe(() => {
+              section.items.splice(itemIndex, 1);
+              this.cdr.detectChanges();
             });
           } else {
-            // Remove form input locally if it has no ID
-            section.items.splice(sectionItemIndex, 1);
+            section.items.splice(itemIndex, 1);
             this.cdr.detectChanges();
           }
           return;
@@ -587,6 +664,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       }
     }
   }
+
   getOptionsArray(options: string | string[] | any[]): string[] {
     if (Array.isArray(options)) {
       return options.map((opt) =>
@@ -622,6 +700,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       return;
     }
   }
+
   private processMultiChoiceItems(
     multiChoiceItems: { item: any; layoutId: number }[],
     savedInputs: any[],
@@ -702,6 +781,48 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           if (onComplete) onComplete();
         },
       });
+  }
+  onSubsectionItemDropped(event: CdkDragDrop<any[]>, subsection: any) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const draggedItem = event.item.data;
+
+    if (draggedItem.name) {
+      this.openDialog(
+        this.getConfigComponent(draggedItem.name),
+        draggedItem,
+        0
+      )
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((itemResult) => {
+          if (itemResult) {
+            if (!subsection.items) subsection.items = [];
+            subsection.items.splice(event.currentIndex, 0, {
+              ...itemResult,
+              type: draggedItem.name 
+            });
+            this.cdr.detectChanges();
+          }
+        });
+    }
+    else {
+      if (!subsection.items) subsection.items = [];
+      
+      if (event.previousContainer !== event.container) {
+        event.previousContainer.data.splice(event.previousIndex, 1);
+      }
+      
+      subsection.items.splice(event.currentIndex, 0, draggedItem);
+      this.cdr.detectChanges();
+    }
   }
 
   private loadFormInputsWithMultipleValues(inputs: FormInput[]) {

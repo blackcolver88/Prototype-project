@@ -86,4 +86,16 @@ export class FormTemplateService {
         })
       );
   }
+  
+  getFullFormTemplate(formTemplateId: number): Observable<FormTemplate> {
+    const url = `${this.baseUrl}/${formTemplateId}/full`;
+    return this.http.get<FormTemplate>(url).pipe(
+      catchError(error => {
+        console.error('Error fetching full form template:', error);
+        return throwError(() => new Error('Failed to fetch full form template'));
+      })
+    );
+  }
+
+ 
 }

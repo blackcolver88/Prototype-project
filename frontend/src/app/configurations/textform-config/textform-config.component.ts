@@ -34,8 +34,6 @@ export class TextformConfigComponent implements OnInit {
       type: ['text', Validators.required],
       isRequired: [false],
       placeholder: ['Enter Text Field here'],
-      labelPosition: ['top', Validators.required],
-      labelAlignment: ['left', Validators.required]
     });
 
     // Type changes with proper typing
