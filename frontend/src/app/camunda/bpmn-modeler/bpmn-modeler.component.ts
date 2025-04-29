@@ -193,6 +193,9 @@ export class BpmnModelerComponent {
   showOpenProcessModal: boolean = false;
   availableProcesses: any[] = [];
 
+  // Add this property
+  createNewProcess: boolean = true;
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private diagramService: DiagramService,
@@ -900,26 +903,28 @@ export class BpmnModelerComponent {
       // Get current XML
       const xml = await this.exportDiagram();
       
+      // Generate a new unique process ID if creating a new process
+      let processId = this.saveProcessConfig.id;
+      if (this.createNewProcess || !processId) {
+        // Generate a unique ID with timestamp and random string
+        processId = `Process_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 5)}`;
+      }
+      
       // Generate a valid filename
-      const filename = this.saveProcessConfig.id || 
-        this.saveProcessConfig.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const filename = processId;
       
       // Update the process name and ID in the XML
-      const updatedXml = this.updateProcessNameAndId(
-        xml, 
-        this.saveProcessConfig.name, 
-        this.saveProcessConfig.id || filename
-      );
+      const updatedXml = this.updateProcessNameAndId(xml, this.saveProcessConfig.name, processId);
       
-      console.log("Saving process to repository and filesystem...");
+      console.log("Saving process to repository and filesystem with ID:", processId);
       
-      // First, deploy to Camunda engine
+      // Deploy to Camunda engine
       const deployResult = await lastValueFrom(
         this.diagramService.saveAsDeployment(updatedXml, this.saveProcessConfig.name)
       );
       console.log("Process deployed:", deployResult);
       
-      // Then save to filesystem
+      // Save to filesystem
       try {
         const fsResult = await lastValueFrom(
           this.diagramService.saveToFilesystem(updatedXml, `${filename}.bpmn`)
@@ -927,7 +932,6 @@ export class BpmnModelerComponent {
         console.log("Process saved to filesystem:", fsResult);
       } catch (fsErr) {
         console.error("Failed to save to filesystem:", fsErr);
-        // Show a warning but continue
         this.showWarningNotification("Process deployed, but couldn't be saved to filesystem");
       }
       

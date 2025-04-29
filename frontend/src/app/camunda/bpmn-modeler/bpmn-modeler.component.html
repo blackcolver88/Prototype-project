@@ -335,8 +335,15 @@
       <div class="mb-4">
         <label class="block text-sm font-medium mb-1">Process ID</label>
         <input type="text" [(ngModel)]="saveProcessConfig.id" class="w-full p-2 border rounded" 
-          placeholder="process_id" />
-        <small class="text-gray-500">Leave empty to keep the current ID</small>
+          placeholder="process_id" [disabled]="createNewProcess" />
+        <small class="text-gray-500" *ngIf="!createNewProcess">Use a specific ID to update an existing process</small>
+        <small class="text-gray-500" *ngIf="createNewProcess">A unique ID will be generated automatically</small>
+      </div>
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input type="checkbox" [(ngModel)]="createNewProcess" class="mr-2" />
+          <span class="text-sm">Create as new process (recommended)</span>
+        </label>
       </div>
       <div class="flex justify-end mt-6 gap-2">
         <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeSaveProcessModal()">Cancel</button>
