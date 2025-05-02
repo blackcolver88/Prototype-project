@@ -786,64 +786,82 @@ addSubsection(section: any): void {
     }
   });
 }
-  removeItem(item: any) {
-        // First try to find and remove the item from the top level (sections)
+removeItem(item: any) {
+  // First try to find and remove the item from the top level (sections)
+  const topLevelIndex = this.editorItems.indexOf(item);
 
-    const topLevelIndex = this.editorItems.indexOf(item);
-  
-    if (topLevelIndex !== -1) {
+  if (topLevelIndex !== -1) {
       // Item is a section
       if (item.id) {
-        this.formLayoutService.deleteFormLayout(item.id).subscribe(() => {
+          // Optimistic update: immediately remove from UI first
+          const removedItem = this.editorItems.splice(topLevelIndex, 1)[0];
+          this.cdr.detectChanges();
+          
+          this.formLayoutService.deleteFormLayout(item.id).subscribe({
+              next: () => {
+                  console.log('Section deleted successfully:', item);
+              },
+              error: (err) => {
+                  console.error('Error deleting section:', err);
+                  // Optionally show user notification without reverting UI
+                  // this.showErrorNotification('The section was removed from your view but the server update failed. Changes will sync when you reload.');
+              },
+          });
+      } else {
           this.editorItems.splice(topLevelIndex, 1);
           this.cdr.detectChanges();
-        });
-      } else {
-        this.editorItems.splice(topLevelIndex, 1);
-        this.cdr.detectChanges();
       }
       return;
-    }
-  
-    for (const section of this.editorItems) {
+  }
+
+  // Search through nested structure
+  for (const section of this.editorItems) {
       if (section.children) {
-        const subsectionIndex = section.children.indexOf(item);
-        if (subsectionIndex !== -1) {
-          section.children.splice(subsectionIndex, 1);
-          this.cdr.detectChanges();
-          return;
-        }
-        
-        for (const subsection of section.children || []) {
-          if (subsection.items) {
-            const itemIndex = subsection.items.indexOf(item);
-            if (itemIndex !== -1) {
-              subsection.items.splice(itemIndex, 1);
+          const subsectionIndex = section.children.indexOf(item);
+          if (subsectionIndex !== -1) {
+              section.children.splice(subsectionIndex, 1);
               this.cdr.detectChanges();
               return;
-            }
           }
-        }
+          
+          for (const subsection of section.children || []) {
+              if (subsection.items) {
+                  const itemIndex = subsection.items.indexOf(item);
+                  if (itemIndex !== -1) {
+                      subsection.items.splice(itemIndex, 1);
+                      this.cdr.detectChanges();
+                      return;
+                  }
+              }
+          }
       }
       
       if (section.items) {
-        const itemIndex = section.items.indexOf(item);
-        if (itemIndex !== -1) {
-          if (item.id) {
-            this.formInputService.deleteFormInput(item.id).subscribe(() => {
-              section.items.splice(itemIndex, 1);
-              this.cdr.detectChanges();
-            });
-          } else {
-            section.items.splice(itemIndex, 1);
-            this.cdr.detectChanges();
+          const itemIndex = section.items.indexOf(item);
+          if (itemIndex !== -1) {
+              if (item.id) {
+                  // Optimistic update for form inputs
+                  const removedInput = section.items.splice(itemIndex, 1)[0];
+                  this.cdr.detectChanges();
+                  
+                  this.formInputService.deleteFormInput(item.id).subscribe({
+                      next: () => {
+                          console.log('Form input deleted successfully:', item);
+                      },
+                      error: (err) => {
+                          console.error('Error deleting form input:', err);
+                          // Optionally show user notification
+                      },
+                  });
+              } else {
+                  section.items.splice(itemIndex, 1);
+                  this.cdr.detectChanges();
+              }
+              return;
           }
-          return;
-        }
       }
-    }
   }
-
+}
   getOptionsArray(options: string | string[] | any[]): string[] {
     if (Array.isArray(options)) {
       return options.map((opt) =>

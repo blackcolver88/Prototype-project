@@ -18,30 +18,7 @@ public class FormSubmissionDTO {
     private List<FormValueDTO> formValues = new ArrayList<>();
     private String processInstanceId;
     private Long userId;
-    @Getter
-    @Setter
     private String task;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
-
-    public Long getFormId() { return formId; }
-    public void setFormId(Long formId) { this.formId = formId; }
-
-    public List<FormValueDTO> getFormValues() { return formValues; }
-    public void setFormValues(List<FormValueDTO> formValues) { this.formValues = formValues; }
-
-    public String getProcessInstanceId() { return processInstanceId; }
-    public void setProcessInstanceId(String processInstanceId) { this.processInstanceId = processInstanceId; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
-    public String getTask() { return task; }
-    public void setTask(String task) { this.task = task; }
 
     @Override
     public String toString() {
@@ -66,11 +43,6 @@ public class FormSubmissionDTO {
             this.value = value;
         }
 
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-
-        public String getValue() { return value; }
-        public void setValue(String value) { this.value = value; }
     }
 
 }

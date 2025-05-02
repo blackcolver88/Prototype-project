@@ -1,357 +1,356 @@
 <div class="flex flex-col w-full h-full">
-    <!-- Enhanced Toolbar -->
-    <div class="flex justify-between items-center p-2 bg-gray-200 border-b border-gray-300">
-        <div class="flex gap-2">
-            <button class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="saveDiagram()">
-                Save
-            </button>
-            <button class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded" (click)="downloadDiagram()">
-                Download
-            </button>
-            <button class="px-2 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded" (click)="openDeployModal()">
-                Deploy
-            </button>
-            <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded" (click)="validateDiagram()">
-                Validate
-            </button>
-            <button class="px-2 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded" (click)="simulateProcess()">
-                Simulate
-            </button>
-            <button class="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded" (click)="openStartInstanceModal()">
-                Start Instance
-            </button>
-        </div>
-        
-        <!-- Template dropdown -->
-        <div class="relative">
-            <button class="px-2 py-1 bg-gray-400 hover:bg-gray-500 text-white rounded inline-flex items-center" (click)="toggleTemplateDropdown()">
-                Element Templates
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-            <div *ngIf="showTemplateDropdown" class="absolute z-10 mt-1 w-56 bg-white rounded shadow-lg">
-                <div *ngFor="let template of elementTemplates" 
-                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                     (click)="applyTemplate(template)">
-                    {{template.name}}
-                </div>
-                <div *ngIf="!elementTemplates.length" class="px-4 py-2 text-gray-500">
-                    No templates available
-                </div>
-            </div>
-        </div>
-        
-        <!-- Zoom controls -->
-        <div class="flex gap-2">
-            <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Zoom In" (click)="zoomIn()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-            </button>
-            <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Zoom Out" (click)="zoomOut()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
-                </svg>
-            </button>
-            <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Reset Zoom" (click)="resetZoom()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-                </svg>
-            </button>
-        </div>
+  <!-- Toolbar -->
+  <div class="flex justify-between items-center p-2 bg-gray-200 border-b border-gray-300">
+    <div class="flex gap-2">
+      <!-- Add or ensure this Save button exists -->
+      <button class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="openSaveProcessModal()">Save</button>
+      <button class="px-2 py-1 bg-teal-500 hover:bg-teal-600 text-white rounded" (click)="openProcessModal()">Open</button>
+      <button class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded" (click)="downloadDiagram()">Download</button>
+      <button class="px-2 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded" (click)="openDeployModal()">Deploy</button>
+      <button class="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded" (click)="validateDiagram()">Validate</button>
+      <button class="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded" (click)="openStartInstanceModal()">Start Instance</button>
+      <button class="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded" (click)="undo()">Undo</button>
+      <button class="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded" (click)="redo()">Redo</button>
     </div>
+    <!-- Zoom controls -->
+    <div class="flex gap-2">
+      <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Zoom In" (click)="zoomIn()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </button>
+      <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Zoom Out" (click)="zoomOut()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
+        </svg>
+      </button>
+      <button class="p-1 bg-gray-300 hover:bg-gray-400 rounded" title="Reset Zoom" (click)="resetZoom()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+        </svg>
+      </button>
+    </div>
+  </div>
 
-    <!-- Loading overlay -->
-    <div *ngIf="isLoading" class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center z-10">
-        <div class="bg-white p-4 rounded shadow-lg">
-            Loading...
-        </div>
-    </div>
+  <!-- Loading overlay -->
+  <div *ngIf="isLoading" class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center z-10">
+    <div class="bg-white p-4 rounded shadow-lg">Loading...</div>
+  </div>
 
-    <!-- Error notification -->
-    <div *ngIf="error$ | async as error" class="absolute top-4 right-4 bg-red-500 text-white p-3 rounded shadow-lg z-20">
-        {{ error.message }}
-    </div>
-    
-    <!-- Validation results -->
-    <div *ngIf="validationErrors.length" class="absolute top-4 left-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded shadow-lg z-20 max-w-md max-h-60 overflow-auto">
-        <h3 class="font-bold">Diagram Validation Issues:</h3>
-        <ul class="list-disc pl-5">
-            <li *ngFor="let error of validationErrors">{{ error.message }}</li>
-        </ul>
-    </div>
+  <!-- Error notification -->
+  <div *ngIf="error$ | async as error" class="absolute top-32 right-4 bg-red-500 text-white p-3 rounded shadow-lg z-20 flex items-center">
+    <span>{{ error.message }}</span>
+    <button class="ml-3 text-white hover:text-gray-200" (click)="clearError()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
 
-    <!-- Main editor container -->
-    <div class="flex justify-between w-full h-[750px] border border-gray-300">
-        <div #bpmnModelerRef class="w-4/5 h-full border-r border-gray-300"></div>
-        <div #propertiesRef class="w-1/5 h-full overflow-y-auto bg-gray-100 py-2.5"></div>
+  <!-- Validation results -->
+  <div *ngIf="validationErrors.length" class="absolute top-32 left-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded shadow-lg z-20 max-w-md max-h-60 overflow-auto">
+    <div class="flex justify-between">
+      <h3 class="font-bold">Diagram Validation Issues:</h3>
+      <button class="text-yellow-700 hover:text-yellow-900" (click)="clearValidationErrors()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
     </div>
-    
-    <!-- Task configuration modal -->
-    <div *ngIf="showTaskModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
-        <div class="bg-white p-6 rounded shadow-lg w-2/3 max-h-[80vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4">Configure {{ selectedTaskType }} Task</h2>
-            
-            <!-- Service Task Configuration -->
-            <div *ngIf="selectedTaskType === 'Service'">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Implementation</label>
-                    <select [(ngModel)]="serviceTaskConfig.implementation" class="w-full p-2 border rounded">
-                        <option value="delegateExpression">Delegate Expression</option>
-                        <option value="expression">Expression</option>
-                        <option value="class">Java Class</option>
-                        <option value="externalTask">External Task</option>
-                        <option value="connector">Connector</option>
-                    </select>
-                </div>
-                
-                <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'delegateExpression'">
-                    <label class="block text-sm font-medium mb-1">Delegate Expression</label>
-                    <input type="text" [(ngModel)]="serviceTaskConfig.delegateExpression" class="w-full p-2 border rounded" placeholder="${serviceDelegate}">
-                </div>
-                
-                <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'expression'">
-                    <label class="block text-sm font-medium mb-1">Expression</label>
-                    <input type="text" [(ngModel)]="serviceTaskConfig.expression" class="w-full p-2 border rounded" placeholder="${execution.setVariable('varName', 'value')}">
-                </div>
-                
-                <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'class'">
-                    <label class="block text-sm font-medium mb-1">Java Class</label>
-                    <input type="text" [(ngModel)]="serviceTaskConfig.javaClass" class="w-full p-2 border rounded" placeholder="com.example.ServiceTaskImplementation">
-                </div>
-                
-                <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'externalTask'">
-                    <label class="block text-sm font-medium mb-1">Topic Name</label>
-                    <input type="text" [(ngModel)]="serviceTaskConfig.topic" class="w-full p-2 border rounded" placeholder="payment-service">
-                </div>
-            </div>
-            
-            <!-- User Task Configuration -->
-            <div *ngIf="selectedTaskType === 'User'">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Assignee</label>
-                    <input type="text" [(ngModel)]="userTaskConfig.assignee" class="w-full p-2 border rounded" placeholder="${userId}">
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Candidate Groups</label>
-                    <input type="text" [(ngModel)]="userTaskConfig.candidateGroups" class="w-full p-2 border rounded" placeholder="management,accounting">
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Form Key</label>
-                    <input type="text" [(ngModel)]="userTaskConfig.formKey" class="w-full p-2 border rounded" placeholder="embedded:app:forms/approval-form.html">
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Priority</label>
-                    <input type="number" [(ngModel)]="userTaskConfig.priority" class="w-full p-2 border rounded" placeholder="50">
-                </div>
-            </div>
-            
-            <!-- Process Variable Configuration -->
-            <div *ngIf="selectedTaskType === 'Process'">
-                <h3 class="font-medium mb-2">Process Variables</h3>
-                <div class="mb-4" *ngFor="let variable of processVariables; let i = index">
-                    <div class="flex gap-2">
-                        <input type="text" [(ngModel)]="variable.name" class="w-1/3 p-2 border rounded" placeholder="Variable name">
-                        <select [(ngModel)]="variable.type" class="w-1/3 p-2 border rounded">
-                            <option value="string">String</option>
-                            <option value="integer">Integer</option>
-                            <option value="boolean">Boolean</option>
-                            <option value="date">Date</option>
-                            <option value="json">JSON</option>
-                        </select>
-                        <input type="text" [(ngModel)]="variable.defaultValue" class="w-1/3 p-2 border rounded" placeholder="Default value">
-                        <button class="p-2 bg-red-500 text-white rounded" (click)="removeProcessVariable(i)">X</button>
-                    </div>
-                </div>
-                <button class="px-3 py-1 bg-blue-500 text-white rounded" (click)="addProcessVariable()">Add Variable</button>
-            </div>
-            
-            <div class="flex justify-end mt-6 gap-2">
-                <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeTaskModal()">Cancel</button>
-                <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="applyTaskConfiguration()">Apply</button>
-            </div>
+    <ul class="list-disc pl-5">
+      <li *ngFor="let error of validationErrors">{{ error.message }}</li>
+    </ul>
+  </div>
+
+  <!-- Main editor container -->
+  <div class="flex justify-between w-full h-[750px] border border-gray-300">
+    <div #bpmnModelerRef class="w-4/5 h-full border-r border-gray-300"></div>
+    <div #propertiesRef class="w-1/5 h-full overflow-y-auto bg-gray-100 py-2.5"></div>
+  </div>
+
+  <!-- Task configuration modal -->
+  <div *ngIf="showTaskModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-h-[80vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4">Configure {{ selectedTaskType }} Task</h2>
+
+      <!-- Service Task Configuration -->
+      <div *ngIf="selectedTaskType === 'Service'">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Implementation</label>
+          <select [(ngModel)]="serviceTaskConfig.implementation" class="w-full p-2 border rounded">
+            <option value="delegateExpression">Delegate Expression</option>
+            <option value="expression">Expression</option>
+            <option value="class">Java Class</option>
+          </select>
         </div>
-    </div>
-    
-    <!-- NEW: Deployment Modal -->
-    <div *ngIf="showDeployModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
-        <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
-            <h2 class="text-xl font-bold mb-4">Deploy Process to Engine</h2>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Deployment Name</label>
-                <input type="text" [(ngModel)]="deploymentConfig.name" class="w-full p-2 border rounded" 
-                       placeholder="My Process Deployment">
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Process ID</label>
-                <input type="text" [(ngModel)]="deploymentConfig.processId" class="w-full p-2 border rounded" readonly>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Tenant ID (Optional)</label>
-                <input type="text" [(ngModel)]="deploymentConfig.tenantId" class="w-full p-2 border rounded" 
-                       placeholder="tenant-1">
-            </div>
-            
-            <div class="mb-4">
-                <label class="flex items-center">
-                    <input type="checkbox" [(ngModel)]="deploymentConfig.duplicateFiltering" class="mr-2">
-                    <span class="text-sm">Enable duplicate filtering</span>
-                </label>
-            </div>
-            
-            <div class="mb-4">
-                <label class="flex items-center">
-                    <input type="checkbox" [(ngModel)]="deploymentConfig.deployChangedOnly" class="mr-2">
-                    <span class="text-sm">Deploy changed resources only</span>
-                </label>
-            </div>
-            
-            <div class="flex justify-end mt-6 gap-2">
-                <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeDeployModal()">Cancel</button>
-                <button class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded" (click)="deployProcess()">
-                    Deploy
-                </button>
-            </div>
+        <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'delegateExpression'">
+          <label class="block text-sm font-medium mb-1">Delegate Expression</label>
+          <input type="text" [(ngModel)]="serviceTaskConfig.delegateExpression" class="w-full p-2 border rounded" placeholder="${serviceDelegate}" />
         </div>
-    </div>
-    
-    <!-- NEW: Start Instance Modal -->
-    <div *ngIf="showStartInstanceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
-        <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
-            <h2 class="text-xl font-bold mb-4">Start Process Instance</h2>
-            
-            <div class="mb-4" *ngIf="!deployments.length">
-                <div class="p-4 bg-yellow-100 text-yellow-700 rounded">
-                    No deployments available. Please deploy a process first.
-                </div>
-            </div>
-            
-            <div *ngIf="deployments.length">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Process Definition</label>
-                    <select [(ngModel)]="startInstanceConfig.processDefinitionId" class="w-full p-2 border rounded"
-                            (change)="onProcessDefinitionSelected()">
-                        <option *ngFor="let deployment of deployments" [value]="deployment.id">
-                            {{ deployment.name }} (v{{ deployment.version }})
-                        </option>
-                    </select>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Business Key (Optional)</label>
-                    <input type="text" [(ngModel)]="startInstanceConfig.businessKey" class="w-full p-2 border rounded" 
-                           placeholder="unique-business-key">
-                </div>
-                
-                <div class="mb-2">
-                    <h3 class="font-medium">Process Variables</h3>
-                </div>
-                
-                <div class="bg-gray-50 p-3 rounded mb-4">
-                    <div class="mb-2" *ngFor="let variable of startInstanceConfig.variables; let i = index">
-                        <div class="flex gap-2">
-                            <input type="text" [(ngModel)]="variable.name" class="w-1/3 p-2 border rounded" 
-                                   placeholder="Variable name">
-                            <select [(ngModel)]="variable.type" class="w-1/3 p-2 border rounded">
-                                <option value="string">String</option>
-                                <option value="integer">Integer</option>
-                                <option value="boolean">Boolean</option>
-                                <option value="date">Date</option>
-                                <option value="json">JSON</option>
-                            </select>
-                            <input type="text" [(ngModel)]="variable.value" class="w-1/3 p-2 border rounded" 
-                                   placeholder="Value">
-                            <button class="p-2 bg-red-500 text-white rounded" (click)="removeStartVariable(i)">X</button>
-                        </div>
-                    </div>
-                    <button class="px-3 py-1 bg-blue-500 text-white rounded" (click)="addStartVariable()">
-                        Add Variable
-                    </button>
-                </div>
-            </div>
-            
-            <div class="flex justify-end mt-6 gap-2">
-                <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeStartInstanceModal()">
-                    Cancel
-                </button>
-                <button class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded" 
-                        (click)="startProcessInstance()" [disabled]="!deployments.length">
-                    Start Instance
-                </button>
-            </div>
+        <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'expression'">
+          <label class="block text-sm font-medium mb-1">Expression</label>
+          <input type="text" [(ngModel)]="serviceTaskConfig.expression" class="w-full p-2 border rounded" placeholder="${execution.setVariable('varName', 'value')}" />
         </div>
-    </div>
-    
-    <!-- NEW: Deployment Success Modal -->
-    <div *ngIf="showDeploymentSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-        <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
-            <div class="flex items-center mb-4 text-green-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <h2 class="text-xl font-bold">Deployment Successful!</h2>
-            </div>
-            
-            <div class="mb-4 bg-gray-50 p-4 rounded-lg">
-                <div class="mb-2">
-                    <span class="font-semibold">Deployment ID:</span> {{ lastDeploymentResult?.id }}
-                </div>
-                <div class="mb-2">
-                    <span class="font-semibold">Deployment Name:</span> {{ lastDeploymentResult?.name }}
-                </div>
-                <div class="mb-2">
-                    <span class="font-semibold">Deploy Time:</span> {{ lastDeploymentResult?.deploymentTime | date:'medium' }}
-                </div>
-                <div>
-                    <span class="font-semibold">Process ID:</span> {{ lastDeploymentResult?.processDefinitionId }}
-                </div>
-            </div>
-            
-            <div class="flex justify-end gap-2">
-                <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeDeploymentSuccessModal()">
-                    Close
-                </button>
-                <button class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded" (click)="openStartInstanceModal()">
-                    Start Instance
-                </button>
-            </div>
+        <div class="mb-4" *ngIf="serviceTaskConfig.implementation === 'class'">
+          <label class="block text-sm font-medium mb-1">Java Class</label>
+          <input type="text" [(ngModel)]="serviceTaskConfig.javaClass" class="w-full p-2 border rounded" placeholder="com.example.ServiceTaskImplementation" />
         </div>
-    </div>
-    
-    <!-- NEW: Instance Started Modal -->
-    <div *ngIf="showInstanceStartedModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-        <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
-            <div class="flex items-center mb-4 text-green-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <h2 class="text-xl font-bold">Process Instance Started!</h2>
-            </div>
-            
-            <div class="mb-4 bg-gray-50 p-4 rounded-lg">
-                <div class="mb-2">
-                    <span class="font-semibold">Instance ID:</span> {{ lastInstanceResult?.id }}
-                </div>
-                <div class="mb-2">
-                    <span class="font-semibold">Process Definition ID:</span> {{ lastInstanceResult?.definitionId }}
-                </div>
-                <div *ngIf="lastInstanceResult?.businessKey">
-                    <span class="font-semibold">Business Key:</span> {{ lastInstanceResult?.businessKey }}
-                </div>
-            </div>
-            
-            <div class="flex justify-end">
-                <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeInstanceStartedModal()">
-                    Close
-                </button>
-            </div>
+      </div>
+
+      <!-- User Task Configuration -->
+      <div *ngIf="selectedTaskType === 'User'">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Assignee</label>
+          <input type="text" [(ngModel)]="userTaskConfig.assignee" class="w-full p-2 border rounded" placeholder="${userId}" />
         </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Candidate Groups</label>
+          <input type="text" [(ngModel)]="userTaskConfig.candidateGroups" class="w-full p-2 border rounded" placeholder="management,accounting" />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Form Key</label>
+          <input type="text" [(ngModel)]="userTaskConfig.formKey" class="w-full p-2 border rounded" placeholder="embedded:app:forms/approval-form.html" />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Priority</label>
+          <input type="number" [(ngModel)]="userTaskConfig.priority" class="w-full p-2 border rounded" placeholder="50" />
+        </div>
+      </div>
+
+      <!-- Process Variable Configuration -->
+      <div *ngIf="selectedTaskType === 'Process'">
+        <h3 class="font-medium mb-2">Process Variables</h3>
+        <div class="mb-4" *ngFor="let variable of processVariables; let i = index">
+          <div class="flex gap-2">
+            <input type="text" [(ngModel)]="variable.name" class="w-1/3 p-2 border rounded" placeholder="Variable name" />
+            <select [(ngModel)]="variable.type" class="w-1/3 p-2 border rounded">
+              <option value="string">String</option>
+              <option value="integer">Integer</option>
+              <option value="boolean">Boolean</option>
+              <option value="date">Date</option>
+            </select>
+            <input type="text" [(ngModel)]="variable.defaultValue" class="w-1/3 p-2 border rounded" placeholder="Default value" />
+            <button class="p-2 bg-red-500 text-white rounded" (click)="removeProcessVariable(i)">X</button>
+          </div>
+        </div>
+        <button class="px-3 py-1 bg-blue-500 text-white rounded" (click)="addProcessVariable()">Add Variable</button>
+      </div>
+
+      <div class="flex justify-end mt-6 gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeTaskModal()">Cancel</button>
+        <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded" (click)="applyTaskConfiguration()">Apply</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Deployment Modal -->
+  <div *ngIf="showDeployModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Deploy Process to Engine</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Deployment Name</label>
+        <input type="text" [(ngModel)]="deploymentConfig.name" class="w-full p-2 border rounded" placeholder="My Process Deployment" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Process ID</label>
+        <input type="text" [(ngModel)]="deploymentConfig.processId" class="w-full p-2 border rounded" readonly />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Tenant ID (Optional)</label>
+        <input type="text" [(ngModel)]="deploymentConfig.tenantId" class="w-full p-2 border rounded" placeholder="tenant-1" />
+      </div>
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input type="checkbox" [(ngModel)]="deploymentConfig.duplicateFiltering" class="mr-2" />
+          <span class="text-sm">Enable duplicate filtering</span>
+        </label>
+      </div>
+      <div class="flex justify-end mt-6 gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeDeployModal()">Cancel</button>
+        <button class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded" (click)="deployProcess()">Deploy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Instance Modal -->
+  <div *ngIf="showStartInstanceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Start Process Instance</h2>
+      <div class="mb-4" *ngIf="!deployments.length">
+        <div class="p-4 bg-yellow-100 text-yellow-700 rounded">
+          No deployments available. Please deploy a process first.
+        </div>
+      </div>
+      <div *ngIf="deployments.length">
+        <div class="mb-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Process Definition</label>
+          <select 
+            class="w-full px-2 py-1 border border-gray-300 rounded" 
+            [(ngModel)]="startInstanceConfig.processDefinitionId"
+            (change)="onProcessDefinitionSelected()">
+            <option *ngFor="let def of deployments" [value]="def.id">
+              {{ def.name }} (v{{ def.version }})
+            </option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Business Key (Optional)</label>
+          <input type="text" [(ngModel)]="startInstanceConfig.businessKey" class="w-full p-2 border rounded" placeholder="unique-business-key" />
+        </div>
+        <div class="mb-2">
+          <h3 class="font-medium">Process Variables</h3>
+        </div>
+        <div class="bg-gray-50 p-3 rounded mb-4">
+          <div class="mb-2" *ngFor="let variable of startInstanceConfig.variables; let i = index">
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="variable.name" class="w-1/3 p-2 border rounded" placeholder="Variable name" />
+              <select [(ngModel)]="variable.type" class="w-1/3 p-2 border rounded">
+                <option value="string">String</option>
+                <option value="integer">Integer</option>
+                <option value="boolean">Boolean</option>
+                <option value="date">Date</option>
+              </select>
+              <input type="text" [(ngModel)]="variable.value" class="w-1/3 p-2 border rounded" placeholder="Value" />
+              <button class="p-2 bg-red-500 text-white rounded" (click)="removeStartVariable(i)">X</button>
+            </div>
+          </div>
+          <button class="px-3 py-1 bg-blue-500 text-white rounded" (click)="addStartVariable()">Add Variable</button>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6 gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeStartInstanceModal()">Cancel</button>
+        <button class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded" (click)="startProcessInstance()" [disabled]="!deployments.length">Start Instance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deployment Success Modal -->
+  <div *ngIf="showDeploymentSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <div class="flex items-center mb-4 text-green-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <h2 class="text-xl font-bold">Deployment Successful!</h2>
+      </div>
+      <div class="mb-4 bg-gray-50 p-4 rounded-lg">
+        <div class="mb-2">
+          <span class="font-semibold">Deployment ID:</span> {{ lastDeploymentResult?.id }}
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Deployment Name:</span> {{ lastDeploymentResult?.name }}
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Deploy Time:</span> {{ lastDeploymentResult?.deploymentTime | date : "medium" }}
+        </div>
+        <div>
+          <span class="font-semibold">Process ID:</span> {{ lastDeploymentResult?.processDefinitionId }}
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeDeploymentSuccessModal()">Close</button>
+        <button class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded" (click)="openStartInstanceModal()">Start Instance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instance Started Modal -->
+  <div *ngIf="showInstanceStartedModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <div class="flex items-center mb-4 text-green-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <h2 class="text-xl font-bold">Process Instance Started!</h2>
+      </div>
+      <div class="mb-4 bg-gray-50 p-4 rounded-lg">
+        <div class="mb-2">
+          <span class="font-semibold">Instance ID:</span> {{ lastInstanceResult?.id }}
+        </div>
+        <div class="mb-2">
+          <span class="font-semibold">Process Definition ID:</span> {{ lastInstanceResult?.definitionId }}
+        </div>
+        <div *ngIf="lastInstanceResult?.businessKey">
+          <span class="font-semibold">Business Key:</span> {{ lastInstanceResult?.businessKey }}
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeInstanceStartedModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Process Modal -->
+  <div *ngIf="showOpenProcessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Open Process</h2>
+      
+      <div class="mb-4" *ngIf="!availableProcesses.length">
+        <div class="p-4 bg-yellow-100 text-yellow-700 rounded">
+          No processes available. Deploy a process first.
+        </div>
+      </div>
+      
+      <div *ngIf="availableProcesses.length">
+        <div class="max-h-96 overflow-y-auto border rounded">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let process of availableProcesses" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.key }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ process.version }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded" 
+                    (click)="loadProcess(process.id)">Open</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="flex justify-end mt-6">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeOpenProcessModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Process Modal -->
+  <div *ngIf="showSaveProcessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="bg-white p-6 rounded shadow-lg w-2/3 max-w-2xl">
+      <h2 class="text-xl font-bold mb-4">Save Process</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Process Name</label>
+        <input type="text" [(ngModel)]="saveProcessConfig.name" class="w-full p-2 border rounded" 
+          placeholder="My Process" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Process ID</label>
+        <input type="text" [(ngModel)]="saveProcessConfig.id" class="w-full p-2 border rounded" 
+          placeholder="process_id" [disabled]="createNewProcess" />
+        <small class="text-gray-500" *ngIf="!createNewProcess">Use a specific ID to update an existing process</small>
+        <small class="text-gray-500" *ngIf="createNewProcess">A unique ID will be generated automatically</small>
+      </div>
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input type="checkbox" [(ngModel)]="createNewProcess" class="mr-2" />
+          <span class="text-sm">Create as new process (recommended)</span>
+        </label>
+      </div>
+      <div class="flex justify-end mt-6 gap-2">
+        <button class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded" (click)="closeSaveProcessModal()">Cancel</button>
+        <button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded" 
+          [disabled]="!saveProcessConfig.name"
+          (click)="saveProcessToRepository()">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
