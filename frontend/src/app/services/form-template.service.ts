@@ -96,6 +96,13 @@ export class FormTemplateService {
       })
     );
   }
+  addFormInputToSubsection(layoutId: number, formInput: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/form-layouts/${layoutId}/form-inputs`, formInput);
+  }
+  
+  addFormInputToLayout(layoutId: number, formInput: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/form-layouts/${layoutId}/form-inputs`, formInput);
+  }
 
- 
+  
 }

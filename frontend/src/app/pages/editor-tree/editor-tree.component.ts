@@ -214,15 +214,35 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
 
   private findSectionFromEvent(event: CdkDragDrop<any[]>): any {
     const containerElement = event.container.element.nativeElement;
-    const sectionElement = containerElement.closest('[data-section-id]');
-
-    if (sectionElement) {
-      const sectionId = sectionElement.getAttribute('data-section-id');
-      return this.findSectionById(sectionId);
+    const subsectionElement = containerElement.closest('[data-subsection-id]');
+    if (subsectionElement) {
+        const subsectionId = subsectionElement.getAttribute('data-subsection-id');
+        return this.findSubsectionById(subsectionId);
     }
-
+    const sectionElement = containerElement.closest('[data-section-id]');
+    if (sectionElement) {
+        const sectionId = sectionElement.getAttribute('data-section-id');
+        return this.findSectionById(sectionId);
+    }
     return null;
-  }
+}
+
+private findSubsectionById(subsectionId: string | null): any {
+    if (!subsectionId) return null;
+    const findInItems = (items: any[]): any => {
+        for (const item of items) {
+            if (item.type === 'Subsection' && item.id === subsectionId) {
+                return item;
+            }
+            if (item.items && item.items.length > 0) {
+                const found = findInItems(item.items);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+    return findInItems(this.editorItems);
+}
 
   private findSectionById(sectionId: string | null): any {
     if (!sectionId) return null;
@@ -368,71 +388,154 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
-    const inputsByLayoutId = formInputs.reduce((acc, input) => {
-      const layoutId = input.formLayout.id;
-      if (!acc[layoutId]) {
-        acc[layoutId] = [];
-      }
-      acc[layoutId].push(input);
-      return acc;
-    }, {} as Record<number, FormInput[]>);
+  // private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
+  //   const inputsByLayoutId = formInputs.reduce((acc, input) => {
+  //     const layoutId = input.formLayout.id;
+  //     if (!acc[layoutId]) {
+  //       acc[layoutId] = [];
+  //     }
+  //     acc[layoutId].push(input);
+  //     return acc;
+  //   }, {} as Record<number, FormInput[]>);
 
-    function assignInputsToLayout(layout: any): any {
-      const layoutInputs = inputsByLayoutId[layout.id] || [];
-      const mappedInputs = layoutInputs.map((input) => ({
-        id: input.id,
-        type: input.type,
-        config: {
-          label: input.title,
-          required: input.required,
-        },
-      }));
+  //   function assignInputsToLayout(layout: any): any {
+  //     const layoutInputs = inputsByLayoutId[layout.id] || [];
+  //     const mappedInputs = layoutInputs.map((input) => ({
+  //       id: input.id,
+  //       type: input.type,
+  //       config: {
+  //         label: input.title,
+  //         required: input.required,
+  //       },
+  //     }));
 
-      let children = layout.children || [];
-      if (children.length > 0) {
-        children = children.map(assignInputsToLayout);
-      }
+  //     let children = layout.children || [];
+  //     if (children.length > 0) {
+  //       children = children.map(assignInputsToLayout);
+  //     }
 
-      return {
-        ...layout,
-        items: mappedInputs,
-        children: children,
-      };
-    }
+  //     return {
+  //       ...layout,
+  //       items: mappedInputs,
+  //       children: children,
+  //     };
+  //   }
 
-    this.editorItems = this.editorItems.map(assignInputsToLayout);
-  }
+  //   this.editorItems = this.editorItems.map(assignInputsToLayout);
+  // }
 
   loadFormTemplateWithLayouts(id: string) {
     this.formTemplateService
-      .getFormTemplateWithFormLayouts(+id)
+      .getFullFormTemplate(+id)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap((formTemplate) => {
-          this.editorItems = formTemplate.formLayouts || [];
-          this.formTitle = formTemplate.title ?? '';
-
-          return this.formTemplateService.getFormInputsByTemplateId(+id);
-        }),
         catchError((error) => {
-          console.error('Error in loading process:', error);
+          console.error('Error loading full form template:', error);
           return throwError(() => error);
         })
       )
       .subscribe({
-        next: (formInputs: FormInput[]) => {
-          this.populateFormInputsIntoLayouts(formInputs);
-          this.loadFormInputsWithMultipleValues(formInputs);
+        next: (formTemplate) => {
+          this.formTitle = formTemplate.title ?? '';
+          
+          if (formTemplate.formLayouts && formTemplate.formLayouts.length > 0) {
+            this.editorItems = this.processFormLayouts(formTemplate.formLayouts);
+            
+            const allInputs = this.collectAllFormInputs(formTemplate.formLayouts);
+            if (allInputs.length > 0) {
+              this.loadFormInputsWithMultipleValues(allInputs);
+            }
+          } else {
+            this.editorItems = [];
+          }
+          
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error(
-            'Error loading form template with layouts and inputs:',
-            error
-          );
-        },
+          console.error('Error loading form template:', error);
+        }
       });
+  }
+  private processFormLayouts(layouts: any[]): any[] {
+    return layouts.map(layout => {
+      if (layout.type === 'Section') {
+        const section = {
+          id: layout.id,
+          type: layout.type,
+          title: layout.title,
+          items: [], 
+          children: [] 
+        };
+        
+        // Process form inputs directly in this section
+        if (layout.formInputs && layout.formInputs.length > 0) {
+          section.items = layout.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+        }
+        
+        // Process subsections 
+        if (layout.children && layout.children.length > 0) {
+          section.children = layout.children.map((child: any) => {
+            const subsection = {
+              id: child.id,
+              type: child.type,
+              title: child.title,
+              items: []
+            };
+            
+            // Process form inputs in this subsection
+            if (child.formInputs && child.formInputs.length > 0) {
+              subsection.items = child.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+            }
+            
+            return subsection;
+          });
+        }
+        
+        return section;
+      }
+      
+      return layout;
+    });
+  }
+  
+  private mapFormInputToEditorItem(input: any): any {
+    let config;
+    try {
+      config = input.config ? JSON.parse(input.config) : {};
+    } catch (e) {
+      console.error('Error parsing input config:', e);
+      config = {};
+    }
+    
+    return {
+      id: input.id,
+      type: input.type,
+      config: {
+        ...config,
+        label: input.title,
+        required: input.required
+      }
+    };
+  }
+  
+  private collectAllFormInputs(layouts: any[]): FormInput[] {
+    const allInputs: FormInput[] = [];
+    
+    layouts.forEach(layout => {
+      if (layout.formInputs && layout.formInputs.length > 0) {
+        allInputs.push(...layout.formInputs);
+      }
+      
+      if (layout.children && layout.children.length > 0) {
+        layout.children.forEach((subsection: any) => {
+          if (subsection.formInputs && subsection.formInputs.length > 0) {
+            allInputs.push(...subsection.formInputs);
+          }
+        });
+      }
+    });
+    
+    return allInputs;
   }
   handleSubmit() {
     console.log('Starting form submission process');
@@ -523,51 +626,98 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
   saveFormInputsToSections(onComplete?: () => void) {
     const formInputRequests: any[] = [];
     const multiChoiceItems: { item: any; layoutId: number }[] = [];
-
-    this.editorItems.forEach((section) => {
-      if (section.type === 'Section' && section.items?.length > 0) {
-        const layoutId = section.id;
-
-        section.items.forEach((item: any, itemIndex: number) => {
-          if (item.id || !item.type || item.type === 'Section') {
-            return;
-          }
-
-          const targetLayoutId = item.targetSectionId || layoutId;
-          const itemConfig = item.config || {};
-          const itemTitle =
-            itemConfig.label || itemConfig.groupLabel || itemConfig.title || '';
-
-          formInputRequests.push({
-            formInput: {
-              type: item.type,
-              title: itemTitle,
-              config: JSON.stringify(itemConfig),
-              required: itemConfig.isRequired || itemConfig.required || false,
-              ordinalPosition: itemIndex,
-            },
-            formLayoutId: targetLayoutId,
+        this.editorItems.forEach((section) => {
+      if (section.type === 'Section') {
+        const sectionLayoutId = section.id;
+  
+        if (section.items?.length > 0) {
+          section.items.forEach((item: any, itemIndex: number) => {
+            if (item.id || !item.type || item.type === 'Section') {
+              return;
+            }
+  
+            this.prepareFormInputRequest(item, sectionLayoutId, itemIndex, formInputRequests, multiChoiceItems);
           });
-
-          if (['CHECKBOX', 'SELECT_BOX', 'RADIO_BUTTON'].includes(item.type)) {
-            multiChoiceItems.push({ item, layoutId: targetLayoutId });
-          }
-        });
+        }
+  
+        if (section.children?.length > 0) {
+          section.children.forEach((subsection: any) => {
+            if (!subsection.id) {
+              console.warn('Subsection has no ID, cannot add form inputs to it:', subsection);
+              return;
+            }
+            
+            const subsectionLayoutId = subsection.id;
+            
+            if (subsection.items?.length > 0) {
+              subsection.items.forEach((item: any, itemIndex: number) => {
+                if (item.id || !item.type || item.type === 'Subsection') {
+                  return;
+                }
+  
+                this.prepareFormInputRequest(item, subsectionLayoutId, itemIndex, formInputRequests, multiChoiceItems);
+              });
+            }
+          });
+        }
       }
     });
-
+  
     if (formInputRequests.length === 0) {
       if (onComplete) onComplete();
       return;
     }
-
-    this.formTemplateService
-      .addMultipleFormInputsToTemplate(+this.templateId, formInputRequests)
+  
+    const saveOperations: Observable<any>[] = formInputRequests.map(request => {
+      const { formInput, formLayoutId } = request;
+      
+      let layout = null;
+      for (const section of this.editorItems) {
+        if (section.id === formLayoutId) {
+          layout = section;
+          break;
+        }
+        
+        if (section.children) {
+          const subsection = section.children.find((sub: any) => sub.id === formLayoutId);
+          if (subsection) {
+            layout = subsection;
+            break;
+          }
+        }
+      }
+      
+      if (!layout) {
+        console.error(`Could not find layout with ID ${formLayoutId}`);
+        return of(null);
+      }
+      
+      if (layout.type === 'Subsection') {
+        return this.formTemplateService.addFormInputToSubsection(formLayoutId, formInput)
+          .pipe(
+            catchError(error => {
+              console.error(`Error saving form input to subsection ${formLayoutId}:`, error);
+              return of(null);
+            })
+          );
+      } else {
+        return this.formTemplateService.addFormInputToLayout(formLayoutId, formInput)
+          .pipe(
+            catchError(error => {
+              console.error(`Error saving form input to section ${formLayoutId}:`, error);
+              return of(null);
+            })
+          );
+      }
+    });
+  
+    forkJoin(saveOperations)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (savedInputs) => {
           console.log('Form inputs saved successfully:', savedInputs);
-          this.processMultiChoiceItems(multiChoiceItems, savedInputs, onComplete);
+          const validSavedInputs = savedInputs.filter(input => input !== null);
+          this.processMultiChoiceItems(multiChoiceItems, validSavedInputs, onComplete);
         },
         error: (error) => {
           console.error('Error saving form inputs:', error);
@@ -575,6 +725,35 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         },
       });
   }
+  
+
+// Méthode helper pour préparer les requêtes
+private prepareFormInputRequest(
+  item: any,
+  layoutId: number,
+  itemIndex: number,
+  formInputRequests: any[],
+  multiChoiceItems: { item: any; layoutId: number }[]
+) {
+  const itemConfig = item.config || {};
+  const itemTitle =
+    itemConfig.label || itemConfig.groupLabel || itemConfig.title || '';
+
+  formInputRequests.push({
+    formInput: {
+      type: item.type,
+      title: itemTitle,
+      config: JSON.stringify(itemConfig),
+      required: itemConfig.isRequired || itemConfig.required || false,
+      ordinalPosition: itemIndex,
+    },
+    formLayoutId: layoutId,
+  });
+
+  if (['CHECKBOX', 'SELECT_BOX', 'RADIO_BUTTON'].includes(item.type)) {
+    multiChoiceItems.push({ item, layoutId });
+  }
+}
 
   resetForm() {
     this.editorItems = [];
@@ -832,11 +1011,11 @@ addSubsection(section: any): void {
         input.type === 'SELECT_BOX' ||
         input.type === 'RADIO_BUTTON'
     );
-
+  
     if (multiChoiceInputs.length === 0) {
       return;
     }
-
+  
     const requests = multiChoiceInputs.map((input) =>
       this.multipleValueService.getMultipleValuesByFormInputId(input.id).pipe(
         map((values) => ({ input, values })),
@@ -849,7 +1028,7 @@ addSubsection(section: any): void {
         })
       )
     );
-
+  
     // Execute all requests in parallel
     forkJoin(requests)
       .pipe(takeUntil(this.destroy$))
@@ -857,10 +1036,9 @@ addSubsection(section: any): void {
         next: (results) => {
           results.forEach(({ input, values }) => {
             input.multipleValues = values as MultipleValue[];
-
             this.updateEditorItemWithMultipleValues(input);
           });
-
+  
           this.cdr.detectChanges();
         },
         error: (error) => {
@@ -868,36 +1046,47 @@ addSubsection(section: any): void {
         },
       });
   }
+  
 
   private updateEditorItemWithMultipleValues(input: FormInput) {
+    const updateItemConfig = (item: any) => {
+      if (item.id === input.id) {
+        if (!item.config) {
+          item.config = {};
+        }
+  
+        const values =
+          input.multipleValues && input.multipleValues[0]
+            ? input.multipleValues[0].valeurs
+            : [];
+  
+        if (input.type === 'CHECKBOX' || input.type === 'RADIO_BUTTON') {
+          item.config.options = values.map((val: string) => {
+            try {
+              if (typeof val === 'string' && val.startsWith('{')) {
+                return JSON.parse(val);
+              }
+              return val;
+            } catch (e) {
+              console.error('Error parsing value:', val, e);
+              return val;
+            }
+          });
+        } else if (input.type === 'SELECT_BOX') {
+          item.config.options = values.join(',');
+        }
+      }
+    };
+  
     this.editorItems.forEach((section) => {
-      if (section.type === 'Section' && section.items) {
-        section.items.forEach((item: any) => {
-          if (item.id === input.id) {
-            if (!item.config) {
-              item.config = {};
-            }
-
-            const values =
-              input.multipleValues && input.multipleValues[0]
-                ? input.multipleValues[0].valeurs
-                : [];
-
-            if (input.type === 'CHECKBOX' || input.type === 'RADIO_BUTTON') {
-              item.config.options = values.map((val: string) => {
-                try {
-                  if (typeof val === 'string' && val.startsWith('{')) {
-                    return JSON.parse(val);
-                  }
-                  return val;
-                } catch (e) {
-                  console.error('Error parsing value:', val, e);
-                  return val;
-                }
-              });
-            } else if (input.type === 'SELECT_BOX') {
-              item.config.options = values.join(',');
-            }
+      if (section.items) {
+        section.items.forEach(updateItemConfig);
+      }
+      
+      if (section.children) {
+        section.children.forEach((subsection: any) => {
+          if (subsection.items) {
+            subsection.items.forEach(updateItemConfig);
           }
         });
       }

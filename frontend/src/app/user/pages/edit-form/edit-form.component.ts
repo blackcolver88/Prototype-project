@@ -78,6 +78,10 @@ export class EditFormComponent {
       this.loadFormTemplateWithSubmissionId(this.submissionId);
     });
   }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   loadFormTemplateWithSubmissionId(submissionId: number) {
     this.isLoading = true;
@@ -227,10 +231,7 @@ export class EditFormComponent {
     return forkJoin(requests);
   }
   
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+
 
   private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
     const inputsByLayoutId = formInputs.reduce((acc, input) => {
