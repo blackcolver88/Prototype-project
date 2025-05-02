@@ -965,7 +965,7 @@ removeItem(item: any) {
 
       return of(null);
     });
-
+    
     forkJoin(saveRequests)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
