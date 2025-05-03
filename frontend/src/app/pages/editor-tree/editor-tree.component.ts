@@ -1,6 +1,6 @@
 import { Component, ViewChild,inject,Output,EventEmitter,OnInit,Input,OnDestroy} from '@angular/core';
 import { CdkTreeModule, NestedTreeControl } from '@angular/cdk/tree';
-import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, moveItemInArray} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Dialog, DialogModule } from '@angular/cdk/dialog';
 import { TextformConfigComponent } from '../../configurations/textform-config/textform-config.component';
@@ -39,6 +39,7 @@ import { MultipleValueService } from '../../services/multiple-value.service';
 import { MultipleValue } from '../../model/MultipleValue';
 import { FormInputService } from '../../services/form-input.service';
 import { SubsectionConfigComponent } from '../../configurations/subsection-config/subsection-config.component';
+import { faBars} from '@fortawesome/free-solid-svg-icons';
 
 export interface FoodNode {
   name: string;
@@ -72,7 +73,7 @@ const TREE_DATA: FoodNode[] = [
   standalone: true,
   imports: [CdkDropList,CdkDrag,CommonModule,CdkTreeModule,DialogModule,CdkDropListGroup,CdkStepperModule,HttpClientModule,FontAwesomeModule,TextformComponent,
     EmailComponent,CheckboxComponent,PhoneNumberComponent,RadioButtonComponent,SelectBoxComponent,DatepickerComponent,ButtonComponent,BasicDatepickerComponent,
-    TextAreaComponent,PasswordComponent
+    TextAreaComponent,PasswordComponent,DragDropModule,    FontAwesomeModule,
   ],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css'],
@@ -103,7 +104,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     private formInputService: FormInputService,
     private multipleValueService: MultipleValueService
   ) {
-    library.addIcons(faTrashAlt, faPlus);
+    library.addIcons(faTrashAlt, faPlus,faBars,
+    );
   }
 
   ngOnInit() {
@@ -979,48 +981,83 @@ removeItem(item: any) {
         },
       });
   }
-  onSubsectionItemDropped(event: CdkDragDrop<any[]>, subsection: any) {
+  onSubsectionItemDropped(event: CdkDragDrop<any[]>, subsection: any): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(
-        event.container.data,
+        subsection.items,
         event.previousIndex,
         event.currentIndex
       );
-      this.cdr.detectChanges();
-      return;
+  
+      subsection.items = [...subsection.items]; 
+  
+      const updatedItems = subsection.items
+        .filter((item: any) => item.id)
+        .map((item: any, index: number) => ({
+          id: item.id,
+          ordinalPosition: index
+        }));
+  
+      if (updatedItems.length > 0) {
+        this.formTemplateService.updateSubsectionItemsOrder(
+          +this.templateId,
+          subsection.id,
+          updatedItems
+        ).pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => console.log('Ordre des items sauvegardé'),
+          error: err => console.error('Échec de sauvegarde:', err)
+        });
+      }
     }
+  }
 
-    const draggedItem = event.item.data;
+  onSubsectionDrop(event: CdkDragDrop<any[]>, section: any) {
+    if (event.previousContainer === event.container && section.children) {
+      moveItemInArray(section.children, event.previousIndex, event.currentIndex);
 
-    if (draggedItem.name) {
-      this.openDialog(
-        this.getConfigComponent(draggedItem.name),
-        draggedItem,
-        0
-      )
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((itemResult) => {
-          if (itemResult) {
-            if (!subsection.items) subsection.items = [];
-            subsection.items.splice(event.currentIndex, 0, {
-              ...itemResult,
-              type: draggedItem.name 
-            });
-            this.cdr.detectChanges();
+      section.children.forEach((subsection: any, index: number) => {
+        subsection.ordinalPosition = index;
+      });
+
+      const reorderedSubsections = section.children
+        .filter((subsection: any) => subsection.id)
+        .map((subsection: any, index: number) => ({
+          id: subsection.id,
+          ordinalPosition: index
+        }));
+
+      const templateIdNumber = +this.templateId;
+      const sectionIdNumber = +section.id;
+
+      if (!this.templateId || isNaN(templateIdNumber)) {
+        console.warn('Invalid templateId');
+        return;
+      }
+
+      if (!section.id || isNaN(sectionIdNumber)) {
+        console.warn('Invalid sectionId');
+        return;
+      }
+
+      console.log('Updating subsection order with:', {
+        templateId: templateIdNumber,
+        sectionId: sectionIdNumber,
+        subsections: reorderedSubsections
+      });
+
+      this.formTemplateService.updateSubsectionOrder(templateIdNumber, sectionIdNumber, reorderedSubsections)
+        .subscribe({
+          next: (response) => {
+            console.log('Subsection order updated successfully', response);
+          },
+          error: (err) => {
+            console.error("Error updating subsection order", err);
           }
         });
     }
-    else {
-      if (!subsection.items) subsection.items = [];
-      
-      if (event.previousContainer !== event.container) {
-        event.previousContainer.data.splice(event.previousIndex, 1);
-      }
-      
-      subsection.items.splice(event.currentIndex, 0, draggedItem);
-      this.cdr.detectChanges();
-    }
   }
+
 
   private loadFormInputsWithMultipleValues(inputs: FormInput[]) {
     const multiChoiceInputs = inputs.filter(

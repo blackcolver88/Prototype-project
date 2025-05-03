@@ -104,5 +104,21 @@ export class FormTemplateService {
     return this.http.post<any>(`${this.baseUrl}/form-layouts/${layoutId}/form-inputs`, formInput);
   }
 
+   updateSubsectionItemsOrder(
+    templateId: number, 
+    subsectionId: number, 
+    inputOrders: { id: number; ordinalPosition: number }[]): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/${templateId}/subsections/${subsectionId}/items/order`, 
+      inputOrders
+    );
+  }
+
+  updateSubsectionOrder(templateId: number, sectionId: number, subsectionOrders: { id: number; ordinalPosition: number }[]): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/${templateId}/sections/${sectionId}/subsections/order`,
+      subsectionOrders
+    );
+  }
   
 }

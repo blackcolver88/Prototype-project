@@ -1,9 +1,6 @@
 package com.example.formservice.service;
 
-import com.example.formservice.DTO.FormInputRequest;
-import com.example.formservice.DTO.FormLayoutDTO;
-import com.example.formservice.DTO.FormLayoutOrderDTO;
-import com.example.formservice.DTO.FormInputOrderDTO;
+import com.example.formservice.DTO.*;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
@@ -307,25 +304,6 @@ public class FormTemplateService {
                 .sorted(Comparator.comparing(FormLayout::getOrdinalPosition))
                 .collect(Collectors.toList());
     }
-
-    @Transactional
-    public FormLayout updateSubsectionOrder(Long sectionId, List<FormLayoutOrderDTO> subsectionOrders) {
-        FormLayout section = formLayoutRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("Section not found with id: " + sectionId));
-
-        Map<Long, FormLayout> childrenMap = section.getChildren().stream()
-                .collect(Collectors.toMap(FormLayout::getId, child -> child));
-
-        for (FormLayoutOrderDTO orderDTO : subsectionOrders) {
-            FormLayout subsection = childrenMap.get(orderDTO.getId());
-            if (subsection != null) {
-                subsection.setOrdinalPosition(orderDTO.getOrdinalPosition());
-                formLayoutRepository.save(subsection);
-            }
-        }
-
-        return formLayoutRepository.findById(sectionId).orElseThrow();
-    }
     @Transactional
     public FormLayout addSectionToFormTemplate(Long formTemplateId, FormLayout section) {
         FormTemplate formTemplate = formTemplateRepository.findById(formTemplateId)
@@ -387,5 +365,48 @@ public class FormTemplateService {
 
         List<FormInput> formInputs = formInputRepository.findByFormLayoutIdOrdered(layout.getId());
         layout.setFormInputs(formInputs);
+    }
+
+    @Transactional
+    public void updateSubsectionItemsOrder(Long templateId, Long subsectionId, List<FormInputOrderDTO> inputOrders) {
+        FormLayout subsection = formLayoutRepository.findById(subsectionId)
+                .orElseThrow(() -> new IllegalArgumentException("Sous-section non trouvée"));
+
+        for (FormInputOrderDTO dto : inputOrders) {
+            FormInput input = formInputRepository.findById(dto.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Champ non trouvé"));
+
+            input.setOrdinalPosition(dto.getOrdinalPosition());
+            formInputRepository.save(input);
+        }
+    }
+    @Transactional
+    public FormLayout updateSubsectionOrder(Long templateId, Long sectionId, List<SubsectionOrderDTO> subsectionOrders) {
+        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("Template non trouvé"));
+
+        FormLayout section = formTemplate.getFormLayouts().stream()
+                .filter(layout -> layout.getId().equals(sectionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Section non trouvée"));
+
+        if (!"Section".equals(section.getType().name())) {
+            throw new IllegalArgumentException("L'élément spécifié n'est pas une section");
+        }
+
+        for (SubsectionOrderDTO orderDTO : subsectionOrders) {
+            FormLayout subsection = section.getChildren().stream()
+                    .filter(s -> s.getId().equals(orderDTO.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Sous-section non trouvée"));
+
+            subsection.setOrdinalPosition(orderDTO.getOrdinalPosition());
+            formLayoutRepository.save(subsection);
+        }
+
+        section.getChildren().sort(Comparator.comparingInt(
+                s -> s.getOrdinalPosition() != null ? s.getOrdinalPosition() : 0));
+
+        return section;
     }
 }

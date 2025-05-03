@@ -22,6 +22,14 @@ public interface FormLayoutRepository extends JpaRepository<FormLayout, Long> {
     @Query("SELECT fl FROM FormLayout fl WHERE fl.parent.id = :parentId ORDER BY COALESCE(fl.ordinalPosition, 0), fl.id")
     List<FormLayout> findByParentIdOrdered(@Param("parentId") Long parentId);
 
+    @Query("SELECT f FROM FormLayout f JOIN FETCH f.formTemplate WHERE f.id = :id")
+    Optional<FormLayout> findWithTemplateById(@Param("id") Long id);
+
+    List<FormLayout> findAllById(Iterable<Long> ids);
+
+
+
+
 
 }
 

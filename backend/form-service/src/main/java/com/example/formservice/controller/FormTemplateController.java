@@ -147,5 +147,23 @@ public class FormTemplateController {
         FormTemplateDTO dto = new FormTemplateDTO(fullFormTemplate);
         return ResponseEntity.ok(dto);
     }
+
+    @PutMapping("/{templateId}/subsections/{subsectionId}/items/order")
+    public ResponseEntity<Void> updateSubsectionItemsOrder(
+            @PathVariable Long templateId,
+            @PathVariable Long subsectionId,
+            @RequestBody List<FormInputOrderDTO> inputOrders) {
+        formTemplateService.updateSubsectionItemsOrder(templateId, subsectionId, inputOrders);
+        return ResponseEntity.ok().build();
+    }
+    @PutMapping("/{templateId}/sections/{sectionId}/subsections/order")
+    public ResponseEntity<FormLayout> updateSubsectionOrder(
+            @PathVariable Long templateId,
+            @PathVariable Long sectionId,
+            @RequestBody List<SubsectionOrderDTO> subsectionOrders) {
+
+        FormLayout updatedSection = formTemplateService.updateSubsectionOrder(templateId, sectionId, subsectionOrders);
+        return ResponseEntity.ok(updatedSection);
+    }
 }
 
