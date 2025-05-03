@@ -31,4 +31,7 @@ export class FormLayoutService {
   deleteFormLayout(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+  deleteSubsection(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/subsections/${id}`);
+  }
 }

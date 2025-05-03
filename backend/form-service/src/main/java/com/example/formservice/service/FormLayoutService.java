@@ -1,6 +1,7 @@
 package com.example.formservice.service;
 
 import com.example.formservice.entities.FormLayout;
+import com.example.formservice.entities.enums.FormLayoutType;
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,17 @@ public class FormLayoutService {
         } else {
             throw new IllegalArgumentException("Section with id " + sectionId + " does not exist");
         }
+    }
+
+    public void deleteSubsectionById(Long id) {
+        FormLayout layout = formLayoutRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("FormLayout non trouvé avec l'id " + id));
+
+        if (layout.getType() != FormLayoutType.Subsection) {
+            throw new RuntimeException("L'élément avec l'id " + id + " n'est pas une Subsection.");
+        }
+
+        formLayoutRepository.deleteById(id);
     }
 
     

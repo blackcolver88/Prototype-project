@@ -762,106 +762,152 @@ private prepareFormInputRequest(
     console.log('All items removed');
   }
 
-addSubsection(section: any): void {
-  const dialogRef = this.dialog.open(SubsectionConfigComponent, {
-    width: '70vw',
-    height: '50vh',
-    data: { item: { name: 'Subsection' } },
-    disableClose: false,
-    panelClass: 'custom-dialog-container',
-    backdropClass: 'custom-dialog-backdrop',
-  });
-
-  dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe((subsectionResult) => {
-    if (subsectionResult) {
-      if (!section.children) {
-        section.children = [];
+  addSubsection(section: any): void {
+    const sectionId = section.id;
+    
+    const dialogRef = this.dialog.open(SubsectionConfigComponent, {
+      width: '70vw',
+      height: '50vh',
+      data: { item: { name: 'Subsection' } },
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      backdropClass: 'custom-dialog-backdrop',
+    });
+  
+    dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe((subsectionResult) => {
+      if (subsectionResult) {
+        const subsectionData = {
+          ...subsectionResult,
+          type: 'Subsection',
+          formTemplate: { id: +this.templateId }
+        };
+        
+        if (sectionId) {
+          this.formTemplateService.addSubsectionToSection(sectionId, subsectionData)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (savedSubsection) => {
+                if (!section.children) {
+                  section.children = [];
+                }
+                
+                section.children.push({
+                  ...savedSubsection,
+                  type: 'Subsection',
+                  items: []
+                });
+                
+                console.log('Subsection added successfully:', savedSubsection);
+                this.cdr.detectChanges();
+              },
+              error: (error) => {
+                console.error('Error adding subsection:', error);
+              }
+            });
+        } else {
+          if (!section.children) {
+            section.children = [];
+          }
+          
+          section.children.push({
+            ...subsectionData,
+            tempId: `temp_subsection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            items: []
+          });
+          
+          this.cdr.detectChanges();
+        }
       }
-      
-      section.children.push({
-        ...subsectionResult,
-        type: 'Subsection',
-        items: []
+    });
+  }
+removeItem(item: any) {
+  const topLevelIndex = this.editorItems.indexOf(item);
+  if (topLevelIndex !== -1) {
+    if (item.id) {
+      const removedItem = this.editorItems.splice(topLevelIndex, 1)[0];
+      this.cdr.detectChanges();
+
+      this.formLayoutService.deleteFormLayout(item.id).subscribe({
+        next: () => console.log('Section deleted:', item.id),
+        error: (err) => {
+          console.error('Error deleting section:', err);
+        }
       });
-      
+    } else {
+      this.editorItems.splice(topLevelIndex, 1);
       this.cdr.detectChanges();
     }
-  });
-}
-removeItem(item: any) {
-  // First try to find and remove the item from the top level (sections)
-  const topLevelIndex = this.editorItems.indexOf(item);
-
-  if (topLevelIndex !== -1) {
-      // Item is a section
-      if (item.id) {
-          // Optimistic update: immediately remove from UI first
-          const removedItem = this.editorItems.splice(topLevelIndex, 1)[0];
-          this.cdr.detectChanges();
-          
-          this.formLayoutService.deleteFormLayout(item.id).subscribe({
-              next: () => {
-                  console.log('Section deleted successfully:', item);
-              },
-              error: (err) => {
-                  console.error('Error deleting section:', err);
-                  // Optionally show user notification without reverting UI
-                  // this.showErrorNotification('The section was removed from your view but the server update failed. Changes will sync when you reload.');
-              },
-          });
-      } else {
-          this.editorItems.splice(topLevelIndex, 1);
-          this.cdr.detectChanges();
-      }
-      return;
+    return;
   }
 
-  // Search through nested structure
   for (const section of this.editorItems) {
-      if (section.children) {
-          const subsectionIndex = section.children.indexOf(item);
-          if (subsectionIndex !== -1) {
-              section.children.splice(subsectionIndex, 1);
+    if (section.children) {
+      const subsectionIndex = section.children.indexOf(item);
+      if (subsectionIndex !== -1) {
+        if (item.id) {
+          // Supprimer via l'API
+          section.children.splice(subsectionIndex, 1);
+          this.cdr.detectChanges();
+
+          this.formLayoutService.deleteSubsection(item.id).subscribe({
+            next: () => console.log('Subsection deleted:', item.id),
+            error: (err) => {
+              console.error('Error deleting subsection:', err);
+            }
+          });
+        } else {
+          section.children.splice(subsectionIndex, 1);
+          this.cdr.detectChanges();
+        }
+        return;
+      }
+    }
+
+    if (section.items) {
+      const inputIndex = section.items.indexOf(item);
+      if (inputIndex !== -1) {
+        if (item.id) {
+          const removedInput = section.items.splice(inputIndex, 1)[0];
+          this.cdr.detectChanges();
+
+          this.formInputService.deleteFormInput(item.id).subscribe({
+            next: () => console.log('Form input deleted:', item.id),
+            error: (err) => {
+              console.error('Error deleting form input:', err);
+            }
+          });
+        } else {
+          section.items.splice(inputIndex, 1);
+          this.cdr.detectChanges();
+        }
+        return;
+      }
+    }
+
+    if (section.children) {
+      for (const subsection of section.children) {
+        if (subsection.items) {
+          const inputIndex = subsection.items.indexOf(item);
+          if (inputIndex !== -1) {
+            if (item.id) {
+              subsection.items.splice(inputIndex, 1);
               this.cdr.detectChanges();
-              return;
+
+              this.formInputService.deleteFormInput(item.id).subscribe({
+                next: () => console.log('Nested form input deleted:', item.id),
+                error: (err) => {
+                  console.error('Error deleting nested form input:', err);
+                }
+              });
+            } else {
+              subsection.items.splice(inputIndex, 1);
+              this.cdr.detectChanges();
+            }
+            return;
           }
-          
-          for (const subsection of section.children || []) {
-              if (subsection.items) {
-                  const itemIndex = subsection.items.indexOf(item);
-                  if (itemIndex !== -1) {
-                      subsection.items.splice(itemIndex, 1);
-                      this.cdr.detectChanges();
-                      return;
-                  }
-              }
-          }
+        }
       }
-      
-      if (section.items) {
-          const itemIndex = section.items.indexOf(item);
-          if (itemIndex !== -1) {
-              if (item.id) {
-                  // Optimistic update for form inputs
-                  const removedInput = section.items.splice(itemIndex, 1)[0];
-                  this.cdr.detectChanges();
-                  
-                  this.formInputService.deleteFormInput(item.id).subscribe({
-                      next: () => {
-                          console.log('Form input deleted successfully:', item);
-                      },
-                      error: (err) => {
-                          console.error('Error deleting form input:', err);
-                          // Optionally show user notification
-                      },
-                  });
-              } else {
-                  section.items.splice(itemIndex, 1);
-                  this.cdr.detectChanges();
-              }
-              return;
-          }
-      }
+    }
   }
 }
   getOptionsArray(options: string | string[] | any[]): string[] {

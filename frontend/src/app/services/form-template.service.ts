@@ -121,4 +121,13 @@ export class FormTemplateService {
     );
   }
   
+  addSubsectionToSection(sectionId: number, subsection: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/form-layouts/${sectionId}/subsections`, subsection)
+      .pipe(
+        catchError(error => {
+          console.error('Error adding subsection to section:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 }

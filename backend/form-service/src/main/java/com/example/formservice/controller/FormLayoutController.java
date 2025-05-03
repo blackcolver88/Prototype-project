@@ -49,5 +49,10 @@ public class FormLayoutController {
     public FormLayout addSubsectionToSection(@PathVariable Long sectionId, @RequestBody FormLayout subsection) {
         return formLayoutService.addSubsectionToSection(sectionId, subsection);
     }
+    @DeleteMapping("/subsections/{id}")
+    public ResponseEntity<Void> deleteSubsection(@PathVariable Long id) {
+        formLayoutService.deleteSubsectionById(id);
+        return ResponseEntity.noContent().build();
+    }
     
 }
