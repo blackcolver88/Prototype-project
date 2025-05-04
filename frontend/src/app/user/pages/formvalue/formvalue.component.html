@@ -74,7 +74,7 @@
                     <app-checkbox
                       [groupLabel]="sectionItem.config.label"
                       [name]="sectionItem.config.name"
-                      [isRequired]="sectionItem.config.isRequired"
+                      [isRequired]="sectionItem.config.isRequired || false"
                       [options]="sectionItem.config.options"
                       [isDisabled]="isFormSubmitted"
                       [selectedOptions]="sectionItem.value"
@@ -111,9 +111,9 @@
                   <ng-container *ngIf="sectionItem?.type === 'RADIO_BUTTON'">
                     <app-radio-button
                       [groupLabel]="sectionItem.config.label"
-                      [name]="sectionItem.config.name"
+                      [name]="sectionItem.config.name || 'radio-group'"
                       [options]="sectionItem.config.options"
-                      [isRequired]="sectionItem.config.isRequired"
+                      [isRequired]="sectionItem.config.isRequired || false"
                       [isDisabled]="isFormSubmitted"
                       [selectedOption]="sectionItem.value"
                       (valueChange)="handleRadioChange(sectionItem.id, $event)"

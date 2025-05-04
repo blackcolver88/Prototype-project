@@ -240,22 +240,26 @@ export class FormvalueComponent {
   }
 
   private loadFormInputsWithMultipleValues(inputs: FormInput[]) {
-    const multiChoiceInputs = inputs.filter(input =>
-      input.type === 'CHECKBOX' ||
-      input.type === 'SELECT_BOX' ||
-      input.type === 'RADIO_BUTTON'
+    const multiChoiceInputs = inputs.filter(
+      (input) =>
+        input.type === 'CHECKBOX' ||
+        input.type === 'SELECT_BOX' ||
+        input.type === 'RADIO_BUTTON'
     );
   
     if (multiChoiceInputs.length === 0) {
       return;
     }
   
-    const requests = multiChoiceInputs.map(input =>
+    const requests = multiChoiceInputs.map((input) =>
       this.multipleValueService.getMultipleValuesByFormInputId(input.id).pipe(
-        map(values => ({input, values})),
-        catchError(error => {
-          console.error(`Error loading multiple values for input ${input.id}:`, error);
-          return of({input, values: []});
+        map((values) => ({ input, values })),
+        catchError((error) => {
+          console.error(
+            `Error loading multiple values for input ${input.id}:`,
+            error
+          );
+          return of({ input, values: [] });
         })
       )
     );
@@ -265,9 +269,8 @@ export class FormvalueComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results) => {
-          results.forEach(({input, values}) => {
+          results.forEach(({ input, values }) => {
             input.multipleValues = values as MultipleValue[];
-  
             this.updateEditorItemWithMultipleValues(input);
           });
   
@@ -275,53 +278,63 @@ export class FormvalueComponent {
         },
         error: (error) => {
           console.error('Error loading multiple values:', error);
-        }
+        },
       });
   }
 
   private updateEditorItemWithMultipleValues(input: FormInput) {
+    const updateItemWithValues = (item: any) => {
+      if (item.id === input.id) {
+        if (!item.config) {
+          item.config = {};
+        }
+  
+        const values = input.multipleValues && input.multipleValues[0] ?
+          input.multipleValues[0].valeurs : [];
+  
+        if (input.type === 'RADIO_BUTTON') {
+          item.config.options = values.map((val: string) => {
+            try {
+              if (typeof val === 'string' && val.startsWith('{')) {
+                return JSON.parse(val);
+              }
+              return {label: val, value: val};
+            } catch (e) {
+              console.error('Error parsing value:', val, e);
+              return {label: val, value: val};
+            }
+          });
+        } else if (input.type === 'CHECKBOX') {
+          item.config.options = values.map((val: string) => {
+            try {
+              if (typeof val === 'string' && val.startsWith('{')) {
+                return JSON.parse(val);
+              }
+              return {label: val, value: val};
+            } catch (e) {
+              console.error('Error parsing value:', val, e);
+              return {label: val, value: val};
+            }
+          });
+        } else if (input.type === 'SELECT_BOX') {
+          item.config.options = values.join(',');
+        }
+      }
+    };
+  
     this.editorItems.forEach(section => {
-      if (section.type === 'Section' && section.items) {
-        section.items.forEach((item: any) => {
-          if (item.id === input.id) {
-            if (!item.config) {
-              item.config = {};
+      if (section.type === 'Section') {
+        if (section.items) {
+          section.items.forEach(updateItemWithValues);
+        }
+        
+        if (section.children && section.children.length > 0) {
+          section.children.forEach((subsection: any) => {
+            if (subsection.items && subsection.items.length > 0) {
+              subsection.items.forEach(updateItemWithValues);
             }
-  
-            const values = input.multipleValues && input.multipleValues[0] ?
-              input.multipleValues[0].valeurs : [];
-  
-            if (input.type === 'RADIO_BUTTON') {
-              
-              item.config.options = values.map((val: string) => {
-                try {
-                  if (typeof val === 'string' && val.startsWith('{')) {
-                    return JSON.parse(val);
-                  }
-                  return {label: val, value: val};
-                } catch (e) {
-                  console.error('Error parsing value:', val, e);
-                  return {label: val, value: val};
-                }
-              });
-            } else if (input.type === 'CHECKBOX') {
-
-              item.config.options = values.map((val: string) => {
-                try {
-                  if (typeof val === 'string' && val.startsWith('{')) {
-                    return JSON.parse(val);
-                  }
-                  return {label: val, value: val};
-                } catch (e) {
-                  console.error('Error parsing value:', val, e);
-                  return {label: val, value: val};
-                }
-              });
-            } else if (input.type === 'SELECT_BOX') {
-              item.config.options = values.join(',');
-            }
-          }
-        });
+          });
+        }
       }
     });
   }
