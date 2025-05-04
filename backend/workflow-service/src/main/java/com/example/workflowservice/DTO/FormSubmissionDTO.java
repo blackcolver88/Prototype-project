@@ -19,7 +19,6 @@ public class FormSubmissionDTO {
     private String processInstanceId;
     private Long userId;
     private String task;
-    // Add this field to specify which process to start
     private String processDefinitionKey;
 
     @Override

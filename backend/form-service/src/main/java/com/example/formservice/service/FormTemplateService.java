@@ -84,13 +84,12 @@ public class FormTemplateService {
 
         List<FormLayout> orderedLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
 
-        // Sort the actual collection rather than replacing it
-        // This won't trigger orphan removal
+        
         formTemplate.getFormLayouts().sort((a, b) -> {
             Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
             Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
             if (posA.equals(posB)) {
-                return a.getId().compareTo(b.getId()); // Secondary sort by ID
+                return a.getId().compareTo(b.getId()); 
             }
             return posA.compareTo(posB);
         });
@@ -105,7 +104,6 @@ public class FormTemplateService {
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        // Get all layouts for this template for validation
         List<FormLayout> availableLayouts = formLayoutRepository.findByFormTemplateId(templateId);
         Map<Long, FormLayout> layoutMap = availableLayouts.stream()
                 .collect(Collectors.toMap(FormLayout::getId, layout -> layout));
@@ -116,7 +114,6 @@ public class FormTemplateService {
             FormInput formInput = request.getFormInput();
             Long layoutId = request.getFormLayoutId();
 
-            // Find the layout
             FormLayout formLayout;
             if (layoutId != null) {
                 formLayout = layoutMap.get(layoutId);
@@ -124,7 +121,6 @@ public class FormTemplateService {
                     throw new IllegalArgumentException("FormLayout not found with id: " + layoutId + " for template: " + templateId);
                 }
             } else {
-                // Fallback to first layout if no layout specified
                 formLayout = availableLayouts.stream()
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException("No layouts found for template with id: " + templateId));
@@ -143,18 +139,15 @@ public class FormTemplateService {
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        // Get the form layout by ID if provided, otherwise use the first layout
         FormLayout formLayout;
         if (formInput.getFormLayout() != null && formInput.getFormLayout().getId() != null) {
             formLayout = formLayoutRepository.findById(formInput.getFormLayout().getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + formInput.getFormLayout().getId()));
 
-            // Verify layout belongs to the template
             if (!formLayout.getFormTemplate().getId().equals(templateId)) {
                 throw new IllegalArgumentException("FormLayout does not belong to the specified template");
             }
         } else {
-            // Fallback to first layout
             formLayout = formTemplate.getFormLayouts().stream()
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("No layouts found for template with id: " + templateId));
@@ -166,19 +159,16 @@ public class FormTemplateService {
 
     @Transactional(readOnly = true)
     public List<FormInput> getFormInputsByTemplateId(Long templateId) {
-        // Check if template exists
         if (!formTemplateRepository.existsById(templateId)) {
             throw new IllegalArgumentException("FormTemplate not found with id: " + templateId);
         }
 
-        // Get all layouts for the template
         List<FormLayout> layouts = formLayoutRepository.findByFormTemplateId(templateId);
 
         if (layouts.isEmpty()) {
-            return List.of(); // Return empty list if no layouts found
+            return List.of(); 
         }
 
-        // Collect all form inputs from all layouts in the correct order
         return layouts.stream()
                 .flatMap(layout -> formInputRepository.findByFormLayoutIdOrdered(layout.getId()).stream())
                 .collect(Collectors.toList());
@@ -186,26 +176,21 @@ public class FormTemplateService {
 
     @Transactional
     public FormTemplate updateFormLayoutsOrder(Long templateId, List<FormLayoutOrderDTO> layoutOrders) {
-        // Check if template exists
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        // Update the ordinal position for each layout
         for (FormLayoutOrderDTO orderDTO : layoutOrders) {
             FormLayout layout = formLayoutRepository.findById(orderDTO.getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + orderDTO.getId()));
             
-            // Verify the layout belongs to this template
             if (!layout.getFormTemplate().getId().equals(templateId)) {
                 throw new IllegalArgumentException("FormLayout does not belong to the specified template");
             }
             
-            // Set the ordinal position
             layout.setOrdinalPosition(orderDTO.getOrdinalPosition());
             formLayoutRepository.save(layout);
         }
         
-        // Sort the template's layouts in memory before returning
         FormTemplate result = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
         
@@ -223,26 +208,21 @@ public class FormTemplateService {
 
     @Transactional
     public List<FormInput> updateFormInputsOrder(Long templateId, List<FormInputOrderDTO> inputOrders) {
-        // Check if template exists
         FormTemplate formTemplate = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
 
-        // Update the ordinal position for each input
         for (FormInputOrderDTO orderDTO : inputOrders) {
             FormInput input = formInputRepository.findById(orderDTO.getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormInput not found with id: " + orderDTO.getId()));
             
-            // Verify the input belongs to the correct layout
             if (!input.getFormLayout().getFormTemplate().getId().equals(templateId)) {
                 throw new IllegalArgumentException("FormInput does not belong to the specified template");
             }
             
-            // Set the ordinal position
             input.setOrdinalPosition(orderDTO.getOrdinalPosition());
             formInputRepository.save(input);
         }
         
-        // Return all updated inputs for this template
         return getFormInputsByTemplateId(templateId);
     }
 
@@ -253,7 +233,6 @@ public class FormTemplateService {
 
     @Transactional(readOnly = true)
     public List<FormLayout> getFormLayoutById(Long formTemplateId) {
-    // This returns layouts for a specific form template
     return formLayoutRepository.findByFormTemplateId(formTemplateId);
     }
 }

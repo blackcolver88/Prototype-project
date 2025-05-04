@@ -106,21 +106,17 @@ public class FormSubmissionController {
 
         List<FormValue> values = new ArrayList<>();
 
-        // Get all form layouts (sections) for this form
         List<FormLayout> layouts = formTemplateService.getFormLayoutById(formId);
 
-        // Fetch inputs from all sections and create a unified map
         List<FormInput> allFormInputs = new ArrayList<>();
         for (FormLayout layout : layouts) {
             List<FormInput> sectionInputs = formInputRepository.findByFormLayoutId(layout.getId());
             allFormInputs.addAll(sectionInputs);
         }
 
-        // Create a map for efficient lookup
         Map<Long, FormInput> formInputsMap = allFormInputs.stream()
                 .collect(Collectors.toMap(FormInput::getId, input -> input));
 
-        // Log total input count for debugging
         System.out.println("Total form inputs found across all sections: " + allFormInputs.size());
 
         for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
@@ -128,15 +124,12 @@ public class FormSubmissionController {
                 continue;
             }
 
-            // Skip if formInputId is missing
             if (valueRequest.getFormInputId() == null) {
                 continue;
             }
 
-            // Find corresponding input by ID instead of by index
             FormInput correspondingInput = formInputsMap.get(valueRequest.getFormInputId());
             if (correspondingInput == null) {
-                // Input not found for this form, skip it
                 System.out.println("Warning: No FormInput found for ID: " + valueRequest.getFormInputId());
                 continue;
             }
@@ -145,7 +138,6 @@ public class FormSubmissionController {
             value.setValue(String.join(",", valueRequest.getValues()));
             value.setFormSubmission(submission);
 
-            // Set up bidirectional relationship between FormValue and FormInput
             value.getFormInputs().add(correspondingInput);
             correspondingInput.setFormValue(value);
 
@@ -155,7 +147,6 @@ public class FormSubmissionController {
         submission.setFormValues(values);
         FormSubmission savedSubmission = formSubmissionService.save(submission);
 
-        // When creating the FormSubmissionDTO
         FormSubmissionDTO formSubmissionDTO = new FormSubmissionDTO();
         formSubmissionDTO.setId(savedSubmission.getId());
         formSubmissionDTO.setDate(savedSubmission.getDate());
@@ -163,7 +154,6 @@ public class FormSubmissionController {
         formSubmissionDTO.setTask(user.get().getTask());
         formSubmissionDTO.setFormId(formId);
 
-        // Set the process definition key if provided in the wrapper
         if (formValuesWrapper.getProcessDefinitionKey() != null) {
             formSubmissionDTO.setProcessDefinitionKey(formValuesWrapper.getProcessDefinitionKey());
         }

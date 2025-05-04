@@ -47,7 +47,6 @@ public class WorkflowController {
         }
 
         try {
-            // Use the provided process definition key or fall back to default
             String processDefinitionKey = formSubmission.getProcessDefinitionKey();
             if (processDefinitionKey == null || processDefinitionKey.trim().isEmpty()) {
                 processDefinitionKey = "FormSubmissionProcess"; // Default fallback

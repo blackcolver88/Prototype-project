@@ -33,7 +33,6 @@ export class ProcessSelectorComponent implements OnInit {
         next: (processes) => {
           this.availableProcesses = processes.filter(p => p.suspended === false);
           
-          // If no process is selected and we have processes, select the first one
           if (!this.selectedProcessKey && this.availableProcesses.length > 0) {
             this.selectedProcessKey = this.availableProcesses[0].key;
             this.processSelected.emit(this.selectedProcessKey);

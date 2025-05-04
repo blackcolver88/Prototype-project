@@ -26,7 +26,7 @@ public class FormSubmissionDTO {
     @Setter
     private String processDefinitionKey;
 
-    // Add the missing constructor
+    
     public FormSubmissionDTO(Long id, LocalDateTime date, String task, String formTitle, List<String> formValues) {
         this.id = id;
         this.date = date;
@@ -37,7 +37,7 @@ public class FormSubmissionDTO {
                 .collect(Collectors.toList());
     }
 
-    // Keep the static method
+    
     public static FormSubmissionDTO formFormSubmission(FormSubmission submission, String formTitle,
             FormInputService formInputService) {
         FormSubmissionDTO dto = new FormSubmissionDTO(
@@ -49,7 +49,6 @@ public class FormSubmissionDTO {
                         .map(FormValue::getValue)
                         .collect(Collectors.toList()));
 
-        // Convert form values to DTOs with titles
         dto.setFormValues(submission.getFormValues().stream()
                 .map(fv -> {
                     String title = fv.getFormInputs() != null && !fv.getFormInputs().isEmpty()
