@@ -24,15 +24,20 @@ import { FormInput } from '../../../model/FormInput';
 import { MultipleValue } from '../../../model/MultipleValue';
 import { FormValueRequest } from '../../../model/FormValueRequest';
 import { FormSubmissionService } from '../../../services/form-submission.service';
+import { ProcessSelectorComponent } from '../../../components/process-selector/process-selector.component';
 
 
 @Component({
   selector: 'app-formvalue',
- imports: [ CommonModule, CdkTreeModule, DialogModule,
+  imports: [
+    CommonModule, CdkTreeModule, DialogModule,
     HttpClientModule, FontAwesomeModule,
     TextformComponent, EmailComponent, CheckboxComponent, PhoneNumberComponent,
-    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent, BasicDatepickerComponent, TextAreaComponent, PasswordComponent],  
-    templateUrl: './formvalue.component.html',
+    RadioButtonComponent, SelectBoxComponent, DatepickerComponent, ButtonComponent, 
+    BasicDatepickerComponent, TextAreaComponent, PasswordComponent,
+    ProcessSelectorComponent
+  ],
+  templateUrl: './formvalue.component.html',
   styleUrl: './formvalue.component.css'
 })
 export class FormvalueComponent {
@@ -49,6 +54,8 @@ export class FormvalueComponent {
   isFormSubmitted: boolean = false; 
   submissionMessage: string = ''; 
 
+  // Add this property
+  selectedProcessKey: string = '';
 
   onInputChange(event: any) {
     this.valueChange.emit(event.target.value);
@@ -284,25 +291,47 @@ export class FormvalueComponent {
     return isValid;
   }
 
+  // Add this method to handle process selection
+  onProcessSelected(processKey: string) {
+    console.log('Selected process key:', processKey);
+    this.selectedProcessKey = processKey;
+  }
+
   submitForm() {
     if (this.isFormSubmitted) {
       alert('You have already submitted this form.');
       console.warn('You have already submitted this form.');
       return;
     }
+    
     if (!this.validateForm()) {
       return; 
     }
+    
+    // Check if a process has been selected
+    if (!this.selectedProcessKey) {
+      this.validationErrors.push('Please select a workflow process');
+      this.showValidationErrors = true;
+      return;
+    }
+    
     const formValues = this.collectFormValues();
+    
+    // Call the new method with process key
     this.formSubmissionService
-      .submitForm(this.userId, +this.templateId, formValues)
+      .submitFormWithProcess(this.userId, +this.templateId, formValues, this.selectedProcessKey)
       .subscribe({
         next: (result) => {
           this.isFormSubmitted = true; 
           this.router.navigate(['/forms']); 
         },
         error: (error) => {
-          console.error('Erreur lors de la soumission du formulaire :', error);
+          console.error('Error submitting form:', error);
+          
+          if (error.status === 404 && error.error.includes('No deployment found')) {
+            this.validationErrors = ['The selected process is not properly deployed. Please select another process.'];
+            this.showValidationErrors = true;
+          }
         },
       });
   }

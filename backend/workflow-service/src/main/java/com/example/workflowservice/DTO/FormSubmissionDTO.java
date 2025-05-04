@@ -19,11 +19,14 @@ public class FormSubmissionDTO {
     private String processInstanceId;
     private Long userId;
     private String task;
+    // Add this field to specify which process to start
+    private String processDefinitionKey;
 
     @Override
     public String toString() {
         return "FormSubmissionDTO{id=" + id + ", date=" + date + ", formId=" + formId +
-                ", userId=" + userId + ", task='" + task + "', formValues=" + formValues + "}";
+                ", userId=" + userId + ", task='" + task + "', processDefinitionKey='" + processDefinitionKey +
+                "', formValues=" + formValues + "}";
     }
 
     public FormSubmissionDTO(Long id, LocalDateTime date, Long formId, List<FormValueDTO> formValues) {
@@ -38,11 +41,10 @@ public class FormSubmissionDTO {
     public static class FormValueDTO {
         private String title;
         private String value;
+
         public FormValueDTO(String title, String value) {
             this.title = title;
             this.value = value;
         }
-
     }
-
 }

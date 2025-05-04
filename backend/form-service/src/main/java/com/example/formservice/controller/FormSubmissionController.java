@@ -39,13 +39,12 @@ public class FormSubmissionController {
     private DiscoveryClient discoveryClient;
 
     public FormSubmissionController(FormSubmissionService formSubmissionService,
-                                    UserService userService,
-                                    FormTemplateService formTemplateService,
-                                    FormTemplateRepository formRepository,
-                                    FormValueService formValueService,
-                                    FormInputService formInputService,
-                                    FormInputRepository formInputRepository
-                                    ) {
+            UserService userService,
+            FormTemplateService formTemplateService,
+            FormTemplateRepository formRepository,
+            FormValueService formValueService,
+            FormInputService formInputService,
+            FormInputRepository formInputRepository) {
         this.formSubmissionService = formSubmissionService;
         this.userService = userService;
         this.formTemplateService = formTemplateService;
@@ -106,20 +105,20 @@ public class FormSubmissionController {
         submission.setIdForm(formId);
 
         List<FormValue> values = new ArrayList<>();
-        
+
         // Get all form layouts (sections) for this form
         List<FormLayout> layouts = formTemplateService.getFormLayoutById(formId);
-        
+
         // Fetch inputs from all sections and create a unified map
         List<FormInput> allFormInputs = new ArrayList<>();
         for (FormLayout layout : layouts) {
             List<FormInput> sectionInputs = formInputRepository.findByFormLayoutId(layout.getId());
             allFormInputs.addAll(sectionInputs);
         }
-        
+
         // Create a map for efficient lookup
         Map<Long, FormInput> formInputsMap = allFormInputs.stream()
-            .collect(Collectors.toMap(FormInput::getId, input -> input));
+                .collect(Collectors.toMap(FormInput::getId, input -> input));
 
         // Log total input count for debugging
         System.out.println("Total form inputs found across all sections: " + allFormInputs.size());
@@ -128,7 +127,7 @@ public class FormSubmissionController {
             if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty()) {
                 continue;
             }
-            
+
             // Skip if formInputId is missing
             if (valueRequest.getFormInputId() == null) {
                 continue;
@@ -145,28 +144,35 @@ public class FormSubmissionController {
             FormValue value = new FormValue();
             value.setValue(String.join(",", valueRequest.getValues()));
             value.setFormSubmission(submission);
-            
+
             // Set up bidirectional relationship between FormValue and FormInput
             value.getFormInputs().add(correspondingInput);
             correspondingInput.setFormValue(value);
-            
+
             values.add(value);
         }
 
         submission.setFormValues(values);
         FormSubmission savedSubmission = formSubmissionService.save(submission);
 
-        // Rest of the method remains the same
+        // When creating the FormSubmissionDTO
         FormSubmissionDTO formSubmissionDTO = new FormSubmissionDTO();
         formSubmissionDTO.setId(savedSubmission.getId());
         formSubmissionDTO.setDate(savedSubmission.getDate());
         formSubmissionDTO.setUserId(user.get().getId());
         formSubmissionDTO.setTask(user.get().getTask());
         formSubmissionDTO.setFormId(formId);
+
+        // Set the process definition key if provided in the wrapper
+        if (formValuesWrapper.getProcessDefinitionKey() != null) {
+            formSubmissionDTO.setProcessDefinitionKey(formValuesWrapper.getProcessDefinitionKey());
+        }
+
         formSubmissionDTO.setFormValues(values.stream()
                 .map(fv -> {
                     String title = fv.getFormInputs() != null && !fv.getFormInputs().isEmpty()
-                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId()) : "Untitled";
+                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId())
+                            : "Untitled";
                     return new FormValueDTO(title, fv.getValue());
                 })
                 .collect(Collectors.toList()));
@@ -197,6 +203,7 @@ public class FormSubmissionController {
             formInputRepository.save(formInput);
         }
     }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<FormSubmissionDTO>> getUserFormSubmissions(@PathVariable Long userId) {
         Optional<User> user = userService.getUserById(userId);
@@ -208,8 +215,7 @@ public class FormSubmissionController {
 
             for (FormSubmission submission : submissions) {
 
-           String formTitle = formTemplateService.getFormTemplateTitleById(submission.getIdForm());
-
+                String formTitle = formTemplateService.getFormTemplateTitleById(submission.getIdForm());
 
                 FormSubmissionDTO dto = new FormSubmissionDTO(
                         submission.getId(),
@@ -218,8 +224,7 @@ public class FormSubmissionController {
                         formTitle,
                         submission.getFormValues().stream()
                                 .map(FormValue::getValue) // Valeurs des champs remplis
-                                .collect(Collectors.toList())
-                );
+                                .collect(Collectors.toList()));
 
                 submissionDTOs.add(dto);
             }
@@ -228,6 +233,7 @@ public class FormSubmissionController {
         }
         return ResponseEntity.notFound().build();
     }
+
     @GetMapping("/user/{userId}/form/{formId}")
     public ResponseEntity<List<FormSubmissionDTO>> getFormSubmissionsByUserAndForm(
             @PathVariable Long userId,
@@ -241,7 +247,7 @@ public class FormSubmissionController {
         String formTitle = formTemplateService.getFormTemplateTitleById(formId);
 
         List<FormSubmissionDTO> submissionDTOs = submissions.stream()
-                .map(submission -> FormSubmissionDTO.fromFormSubmission(submission, formTitle, formInputService))
+                .map(submission -> FormSubmissionDTO.formFormSubmission(submission, formTitle, formInputService))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(submissionDTOs);
@@ -305,7 +311,8 @@ public class FormSubmissionController {
                 List<String> allValues = valueRequest.getValues();
                 if (allValues == null || allValues.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("error", "Aucune valeur fournie pour le champ avec formInputId=" + valueRequest.getFormInputId()));
+                            .body(Map.of("error", "Aucune valeur fournie pour le champ avec formInputId="
+                                    + valueRequest.getFormInputId()));
                 }
 
                 Optional<FormInput> formInputOpt = formInputService.getFormInputById(valueRequest.getFormInputId());
@@ -359,9 +366,11 @@ public class FormSubmissionController {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Une erreur est survenue lors de la mise à jour.", "details", e.getMessage()));
+                    .body(Map.of("error", "Une erreur est survenue lors de la mise à jour.", "details",
+                            e.getMessage()));
         }
     }
+
     @GetMapping("/submission/{submissionId}/template")
     public ResponseEntity<FormTemplate> getFormTemplateBySubmissionId(@PathVariable Long submissionId) {
         Optional<FormTemplate> formTemplate = formSubmissionService.getFormTemplateBySubmissionId(submissionId);
@@ -370,6 +379,7 @@ public class FormSubmissionController {
         }
         return ResponseEntity.notFound().build();
     }
+
     @GetMapping("/submission/{submissionId}/values")
     public ResponseEntity<?> getFormValuesBySubmissionId(@PathVariable Long submissionId) {
         try {
@@ -401,8 +411,7 @@ public class FormSubmissionController {
                             formTitle,
                             submission.getFormValues().stream()
                                     .map(FormValue::getValue)
-                                    .collect(Collectors.toList())
-                    );
+                                    .collect(Collectors.toList()));
                 })
                 .collect(Collectors.toList());
 
