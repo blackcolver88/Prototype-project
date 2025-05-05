@@ -1,22 +1,24 @@
-<div class="SUBSECTION bg-gray-50 border border-gray-300 rounded-lg p-4 min-h-[100px]">
-  <div *ngFor="let item of subsectionItems" class="p-2 rounded-lg mb-2">
-    <ng-container [ngSwitch]="item.type">
-      <ng-container *ngSwitchCase="'Subsection'">
-        <app-subsection [subsectionItems]="item.children || []"></app-subsection>
+ <div class="SUBSECTION bg-gray-50 border border-gray-300 rounded-lg p-4 min-h-[100px]">
+    <div *ngFor="let item of subsectionItems" cdkDrag class="p-2 rounded-lg mb-2">
+      <app-subsection [subsectionItems]="item.items"></app-subsection>
+    </div>
+  
+    <div class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
+      <ng-container *ngFor="let item of subsectionItems">
+        <ng-container [ngSwitch]="item?.type">
+          <ng-container *ngSwitchCase="'SUBSECTION'">
+            <app-subsection [subsectionItems]="item.items"></app-subsection>
+          </ng-container>
+        </ng-container>
       </ng-container>
-
-      <ng-container *ngSwitchDefault>
-        <div class="bg-white p-3 rounded shadow-sm">
-          {{ item.title || 'Unnamed Item' }}
-        </div>
-      </ng-container>
-    </ng-container>
+    </div>
+    <div class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
+      Drag and drop items here.
+    </div>
   </div>
 
-  <div class="min-h-[50px] p-2 border-2 border-dashed border-gray-200 rounded-lg">
-    Drag and drop items here.
-  </div>
-</div>
+
+
 
 
 

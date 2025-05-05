@@ -61,23 +61,23 @@ export class EditFormComponent {
     private formSubmissionService: FormSubmissionService
   ) {}
   
-  ngOnInit() {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const userId = params.get('userId');
-      const submissionId = params.get('submissionId');
-  
-      if (!userId || !submissionId) {
-        console.error('Missing parameters in the URL.');
-        this.errorMessage = 'Paramètres manquants dans l\'URL. Veuillez vérifier l\'URL.';
-        return;
-      }
-  
-      this.userId = +userId;
-      this.submissionId = +submissionId;
-  
-      this.loadFormTemplateWithSubmissionId(this.submissionId);
-    });
-  }
+ngOnInit() {
+  this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    const userId = params.get('userId');
+    const submissionId = params.get('submissionId');
+
+    if (!userId || !submissionId) {
+      console.error('Missing parameters in the URL.');
+      this.errorMessage = 'Paramètres manquants dans l\'URL. Veuillez vérifier l\'URL.';
+      return;
+    }
+
+    this.userId = +userId;
+    this.submissionId = +submissionId;
+    
+    this.loadFormTemplateWithSubmissionId(this.submissionId);
+  });
+}
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -142,6 +142,116 @@ export class EditFormComponent {
           this.errorMessage = 'Erreur lors du chargement du formulaire. Veuillez réessayer.';
         }
       });
+  }
+
+  loadFormTemplateWithLayouts(id: string) {
+    this.formTemplateService
+      .getFullFormTemplate(+id)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((error) => {
+          console.error('Error loading full form template:', error);
+          return throwError(() => error);
+        })
+      )
+      .subscribe({
+        next: (formTemplate) => {
+          this.formTitle = formTemplate.title ?? '';
+          
+          if (formTemplate.formLayouts && formTemplate.formLayouts.length > 0) {
+            this.editorItems = this.processFormLayouts(formTemplate.formLayouts);
+            
+            const allInputs = this.collectAllFormInputs(formTemplate.formLayouts);
+            if (allInputs.length > 0) {
+              this.loadFormInputsWithMultipleValues(allInputs);
+            }
+          } else {
+            this.editorItems = [];
+          }
+          
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error loading form template:', error);
+        }
+      });
+  }
+  private processFormLayouts(layouts: any[]): any[] {
+    return layouts.map(layout => {
+      // Process section
+      if (layout.type === 'Section') {
+        const section = {
+          id: layout.id,
+          type: layout.type,
+          title: layout.title,
+          items: [],
+          children: [] 
+        };
+        
+        if (layout.formInputs && layout.formInputs.length > 0) {
+          section.items = layout.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+        }
+        
+        if (layout.children && layout.children.length > 0) {
+          section.children = layout.children.map((child: any) => {
+            const subsection = {
+              id: child.id,
+              type: child.type,
+              title: child.title,
+              items: []
+            };
+            
+            if (child.formInputs && child.formInputs.length > 0) {
+              subsection.items = child.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+            }
+            
+            return subsection;
+          });
+        }
+        
+        return section;
+      }
+      
+      return layout;
+    });
+  }
+  private mapFormInputToEditorItem(input: any): any {
+    let config;
+    try {
+      config = input.config ? JSON.parse(input.config) : {};
+    } catch (e) {
+      console.error('Error parsing input config:', e);
+      config = {};
+    }
+    
+    return {
+      id: input.id,
+      type: input.type,
+      config: {
+        ...config,
+        label: input.title,
+        required: input.required
+      }
+    };
+  }
+  private collectAllFormInputs(layouts: any[]): FormInput[] {
+    const allInputs: FormInput[] = [];
+    
+    layouts.forEach(layout => {
+      if (layout.formInputs && layout.formInputs.length > 0) {
+        allInputs.push(...layout.formInputs);
+      }
+      
+      if (layout.children && layout.children.length > 0) {
+        layout.children.forEach((subsection: any) => {
+          if (subsection.formInputs && subsection.formInputs.length > 0) {
+            allInputs.push(...subsection.formInputs);
+          }
+        });
+      }
+    });
+    
+    return allInputs;
   }
 
   private populateFormWithSubmittedValues(formValues: any[]) {
@@ -235,8 +345,6 @@ export class EditFormComponent {
       
     return forkJoin(requests);
   }
-  
-
 
   private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
     const inputsByLayoutId = formInputs.reduce((acc, input) => {

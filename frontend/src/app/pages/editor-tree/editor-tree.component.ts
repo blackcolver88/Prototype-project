@@ -539,91 +539,87 @@ private findSubsectionById(subsectionId: string | null): any {
     
     return allInputs;
   }
-  handleSubmit() {
-    console.log('Starting form submission process');
-    const sectionItemsMap = new Map<string, any[]>();
-    // Assign temporary IDs to new sections and map their items
+handleSubmit() {
+  console.log('Starting form submission process');
+  const sectionItemsMap = new Map<string, any[]>();
 
-    this.editorItems.forEach((item) => {
-      if (!item.id && item.type === 'Section') {
-        item.tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        if (item.items) {
-          const itemsWithSection = item.items.map((formItem: any) => ({
-            ...formItem,
-            tempSectionId: item.tempId,
-          }));
-          sectionItemsMap.set(item.tempId, itemsWithSection);
-        }
+  // Assign temporary IDs to new sections and map their items
+  this.editorItems.forEach((item) => {
+    if (!item.id && item.type === 'Section') {
+      item.tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      if (item.items) {
+        const itemsWithSection = item.items.map((formItem: any) => ({
+          ...formItem,
+          tempSectionId: item.tempId,
+        }));
+        sectionItemsMap.set(item.tempId, itemsWithSection);
       }
-    });
+    }
+  });
 
-    const layoutsToSave = this.editorItems.filter(
-      (item) => !item.id && item.type === 'Section'
-    );
+  const layoutsToSave = this.editorItems.filter(
+    (item) => !item.id && item.type === 'Section'
+  );
 
-    const saveSections$ = layoutsToSave.length > 0
-      ? this.formTemplateService
-          .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
-          .pipe(
-            takeUntil(this.destroy$),
-            map((updatedFormTemplate: FormTemplate) => {
-              const tempIdToSavedLayoutMap = new Map<string, any>();
-              if (updatedFormTemplate.formLayouts) {
-                const newLayouts = updatedFormTemplate.formLayouts
-                  .filter(
-                    (layout) =>
-                      !this.editorItems.some((existing) => existing.id === layout.id)
-                  )
-                  .sort((a, b) => a.id - b.id);
-
-                layoutsToSave.forEach((originalLayout, index) => {
-                  if (originalLayout.tempId && newLayouts[index]) {
-                    tempIdToSavedLayoutMap.set(
-                      originalLayout.tempId,
-                      newLayouts[index]
-                    );
-                  }
-                });
-              }
-
-              this.editorItems = this.editorItems.map((item) => {
-                if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
-                  const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
-                  const originalItems = sectionItemsMap.get(item.tempId) || [];
-
-                  return {
-                    ...savedLayout,
-                    type: 'Section',
-                    items: originalItems.map((origItem) => ({
-                      ...origItem,
-                      tempSectionId: undefined,
-                      targetSectionId: savedLayout.id,
-                    })),
-                  };
+  const saveSections$ = layoutsToSave.length > 0
+    ? this.formTemplateService
+        .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+        .pipe(
+          takeUntil(this.destroy$),
+          map((updatedFormTemplate: FormTemplate) => {
+            const tempIdToSavedLayoutMap = new Map<string, any>();
+            if (updatedFormTemplate.formLayouts) {
+              const newLayouts = updatedFormTemplate.formLayouts
+                .filter(
+                  (layout) =>
+                    !this.editorItems.some((existing) => existing.id === layout.id)
+                )
+                .sort((a, b) => a.id - b.id);
+              layoutsToSave.forEach((originalLayout, index) => {
+                if (originalLayout.tempId && newLayouts[index]) {
+                  tempIdToSavedLayoutMap.set(
+                    originalLayout.tempId,
+                    newLayouts[index]
+                  );
                 }
-                return item;
               });
-            })
-          )
-      : of(null);
+            }
+            this.editorItems = this.editorItems.map((item) => {
+              if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
+                const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
+                const originalItems = sectionItemsMap.get(item.tempId) || [];
+                return {
+                  ...savedLayout,
+                  type: 'Section',
+                  items: originalItems.map((origItem) => ({
+                    ...origItem,
+                    tempSectionId: undefined,
+                    targetSectionId: savedLayout.id,
+                  })),
+                };
+              }
+              return item;
+            });
+          })
+        )
+    : of(null);
 
-    const saveFormInputs$ = new Subject<void>();
+  const saveFormInputs$ = new Subject<void>();
+  (saveSections$ as Observable<void>).subscribe({
+    next: () => {
+      this.saveFormInputsToSections(() => saveFormInputs$.next());
+    },
+    error: (error: any) => console.error('Error saving sections:', error),
+  });
 
-    (saveSections$ as Observable<void>).subscribe({
-      next: () => {
-        this.saveFormInputsToSections(() => saveFormInputs$.next());
-      },
-      error: (error: any) => console.error('Error saving sections:', error),
-    });
-
-    (saveFormInputs$ as Observable<void>).subscribe({
-      next: () => {
-        console.log('All sections and form inputs saved successfully.');
-        this.router.navigate(['/form-template']);
-      },
-      error: (error) => console.error('Error saving form inputs:', error),
-    });
-  }
+  (saveFormInputs$ as Observable<void>).subscribe({
+    next: () => {
+      console.log('All sections and form inputs saved successfully.');
+      this.router.navigate(['/form-template']);
+    },
+    error: (error) => console.error('Error saving form inputs:', error),
+  });
+}
 
   saveFormInputsToSections(onComplete?: () => void) {
     const formInputRequests: any[] = [];

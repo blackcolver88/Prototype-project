@@ -11,28 +11,4 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 })
 export class SubsectionComponent {
   @Input() subsectionItems: any[] = [];
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  ngOnInit() {
-    this.cdr.detectChanges(); 
-  }
-
-  onSubsectionItemDropped(event: CdkDragDrop<any[]>, subsection: any) {
-    if (event.previousContainer === event.container) {
-      // Réorganiser les éléments dans la même zone
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-    }
-    this.cdr.detectChanges(); 
-  }
 }
