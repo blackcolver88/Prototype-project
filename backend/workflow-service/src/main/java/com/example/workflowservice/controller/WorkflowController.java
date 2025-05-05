@@ -47,7 +47,13 @@ public class WorkflowController {
         }
 
         try {
-            runtimeService.startProcessInstanceByKey("FormSubmissionProcess", variables);
+            String processDefinitionKey = formSubmission.getProcessDefinitionKey();
+            if (processDefinitionKey == null || processDefinitionKey.trim().isEmpty()) {
+                processDefinitionKey = "FormSubmissionProcess"; // Default fallback
+            }
+
+            System.out.println("Starting process with key: " + processDefinitionKey);
+            runtimeService.startProcessInstanceByKey(processDefinitionKey, variables);
         } catch (Exception e) {
             System.err.println("Process start failed: " + e.getMessage());
             throw new RuntimeException("Failed to start process", e);

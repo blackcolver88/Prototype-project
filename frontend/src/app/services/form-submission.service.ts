@@ -102,4 +102,15 @@ getFormSubmissionsByUserAndForm(userId: number, formId: number): Observable<Form
     return this.http.get(`${this.baseUrl}/${submissionId}`);
   }
   
+  submitFormWithProcess(
+    userId: number, 
+    formId: number, 
+    formValues: FormValueRequest[],
+    processDefinitionKey: string
+  ): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${userId}/${formId}`, {
+      formValues: formValues,
+      processDefinitionKey: processDefinitionKey
+    });
+  }
 }

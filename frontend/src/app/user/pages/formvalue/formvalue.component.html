@@ -409,6 +409,13 @@
     <ng-container *ngTemplateOutlet="recursiveSection; context: { items: editorItems }">
     </ng-container>
 
+    <div class="mt-4 mb-4">
+      <app-process-selector 
+        [selectedProcessKey]="selectedProcessKey"
+        (processSelected)="onProcessSelected($event)">
+      </app-process-selector>
+    </div>
+
     <div *ngIf="editorItems.length > 0" class="flex justify-start mt-4">
       <app-button
         label="Submit"

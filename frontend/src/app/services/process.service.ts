@@ -68,12 +68,10 @@ export class ProcessService {
       formData.append('tenant-id', options.tenantId);
     }
     
-    // Generate a filename from the process ID if available
     const fileName = options.processId ? 
       `${options.processId}.bpmn` : 
       `process_${new Date().getTime()}.bpmn`;
     
-    // Use "data" instead of "file" parameter for consistent behavior
     formData.append('data', blob, fileName);
     
     console.log('Deploying process XML:', processXml.substring(0, 500) + '...');
@@ -85,12 +83,10 @@ export class ProcessService {
     return this.http.get(`${this.apiUrl}/engine`);
   }
 
-  // Add this method to match the component call
   deployProcessWithOptions(xml: string, options: DeploymentOptions): Observable<any> {
     return this.deployProcess(xml, options);
   }
 
-  // Get all deployed process definitions
   getDeployedProcesses(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/process-definition`)
       .pipe(

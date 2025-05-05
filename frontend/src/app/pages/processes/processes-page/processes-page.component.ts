@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, PLATFORM_ID, Inject } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AgGridAngular } from "ag-grid-angular";
 import { ColDef } from 'ag-grid-community';
-import { Router, RouterLink } from '@angular/router';  // Import RouterLink here
+import { Router, RouterLink } from '@angular/router';  
 import { ProcessService } from '../../../services/process.service';
 import { DiagramService } from '../../../services/diagram.service';
 import { lastValueFrom } from 'rxjs';
@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 @Component({
   selector: 'app-processes-page',
   standalone: true,
-  imports: [AgGridAngular, CommonModule, RouterLink],  // Add RouterLink to imports
+  imports: [AgGridAngular, CommonModule, RouterLink],  
   templateUrl: './processes-page.component.html',
   styleUrl: './processes-page.component.css'
 })
@@ -81,32 +81,27 @@ export class ProcessesPageComponent implements OnInit {
 
   onGridReady(params: any): void {
     console.log('Grid is ready');
-    // No need to do anything special here
+    
   }
 
   createNewProcess(): void {
     console.log('Creating new process');
-    // Use window.location for a full page reload to the diagram page
     window.location.href = '/diagram'; 
   }
 
   handleEditClick(processId: string): void {
     console.log('Editing process:', processId);
-    // Use window.location for a full page reload with the process ID
     window.location.href = `/diagram?processId=${processId}`;
   }
 
   async handleDeleteClick(processId: string, deploymentId: string): Promise<void> {
     if (confirm('Are you sure you want to delete this process? This cannot be undone.')) {
       try {
-        // Delete the deployment with cascade=true to delete all process instances
         await lastValueFrom(this.processService.deleteDeployment(deploymentId, true));
         
-        // Remove from UI
         this.rowData = this.rowData.filter(process => process.id !== processId);
         this.changeDetector.detectChanges();
         
-        // Show success message
         this.showNotification('Process deleted successfully');
       } catch (error) {
         console.error('Error deleting process:', error);
