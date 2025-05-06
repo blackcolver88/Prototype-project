@@ -41,7 +41,6 @@ public class ProcessResourceController {
         try {
             File sourcesDir = new File(processesPath);
             
-            // Make sure the directory exists
             if (!sourcesDir.exists()) {
                 logger.info("Creating directory: {}", sourcesDir.getAbsolutePath());
                 if (!sourcesDir.mkdirs()) {
@@ -49,13 +48,11 @@ public class ProcessResourceController {
                 }
             }
             
-            // Save the file to the correct location
             File sourceFile = new File(sourcesDir, filename);
             try (FileWriter writer = new FileWriter(sourceFile)) {
                 writer.write(xml);
                 logger.info("Successfully saved to: {}", sourceFile.getAbsolutePath());
                 
-                // Also save to target/classes/processes for immediate runtime use
                 String targetPath = processesPath.replace("/src/main/", "/target/classes/");
                 File targetDir = new File(targetPath);
                 if (!targetDir.exists()) {
