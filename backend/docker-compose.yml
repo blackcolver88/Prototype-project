@@ -37,6 +37,70 @@ services:
       - app_network
     restart: unless-stopped
 
+  discovery-service:
+    container_name: discovery-service
+    build:
+      context: ./discovery
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8222:8222"
+    depends_on:
+      - discovery-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_ZIPKIN_BASEURL=http://zipkin:9411
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  workflow-service:
+    container_name: workflow-service
+    build:
+      context: ./workflow-service
+      dockerfile: Dockerfile
+    depends_on:
+      - postgresql
+      - discovery-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/workflow_db
+      - SPRING_DATASOURCE_USERNAME=momo
+      - SPRING_DATASOURCE_PASSWORD=xpress11
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_ZIPKIN_BASEURL=http://zipkin:9411
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  form-service:
+    container_name: form-service
+    build:
+      context: ./form-service
+      dockerfile: Dockerfile
+    depends_on:
+      - postgresql
+      - discovery-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/form_db
+      - SPRING_DATASOURCE_USERNAME=momo
+      - SPRING_DATASOURCE_PASSWORD=xpress11
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - APPLICATION_CONFIG_WORKFLOWS_URL=http://api-gateway:8222/workflow-service
+      - SPRING_ZIPKIN_BASEURL=http://zipkin:9411
+    networks:
+      - app_network
+    restart: unless-stopped
+
 networks:
   app_network:
     driver: bridge
