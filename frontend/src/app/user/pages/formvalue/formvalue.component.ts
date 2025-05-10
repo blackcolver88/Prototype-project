@@ -433,8 +433,6 @@ export class FormvalueComponent {
         },
       });
   }
-
-
   disableFormFields() {
     this.traverseFormItems(this.editorItems, (item) => {
       item.disabled = this.isFormSubmitted;
@@ -454,46 +452,49 @@ export class FormvalueComponent {
 
   collectFormValues(): FormValueRequest[] {
     const formValues: FormValueRequest[] = [];
-
     this.traverseFormItems(this.editorItems, (item) => {
-      if (item.id && item.value !== undefined) {
-        console.log(`Item ${item.id} (${item.type}):`, item.value);
-        
-        let singleValue = null;
-        let multipleValues = null;
-        
-        if (item.type === 'RADIO_BUTTON') {
-          multipleValues = [item.value];
-        } else if (item.type === 'CHECKBOX') {
-          multipleValues = Array.isArray(item.value) ? item.value : [item.value];
-        } else if (item.type === 'SELECT_BOX') {
-          multipleValues = [item.value];
-        } else {
-          singleValue = item.value;
+        if (item.id && item.value !== undefined) {
+            console.log(`Item ${item.id} (${item.type}):`, item.value);
+            let singleValue = null;
+            let multipleValues = null;
+
+            if (item.type === 'RADIO_BUTTON') {
+                multipleValues = [item.value];
+            } else if (item.type === 'CHECKBOX') {
+                multipleValues = Array.isArray(item.value) ? item.value : [item.value];
+            } else if (item.type === 'SELECT_BOX') {
+                multipleValues = [item.value];
+            } else {
+                singleValue = item.value;
+            }
+
+            formValues.push(new FormValueRequest(
+                item.id,
+                singleValue,
+                multipleValues
+            ));
         }
-        
-        formValues.push(new FormValueRequest(
-          item.id,
-          singleValue,
-          multipleValues
-        ));
-      }
     });
-
     return formValues;
-  }
+}
 
-  traverseFormItems(items: any[], callback: (item: any) => void) {
-    if (!items) return;
-    
-    items.forEach(item => {
+traverseFormItems(items: any[], callback: (item: any) => void) {
+  if (!items) return;
+  items.forEach(item => {
       if (item.type === 'Section' && item.items) {
-        this.traverseFormItems(item.items, callback);
+          this.traverseFormItems(item.items, callback);
+          if (item.children && item.children.length > 0) {
+              item.children.forEach((subsection: any) => {
+                  if (subsection.items && subsection.items.length > 0) {
+                      this.traverseFormItems(subsection.items, callback);
+                  }
+              });
+          }
       } else {
-        callback(item);
+          callback(item);
       }
-    });
-  }
+  });
+}
 
   handleCheckboxChange(itemId: number, selectedLabels: string[]) {
     console.log(`Checkbox change for item ${itemId}:`, selectedLabels);

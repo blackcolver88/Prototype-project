@@ -27,9 +27,13 @@ public interface FormLayoutRepository extends JpaRepository<FormLayout, Long> {
 
     List<FormLayout> findAllById(Iterable<Long> ids);
 
+        List<FormLayout> findByFormTemplateIdAndParentIsNull(Long formTemplateId);
+
+    }
 
 
 
 
-}
+
+
 

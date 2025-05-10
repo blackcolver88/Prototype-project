@@ -106,25 +106,18 @@ public class FormSubmissionController {
 
         List<FormValue> values = new ArrayList<>();
 
-        List<FormLayout> layouts = formTemplateService.getFormLayoutById(formId);
+        // Récupérer tous les layouts de premier niveau
+        List<FormLayout> topLevelLayouts = formTemplateService.getFormLayoutById(formId);
 
-        List<FormInput> allFormInputs = new ArrayList<>();
-        for (FormLayout layout : layouts) {
-            List<FormInput> sectionInputs = formInputRepository.findByFormLayoutId(layout.getId());
-            allFormInputs.addAll(sectionInputs);
-        }
+        Map<Long, FormInput> formInputsMap = new HashMap<>();
 
-        Map<Long, FormInput> formInputsMap = allFormInputs.stream()
-                .collect(Collectors.toMap(FormInput::getId, input -> input));
+        collectAllFormInputs(topLevelLayouts, formInputsMap);
 
-        System.out.println("Total form inputs found across all sections: " + allFormInputs.size());
+        System.out.println("Total form inputs found across all sections and subsections: " + formInputsMap.size());
 
         for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
-            if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty()) {
-                continue;
-            }
-
-            if (valueRequest.getFormInputId() == null) {
+            if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty() ||
+                    valueRequest.getFormInputId() == null) {
                 continue;
             }
 
@@ -179,6 +172,20 @@ public class FormSubmissionController {
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSubmission);
+    }
+
+   
+    private void collectAllFormInputs(List<FormLayout> layouts, Map<Long, FormInput> formInputsMap) {
+        for (FormLayout layout : layouts) {
+            List<FormInput> directInputs = formInputRepository.findByFormLayoutId(layout.getId());
+            for (FormInput input : directInputs) {
+                formInputsMap.put(input.getId(), input);
+            }
+
+            if (layout.getChildren() != null && !layout.getChildren().isEmpty()) {
+                collectAllFormInputs(layout.getChildren(), formInputsMap);
+            }
+        }
     }
 
     private void updateFormInputWithFormValueId(FormSubmission submission) {

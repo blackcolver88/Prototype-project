@@ -155,15 +155,30 @@ public class FormTemplateService {
             throw new IllegalArgumentException("FormTemplate not found with id: " + templateId);
         }
 
-        List<FormLayout> layouts = formLayoutRepository.findByFormTemplateId(templateId);
+        List<FormLayout> topLevelLayouts = formLayoutRepository.findByFormTemplateIdAndParentIsNull(templateId);
 
-        if (layouts.isEmpty()) {
-            return List.of(); 
+        if (topLevelLayouts.isEmpty()) {
+            return List.of();
         }
 
-        return layouts.stream()
-                .flatMap(layout -> formInputRepository.findByFormLayoutIdOrdered(layout.getId()).stream())
-                .collect(Collectors.toList());
+        List<FormInput> allFormInputs = new ArrayList<>();
+
+        for (FormLayout layout : topLevelLayouts) {
+            allFormInputs.addAll(formInputRepository.findByFormLayoutIdOrdered(layout.getId()));
+
+            collectFormInputsRecursively(layout, allFormInputs);
+        }
+
+        return allFormInputs;
+    }
+
+  
+    private void collectFormInputsRecursively(FormLayout layout, List<FormInput> allFormInputs) {
+        for (FormLayout childLayout : layout.getChildren()) {
+            allFormInputs.addAll(formInputRepository.findByFormLayoutIdOrdered(childLayout.getId()));
+
+            collectFormInputsRecursively(childLayout, allFormInputs);
+        }
     }
 
     @Transactional

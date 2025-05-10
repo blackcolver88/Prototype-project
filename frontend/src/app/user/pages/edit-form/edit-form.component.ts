@@ -90,23 +90,17 @@ ngOnInit() {
         takeUntil(this.destroy$),
         switchMap(formTemplate => {
           console.log('Loaded form template:', formTemplate);
-          
-          // Add proper type annotations to the sort parameters
           this.editorItems = formTemplate.formLayouts
-            ?.sort((a: {ordinalPosition?: number}, b: {ordinalPosition?: number}) => 
-                (a.ordinalPosition || 0) - (b.ordinalPosition || 0)) || [];
-            
+            ?.sort((a: { ordinalPosition?: number }, b: { ordinalPosition?: number }) =>
+              (a.ordinalPosition || 0) - (b.ordinalPosition || 0)) || [];
           this.formTitle = formTemplate.title ?? '';
           this.templateId = formTemplate.id.toString();
-          
           return this.formTemplateService.getFormInputsByTemplateId(formTemplate.id);
         }),
         switchMap(formInputs => {
           console.log('Loaded form inputs:', formInputs);
           this.populateFormInputsIntoLayouts(formInputs);
-          
           const multipleValueRequests = this.loadFormInputsWithMultipleValues(formInputs);
-          
           return forkJoin({
             formValues: this.formSubmissionService.getFormValuesBySubmissionId(this.submissionId),
             multipleValues: multipleValueRequests || of(null)
@@ -126,15 +120,13 @@ ngOnInit() {
         next: (results: { formValues: any[], multipleValues?: any }) => {
           console.log('Form values from submission:', results.formValues);
           this.populateFormWithSubmittedValues(results.formValues);
-  
           this.traverseFormItems(this.editorItems, (item) => {
             if (item.type === 'CHECKBOX') {
-              item.value = Array.isArray(item.value) 
+              item.value = Array.isArray(item.value)
                 ? item.value.filter((v: string) => v.trim() !== '')
                 : [];
             }
           });
-          
           this.cdr.detectChanges();
         },
         error: (error: any) => {
@@ -143,7 +135,6 @@ ngOnInit() {
         }
       });
   }
-
   loadFormTemplateWithLayouts(id: string) {
     this.formTemplateService
       .getFullFormTemplate(+id)
@@ -178,43 +169,36 @@ ngOnInit() {
   }
   private processFormLayouts(layouts: any[]): any[] {
     return layouts.map(layout => {
-      // Process section
-      if (layout.type === 'Section') {
-        const section = {
-          id: layout.id,
-          type: layout.type,
-          title: layout.title,
-          items: [],
-          children: [] 
-        };
-        
-        if (layout.formInputs && layout.formInputs.length > 0) {
-          section.items = layout.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
-        }
-        
-        if (layout.children && layout.children.length > 0) {
-          section.children = layout.children.map((child: any) => {
-            const subsection = {
-              id: child.id,
-              type: child.type,
-              title: child.title,
-              items: []
+        if (layout.type === 'Section') {
+            const section = {
+                id: layout.id,
+                type: layout.type,
+                title: layout.title,
+                items: [],
+                children: []
             };
-            
-            if (child.formInputs && child.formInputs.length > 0) {
-              subsection.items = child.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+            if (layout.formInputs && layout.formInputs.length > 0) {
+                section.items = layout.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
             }
-            
-            return subsection;
-          });
+            if (layout.children && layout.children.length > 0) {
+                section.children = layout.children.map((child: any) => {
+                    const subsection = {
+                        id: child.id,
+                        type: child.type,
+                        title: child.title,
+                        items: []
+                    };
+                    if (child.formInputs && child.formInputs.length > 0) {
+                        subsection.items = child.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
+                    }
+                    return subsection;
+                });
+            }
+            return section;
         }
-        
-        return section;
-      }
-      
-      return layout;
+        return layout;
     });
-  }
+}
   private mapFormInputToEditorItem(input: any): any {
     let config;
     try {
@@ -253,44 +237,45 @@ ngOnInit() {
     
     return allInputs;
   }
-
   private populateFormWithSubmittedValues(formValues: any[]) {
     if (!formValues || formValues.length === 0) {
-      console.log('No form values to populate');
-      return;
+        console.log('No form values to populate');
+        return;
     }
 
-    console.log('Populating form with', formValues.length, 'values');
-    
-    // Create a map of form values by input ID for quick lookup
     const formValuesByInputId = new Map<number, any>();
-    
     formValues.forEach(formValue => {
-      if (formValue.formInputs?.length) {
-        const inputId = formValue.formInputs[0].id;
-        formValuesByInputId.set(inputId, formValue);
-        console.log(`Mapped value for input ID ${inputId}:`, formValue.value);
-      }
-    });
-    
-    // Count populated fields for validation
-    let fieldsPopulated = 0;
-    
-    // Traverse all sections and their inputs
-    this.traverseFormItems(this.editorItems, (item) => {
-      if (item.id && item.type !== 'Section') {
-        const formValue = formValuesByInputId.get(item.id);
-        if (formValue) {
-          this.applyFormValue(item, formValue.value);
-          fieldsPopulated++;
+        if (formValue.formInputs?.length) {
+            const inputId = formValue.formInputs[0].id;
+            formValuesByInputId.set(inputId, formValue);
         }
-      }
     });
-    
-    console.log(`Populated ${fieldsPopulated} out of ${formValuesByInputId.size} form fields`);
-    
+
+    const applyValuesToItems = (items: any[]) => {
+        items.forEach(item => {
+            if (item.id && item.type !== 'Section' && item.type !== 'Subsection') {
+                const formValue = formValuesByInputId.get(item.id);
+                if (formValue) {
+                    this.applyFormValue(item, formValue.value);
+                }
+            }
+            
+            if (item.items) {
+                applyValuesToItems(item.items);
+            }
+            if (item.children) {
+                item.children.forEach((child: any) => {
+                    if (child.items) {
+                        applyValuesToItems(child.items);
+                    }
+                });
+            }
+        });
+    };
+
+    applyValuesToItems(this.editorItems);
     this.cdr.detectChanges();
-  }
+}
 
   // New helper method for type-safe value application
   private applyFormValue(item: any, value: any): void {
@@ -300,9 +285,14 @@ ngOnInit() {
         : typeof value === 'string'
         ? value.split(',').filter((v: string) => v.trim() !== '')
         : [];
+    } else if (item.type === 'RADIO_BUTTON') {
+      item.value = typeof value === 'string' ? value.trim() : null;
+    } else if (item.type === 'SELECT_BOX') {
+      item.value = typeof value === 'string' ? value.trim() : null;
     } else {
       item.value = value;
     }
+  
     console.log(`Applied value to ${item.id} (${item.type}):`, item.value);
   }
 
@@ -348,48 +338,72 @@ ngOnInit() {
 
   private populateFormInputsIntoLayouts(formInputs: FormInput[]) {
     const inputsByLayoutId = formInputs.reduce((acc, input) => {
-      if (!input.formLayout) {
-        console.warn('Input has no formLayout:', input);
+        if (!input.formLayout) {
+            console.warn('Input has no formLayout:', input);
+            return acc;
+        }
+        const layoutId = input.formLayout.id;
+        if (!acc[layoutId]) {
+            acc[layoutId] = [];
+        }
+        acc[layoutId].push(input);
         return acc;
-      }
-      
-      const layoutId = input.formLayout.id;
-      if (!acc[layoutId]) {
-        acc[layoutId] = [];
-      }
-      acc[layoutId].push(input);
-      return acc;
     }, {} as Record<number, FormInput[]>);
 
     this.editorItems = this.editorItems.map(layout => {
-      if (layout.type === 'Section' && layout.id) {
-        const layoutInputs = inputsByLayoutId[layout.id] || [];
-        
-        // Add proper type annotations here too
-        const sortedInputs = [...layoutInputs].sort((a: FormInput, b: FormInput) => 
-          (a.ordinalPosition || 0) - (b.ordinalPosition || 0));
-          
-        return {
-          ...layout,
-          items: sortedInputs.map(input => ({
-            id: input.id, 
-            type: input.type,
-            ordinalPosition: input.ordinalPosition, // Preserve ordinalPosition
-            config: {
-              label: input.title,
-              textName: input.title,
-              placeholder: `Enter ${input.title}`,
-              required: input.required,
-              name: input.type.toLowerCase()
+        if (layout.type === 'Section' && layout.id) {
+            const sectionInputs = inputsByLayoutId[layout.id] || [];
+            const sortedSectionInputs = [...sectionInputs].sort((a: FormInput, b: FormInput) =>
+                (a.ordinalPosition || 0) - (b.ordinalPosition || 0));
+
+            const sectionItems = sortedSectionInputs.map(input => this.createEditorItemFromInput(input));
+
+            let processedChildren = [];
+            if (layout.children && layout.children.length > 0) {
+                processedChildren = layout.children.map((subsection: any) => {
+                    if (subsection.id) {
+                        const subsectionInputs = inputsByLayoutId[subsection.id] || [];
+                        const sortedSubsectionInputs = [...subsectionInputs].sort((a: FormInput, b: FormInput) =>
+                            (a.ordinalPosition || 0) - (b.ordinalPosition || 0));
+                        
+                        const subsectionItems = sortedSubsectionInputs.map(input => this.createEditorItemFromInput(input));
+                        
+                        return {
+                            ...subsection,
+                            items: subsectionItems
+                        };
+                    }
+                    return subsection;
+                });
             }
-          }))
-        };
-      }
-      return layout;
+
+            return {
+                ...layout,
+                items: sectionItems,
+                children: processedChildren
+            };
+        }
+        return layout;
     });
     
-    console.log('Updated editor items with proper ordering:', this.editorItems);
-  }
+    console.log('Updated editor items with subsections:', this.editorItems);
+}
+
+private createEditorItemFromInput(input: FormInput): any {
+    return {
+        id: input.id, 
+        type: input.type,
+        ordinalPosition: input.ordinalPosition,
+        config: {
+            label: input.title,
+            textName: input.title,
+            placeholder: `Enter ${input.title}`,
+            required: input.required,
+            name: input.type.toLowerCase(),
+            ...(input.config ? JSON.parse(input.config) : {})
+        }
+    };
+}
 
   private updateEditorItemWithMultipleValues(input: FormInput) {
     this.traverseFormItems(this.editorItems, (item) => {
@@ -589,14 +603,27 @@ handleCheckboxChange(itemId: number, selectedOptions: string[]) {
     if (!items) return;
     
     items.forEach(item => {
-      if (item.type === 'Section' && item.items) {
-        this.traverseFormItems(item.items, callback);
+      if (item.type === 'Section') {
+        if (item.items && item.items.length > 0) {
+          this.traverseFormItems(item.items, callback);
+        }
+    
+        if (item.children && item.children.length > 0) {
+          item.children.forEach((subsection: any) => {
+            if (subsection.items && subsection.items.length > 0) {
+              this.traverseFormItems(subsection.items, callback);
+            }
+          });
+        }
+      } else if (item.type === 'Subsection') {
+        if (item.items && item.items.length > 0) {
+          this.traverseFormItems(item.items, callback);
+        }
       } else {
         callback(item);
       }
     });
   }
-
   onSubmit() {
     if (this.isSubmitting) return;
     
