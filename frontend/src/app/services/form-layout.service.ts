@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {FormLayout} from "../model/FormLayout";
+import { FormInput } from '../model/FormInput';
 
 @Injectable({
   providedIn: 'root'
@@ -24,14 +25,17 @@ export class FormLayoutService {
     return this.http.post<FormLayout>(this.baseUrl, formLayout);
   }
 
-  updateFormLayout(id: number, formLayout: FormLayout): Observable<FormLayout> {
-    return this.http.put<FormLayout>(`${this.baseUrl}/${id}`, formLayout);
+  updateFormLayout(id: number, formLayout: Partial<FormLayout>): Observable<FormLayout> {
+    return this.http.patch<FormLayout>(`${this.baseUrl}/${id}`, formLayout);
   }
-
   deleteFormLayout(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
   deleteSubsection(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/subsections/${id}`);
   }
+  updateFormInput(id: number, formInput: FormInput): Observable<FormInput> {
+    return this.http.put<FormInput>(`${this.baseUrl}/form-inputs/${id}`, formInput);
+  }
+  
 }

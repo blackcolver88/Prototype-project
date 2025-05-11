@@ -1,0 +1,10 @@
+div {
+  background-color: white;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.edit-mode {
+  background-color: lightgray; 
+}

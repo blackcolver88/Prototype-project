@@ -72,6 +72,10 @@
         <button   (click)="addSubsection(item)"class="text-blue-500 hover:text-blue-700">
           <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add Subsection
         </button>
+        <button (click)="editItem(item)" class="text-green-500 hover:text-green-700">
+          <fa-icon [icon]="['fas', 'edit']"></fa-icon> Edit
+        </button>
+   
         <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
           <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
         </button>
@@ -203,9 +207,15 @@
                   <fa-icon [icon]="['fas', 'bars']" class="mr-2 text-gray-400"></fa-icon>
                   {{ subsection.title || 'Subsection' }}
                 </h4>
-                <button (click)="removeItem(subsection)" class="text-red-400 hover:text-red-700">
-                  <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
-                </button>
+              
+                <div class="flex space-x-2">
+                  <button type="button" (click)="editItem(subsection)" class="text-blue-500 hover:text-blue-700">
+                    <fa-icon [icon]="['fas', 'edit']"></fa-icon>
+                  </button>
+                   <button type="button" (click)="removeItem(subsection)" class="text-red-400 hover:text-red-700">
+                    <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+                  </button>
+                </div>
               </div>
               
               <div 

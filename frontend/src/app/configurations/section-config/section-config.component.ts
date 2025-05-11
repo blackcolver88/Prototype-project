@@ -14,33 +14,52 @@ import {DIALOG_DATA, DialogRef} from "@angular/cdk/dialog";
 export class SectionConfigComponent implements OnInit {
   sectionForm: FormGroup;
   @Output() saveSection = new EventEmitter<any>();
-  private dialogRef = inject(DialogRef);
-  
-  constructor(private fb: FormBuilder, @Inject(DIALOG_DATA) public data: any) {
+  mode: 'add' | 'edit' = 'add'; 
+  subsectionForm: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: DialogRef,
+    @Inject(DIALOG_DATA) public data: any
+  ) {
+    this.mode = data?.mode || 'add';
+
     this.sectionForm = this.fb.group({
       type: ['Section'],
       title: ['', Validators.required],
       children: []
     });
+    if (this.mode === 'edit' && data?.item) {
+      this.sectionForm.patchValue({
+        title: data.item.title || '',
+        children: data.item.children || [] 
+      });
+    }
+    this.subsectionForm = this.fb.group({
+      title: ['', Validators.required],
+      children: this.fb.array([]) 
+    });
   }
 
-  ngOnInit() {
-    if (this.data && this.data.item && this.data.item.config) {
+  ngOnInit(): void {
+    if (this.mode === 'edit' && this.data?.item) {
       this.sectionForm.patchValue({
         title: this.data.item.title || '',
-        // children: this.data.item.items || []
       });
     }
   }
 
   onSave(): void {
     if (this.sectionForm.valid) {
-      const formData = this.sectionForm.value; 
+      const formData = this.sectionForm.value;
+
       this.dialogRef.close({
         type: 'Section',
         title: formData.title,
         config: {
-          title: formData.title
+          title: formData.title,
+          children: formData.children 
+
         },
         items: []
       });
@@ -49,5 +68,9 @@ export class SectionConfigComponent implements OnInit {
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  get isEditMode(): boolean {
+    return this.mode === 'edit';
   }
 }

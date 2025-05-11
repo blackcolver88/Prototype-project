@@ -33,8 +33,7 @@ public class FormLayoutController {
     public FormLayout createFormLayout(@RequestBody FormLayout formLayout) {
         return formLayoutService.save(formLayout);
     }
-
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public FormLayout updateFormLayout(@PathVariable Long id, @RequestBody FormLayout formLayout) {
         return formLayoutService.updateFormLayout(id, formLayout);
     }

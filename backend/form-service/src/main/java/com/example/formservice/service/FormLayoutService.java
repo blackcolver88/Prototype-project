@@ -37,13 +37,25 @@ public class FormLayoutService {
         formLayoutRepository.deleteById(id);
     }
 
-    public FormLayout updateFormLayout(Long id, FormLayout formLayout) {
-        if (formLayoutRepository.existsById(id)) {
-            formLayout.setId(id);
-            return formLayoutRepository.save(formLayout);
-        } else {
-            throw new IllegalArgumentException("FormLayout with id " + id + " does not exist");
-        }
+    public FormLayout updateFormLayout(Long id, FormLayout formLayoutDetails) {
+        return formLayoutRepository.findById(id)
+                .map(formLayout -> {
+                    if (formLayoutDetails.getTitle() != null && !formLayoutDetails.getTitle().trim().isEmpty()) {
+                        formLayout.setTitle(formLayoutDetails.getTitle());
+                    } else {
+                        throw new IllegalArgumentException("Title cannot be null or empty");
+                    }
+
+                    if (formLayoutDetails.getType() != null) {
+                        formLayout.setType(formLayoutDetails.getType());
+                    }
+
+                    if (formLayoutDetails.getOrdinalPosition() != null) {
+                        formLayout.setOrdinalPosition(formLayoutDetails.getOrdinalPosition());
+                    }
+
+                    return formLayoutRepository.save(formLayout);
+                }).orElseThrow(() -> new IllegalArgumentException("FormLayout with id " + id + " does not exist"));
     }
 
     public FormLayout addSubsectionToSection(Long sectionId, FormLayout subsection) {

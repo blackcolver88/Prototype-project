@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, Subject,switchMap, takeUntil, throwError,} from 'rxjs';
 import { FaIconLibrary, FontAwesomeModule} from '@fortawesome/angular-fontawesome';
-import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { TextformComponent } from '../../components/textform/textform.component';
 import { EmailComponent } from '../../components/email/email.component';
 import { CheckboxComponent } from '../../components/checkbox/checkbox.component';
@@ -104,7 +104,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     private formInputService: FormInputService,
     private multipleValueService: MultipleValueService
   ) {
-    library.addIcons(faTrashAlt, faPlus,faBars,
+    library.addIcons(faTrashAlt, faPlus,faBars,faEdit
     );
   }
 
@@ -1230,5 +1230,116 @@ removeItem(item: any) {
           console.error('Error updating form input order:', error);
         },
       });
+  }
+  editItem(item: any): void {
+    if (item.type === 'Section') {
+      const dialogRef = this.dialog.open(SectionConfigComponent, {
+        data: {
+          item: item,
+          mode: 'edit' as const
+        }
+      });
+  
+      dialogRef.closed.subscribe((updatedSection) => {
+        if (updatedSection) {
+          this.handleUpdateSection(item, updatedSection);
+        }
+      });
+    } else
+     if (item.type === 'Subsection') {
+      const dialogRef = this.dialog.open(SubsectionConfigComponent, {
+        data: {
+          item: item,
+          mode: 'edit' as const
+        }
+      });
+  
+      dialogRef.closed.subscribe((updatedSubsection) => {
+        if (updatedSubsection) {
+          this.handleUpdateSubsection(item, updatedSubsection);
+        }
+      });
+    } else {
+      console.warn('Unsupported item type for editing:', item.type);
+    }
+  }
+  handleUpdateSection(oldSection: any, updatedSection: any): void {
+    const topLevelIndex = this.editorItems.indexOf(oldSection);
+  
+    let sectionToUpdate = { ...oldSection, ...updatedSection };
+  
+    if (topLevelIndex !== -1) {
+      this.editorItems[topLevelIndex] = sectionToUpdate;
+    } else {
+      for (const section of this.editorItems) {
+        if (section.children) {
+          const subIndex = section.children.indexOf(oldSection);
+          if (subIndex !== -1) {
+            section.children[subIndex] = sectionToUpdate;
+            break;
+          }
+        }
+      }
+    }
+      if (sectionToUpdate.id) {
+      const updatePayload = {
+        title: sectionToUpdate.title
+      };
+
+      this.formLayoutService.updateFormLayout(sectionToUpdate.id, updatePayload).subscribe({
+        next: (response) => {
+          console.log('Section mise à jour sur le serveur:', response);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Erreur lors de la mise à jour de la section:", err);
+        }
+      });
+    } else {
+      console.warn("Impossible de mettre à jour cette section : ID manquant");
+    }
+  }
+  handleUpdateSubsection(oldSubsection: any, updatedSubsection: any): void {
+    let subsectionToUpdate = { 
+      ...oldSubsection,
+      title: updatedSubsection.title,
+      config: {
+        ...oldSubsection.config,
+        title: updatedSubsection.title,
+        children: updatedSubsection.config?.children || oldSubsection.config?.children || []
+      }
+    };
+    
+    if (oldSubsection.items && !updatedSubsection.items) {
+      subsectionToUpdate.items = oldSubsection.items;
+    }
+  
+    for (const section of this.editorItems) {
+      if (section.children) {
+        const subIndex = section.children.indexOf(oldSubsection);
+        if (subIndex !== -1) {
+          section.children[subIndex] = subsectionToUpdate;
+  
+          if (subsectionToUpdate.id) {
+            this.formLayoutService.updateFormLayout(subsectionToUpdate.id, {
+              title: subsectionToUpdate.title,
+              children: subsectionToUpdate.config?.children || [] 
+
+            })
+              .subscribe({
+                next: (response) => {
+                  console.log('Subsection mise à jour sur le serveur:', response);
+                  this.cdr.detectChanges();
+                },
+                error: (err) => {
+                  console.error("Erreur lors de la mise à jour de la subsection:", err);
+                }
+              });
+          }
+  
+          break;
+        }
+      }
+    }
   }
 }
