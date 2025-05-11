@@ -2,6 +2,9 @@ package com.example.formservice.service;
 import com.example.formservice.DTO.FormInputWithValues;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormValue;
+import com.example.formservice.entities.MultipleValue;
+import com.example.formservice.entities.enums.FormInputType;
+import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
 import java.util.List;
 import java.util.Optional;
@@ -36,14 +39,17 @@ public class FormInputService {
     }
 
     public FormInput updateFormInput(Long id, FormInput formInput) {
-        if (formInputRepository.existsById(id)) {
-            formInput.setId(id);
-            return formInputRepository.save(formInput);
-        } else {
-            throw new IllegalArgumentException("FormInput with id " + id + " does not exist");
-        }
-    }
+        FormInput existing = formInputRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("FormInput not found with id " + id));
 
+        existing.setTitle(formInput.getTitle());
+        existing.setType(formInput.getType());
+        existing.setRequired(formInput.isRequired());
+        existing.setFormLayout(formInput.getFormLayout());
+        existing.setMultipleValues(formInput.getMultipleValues());
+
+        return formInputRepository.save(existing);
+    }
     public List<FormInputWithValues> getFormInputsWithValuesByFormId(Long formId) {
         List<FormInput> formInputs = formInputRepository.findByFormLayoutFormId(formId);
 

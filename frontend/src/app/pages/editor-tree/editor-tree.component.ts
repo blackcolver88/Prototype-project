@@ -40,6 +40,8 @@ import { MultipleValue } from '../../model/MultipleValue';
 import { FormInputService } from '../../services/form-input.service';
 import { SubsectionConfigComponent } from '../../configurations/subsection-config/subsection-config.component';
 import { faBars} from '@fortawesome/free-solid-svg-icons';
+import { GenericFormInputEditorComponent } from '../../configurations/generic-form-input-editor/generic-form-input-editor.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 export interface FoodNode {
   name: string;
@@ -73,7 +75,7 @@ const TREE_DATA: FoodNode[] = [
   standalone: true,
   imports: [CdkDropList,CdkDrag,CommonModule,CdkTreeModule,DialogModule,CdkDropListGroup,CdkStepperModule,HttpClientModule,FontAwesomeModule,TextformComponent,
     EmailComponent,CheckboxComponent,PhoneNumberComponent,RadioButtonComponent,SelectBoxComponent,DatepickerComponent,ButtonComponent,BasicDatepickerComponent,
-    TextAreaComponent,PasswordComponent,DragDropModule,    FontAwesomeModule,
+    TextAreaComponent,PasswordComponent,DragDropModule,    FontAwesomeModule,ReactiveFormsModule
   ],
   templateUrl: './editor-tree.component.html',
   styleUrls: ['./editor-tree.component.css'],
@@ -370,6 +372,7 @@ private findSubsectionById(subsectionId: string | null): any {
     };
     return configMap[itemName];
   }
+
   private openDialog(configComponent: any, draggedItem: any, index: number) {
     const dialogRef = this.dialog.open(configComponent, {
       width: '70vw',
@@ -515,7 +518,8 @@ private findSubsectionById(subsectionId: string | null): any {
       config: {
         ...config,
         label: input.title,
-        required: input.required
+        required: input.required,
+        isRequired: input.required 
       }
     };
   }
@@ -1245,8 +1249,7 @@ removeItem(item: any) {
           this.handleUpdateSection(item, updatedSection);
         }
       });
-    } else
-     if (item.type === 'Subsection') {
+    } else if (item.type === 'Subsection') {
       const dialogRef = this.dialog.open(SubsectionConfigComponent, {
         data: {
           item: item,
@@ -1260,7 +1263,21 @@ removeItem(item: any) {
         }
       });
     } else {
-      console.warn('Unsupported item type for editing:', item.type);
+      const dialogRef = this.dialog.open(GenericFormInputEditorComponent, {
+        width: '70vw',
+        height: '55vh',
+        data: { item: item },
+        disableClose: false,
+        panelClass: 'custom-dialog-container',
+        backdropClass: 'custom-dialog-backdrop',
+      });
+
+      dialogRef.closed.subscribe((updatedItem) => {
+        if (updatedItem) {
+          Object.assign(item, updatedItem);
+          this.cdr.detectChanges();
+        }
+      });
     }
   }
   handleUpdateSection(oldSection: any, updatedSection: any): void {

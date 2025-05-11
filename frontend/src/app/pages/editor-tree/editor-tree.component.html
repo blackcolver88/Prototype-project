@@ -93,25 +93,29 @@
 
                     <!-- Text Field -->
                     <ng-container *ngIf="sectionItem?.type === 'TEXTFIELD'">
-                      <app-textform [label]="sectionItem.config.label" 
-                                  [textName]="sectionItem.config.textName"
-                                  [type]="sectionItem.config.type" 
-                                  [placeholder]="sectionItem.config.placeholder">
-                      </app-textform>
+                      <app-textform 
+                      [label]="sectionItem.config.label" 
+                      [textName]="sectionItem.config.textName"
+                      [type]="sectionItem.config.type" 
+                      [placeholder]="sectionItem.config.placeholder"
+                      [isRequired]="sectionItem.config.isRequired || false">
+                    </app-textform>
                     </ng-container>
 
                     <!-- Password Field -->
                     <ng-container *ngIf="sectionItem?.type === 'PASSWORD'">
                       <app-password 
                         [label]="sectionItem.config.label"
-                        [placeholder]="sectionItem.config.placeholder">
+                        [placeholder]="sectionItem.config.placeholder"
+                        [isRequired]="sectionItem.config.isRequired || false">
                       </app-password>
                     </ng-container>
 
                     <!-- Email -->
                     <ng-container *ngIf="sectionItem?.type === 'EMAIL'">
                       <app-email [label]="sectionItem.config.label" 
-                               [placeholder]="sectionItem.config.placeholder">
+                               [placeholder]="sectionItem.config.placeholder"
+                               [isRequired]="sectionItem.config.isRequired || false">
                       </app-email>
                     </ng-container>
 
@@ -120,7 +124,8 @@
                       <app-checkbox [groupLabel]="sectionItem.config.label"
                                   [name]="sectionItem.config.name" 
                                   [options]="sectionItem.config.options"
-                                  [selectedOptions]="sectionItem.config.selectedOption">
+                                  [selectedOptions]="sectionItem.config.selectedOption"
+                                  [isRequired]="sectionItem.config.isRequired || false">
                       </app-checkbox>
                     </ng-container>
                     
@@ -135,6 +140,7 @@
                       <app-text-area 
                         [label]="sectionItem.config.label" 
                         [placeholder]="sectionItem.placeholder || 'Enter text here'"
+                        [isRequired]="sectionItem.config.isRequired || false"
                       >
                       </app-text-area>
                     </ng-container>
@@ -155,7 +161,8 @@
                     <ng-container *ngIf="sectionItem?.type === 'SELECT_BOX'">
                       <app-select-box
                         [label]="sectionItem.config.label"
-                        [options]="getOptionsArray(sectionItem.config.options)">
+                        [options]="getOptionsArray(sectionItem.config.options)"
+                        [isRequired]="sectionItem.config.isRequired || false">
                       </app-select-box>
                     </ng-container>
                     
@@ -187,7 +194,7 @@
                     </button>
                     <button 
                     type="button" 
-                    (click)="editItem(item)" 
+                    (click)="editItem(sectionItem)" 
                     class="absolute top-2 right-10 text-blue-500 hover:text-blue-700"
                     aria-label="Edit field">
                     <fa-icon [icon]="['fas', 'edit']"></fa-icon>
@@ -242,13 +249,15 @@
                             [label]="subItem.config?.label || 'Text Field'" 
                             [textName]="subItem.config?.textName || ''"
                             [type]="subItem.config?.type || 'text'" 
-                            [placeholder]="subItem.config?.placeholder || ''">
+                            [placeholder]="subItem.config?.placeholder || ''"
+                            [isRequired]="subItem.config?.isRequired || false">
                           </app-textform>
                         </ng-container>
                         
                         <ng-container *ngSwitchCase="'PASSWORD'">
                           <app-password 
                             [label]="subItem.config?.label || 'Password'"
+                            [isRequired]="subItem.config?.isRequired || false"
                             [placeholder]="subItem.config?.placeholder || 'Enter password'">
                           </app-password>
                         </ng-container>
@@ -256,7 +265,8 @@
                         <ng-container *ngSwitchCase="'EMAIL'">
                           <app-email 
                             [label]="subItem.config?.label || 'Email'" 
-                            [placeholder]="subItem.config?.placeholder || 'Enter email'">
+                            [placeholder]="subItem.config?.placeholder || 'Enter email'"
+                            [isRequired]="subItem.config?.isRequired || false">
                           </app-email>
                         </ng-container>
                         
@@ -265,7 +275,8 @@
                             [groupLabel]="subItem.config?.label || 'Checkbox Group'"
                             [name]="subItem.config?.name || 'checkbox-group'" 
                             [options]="subItem.config?.options || []"
-                            [selectedOptions]="subItem.config?.selectedOption || []">
+                            [selectedOptions]="subItem.config?.selectedOption || []"
+                            [isRequired]="subItem.config?.isRequired || false">
                           </app-checkbox>
                         </ng-container>
                         
@@ -279,7 +290,8 @@
                         <ng-container *ngSwitchCase="'textarea'">
                           <app-text-area 
                             [label]="subItem.config?.label || 'Text Area'"
-                            [placeholder]="subItem.config?.placeholder || 'Enter text here'">
+                            [placeholder]="subItem.config?.placeholder || 'Enter text here'"
+                            [isRequired]="subItem.config?.isRequired || false">
                           </app-text-area>
                         </ng-container>
                         
@@ -297,6 +309,7 @@
                         <ng-container *ngSwitchCase="'SELECT_BOX'">
                           <app-select-box
                             [label]="subItem.config?.label || 'Select Option'"
+                            [isRequired]="subItem.config?.isRequired || false"
                             [options]="getOptionsArray(subItem.config?.options) || []">
                           </app-select-box>
                         </ng-container>
@@ -329,7 +342,7 @@
                       </ng-container>
                       <button 
                       type="button" 
-                      (click)="editItem(item)" 
+                      (click)="editItem(subItem)" 
                       class="absolute top-2 right-10 text-blue-500 hover:text-blue-700"
                       aria-label="Edit field">
                       <fa-icon [icon]="['fas', 'edit']"></fa-icon>

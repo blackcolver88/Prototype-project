@@ -33,8 +33,9 @@ public class FormInputController {
     }
 
     @PutMapping("/{id}")
-    public FormInput updateFormInput(@PathVariable Long id, @RequestBody FormInput formInput) {
-        return formInputService.updateFormInput(id, formInput);
+    public ResponseEntity<FormInput> updateFormInput(@PathVariable Long id, @RequestBody FormInput formInput) {
+        FormInput updated = formInputService.updateFormInput(id, formInput);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
