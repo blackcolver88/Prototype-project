@@ -1266,7 +1266,22 @@ removeItem(item: any) {
   handleUpdateSection(oldSection: any, updatedSection: any): void {
     const topLevelIndex = this.editorItems.indexOf(oldSection);
   
-    let sectionToUpdate = { ...oldSection, ...updatedSection };
+    let sectionToUpdate = { 
+      ...oldSection, 
+      title: updatedSection.title,
+      config: {
+        ...oldSection.config,
+        title: updatedSection.title
+      }
+    };
+    
+    if (!sectionToUpdate.children && oldSection.children) {
+      sectionToUpdate.children = [...oldSection.children];
+    }
+    
+    if (!sectionToUpdate.items && oldSection.items) {
+      sectionToUpdate.items = [...oldSection.items];
+    }
   
     if (topLevelIndex !== -1) {
       this.editorItems[topLevelIndex] = sectionToUpdate;
@@ -1281,11 +1296,12 @@ removeItem(item: any) {
         }
       }
     }
-      if (sectionToUpdate.id) {
+  
+    if (sectionToUpdate.id) {
       const updatePayload = {
         title: sectionToUpdate.title
       };
-
+  
       this.formLayoutService.updateFormLayout(sectionToUpdate.id, updatePayload).subscribe({
         next: (response) => {
           console.log('Section mise à jour sur le serveur:', response);

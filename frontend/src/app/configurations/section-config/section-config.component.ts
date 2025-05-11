@@ -16,6 +16,7 @@ export class SectionConfigComponent implements OnInit {
   @Output() saveSection = new EventEmitter<any>();
   mode: 'add' | 'edit' = 'add'; 
   subsectionForm: FormGroup;
+  originalChildren: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -27,14 +28,9 @@ export class SectionConfigComponent implements OnInit {
     this.sectionForm = this.fb.group({
       type: ['Section'],
       title: ['', Validators.required],
-      children: []
+      children: this.fb.array([])
     });
-    if (this.mode === 'edit' && data?.item) {
-      this.sectionForm.patchValue({
-        title: data.item.title || '',
-        children: data.item.children || [] 
-      });
-    }
+
     this.subsectionForm = this.fb.group({
       title: ['', Validators.required],
       children: this.fb.array([]) 
@@ -43,6 +39,8 @@ export class SectionConfigComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.mode === 'edit' && this.data?.item) {
+      this.originalChildren = this.data.item.children || [];
+      
       this.sectionForm.patchValue({
         title: this.data.item.title || '',
       });
@@ -58,10 +56,9 @@ export class SectionConfigComponent implements OnInit {
         title: formData.title,
         config: {
           title: formData.title,
-          children: formData.children 
-
         },
-        items: []
+        children: this.mode === 'edit' ? this.originalChildren : formData.children || [],
+        items: this.mode === 'edit' ? (this.data.item.items || []) : []
       });
     }
   }

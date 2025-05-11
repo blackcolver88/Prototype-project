@@ -69,17 +69,17 @@
                 <h3 class="font-semibold text-gray-700">{{ item.title || 'Section' }}</h3>
 
               <div class="flex space-x-2">
-        <button   (click)="addSubsection(item)"class="text-blue-500 hover:text-blue-700">
-          <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add Subsection
-        </button>
-        <button (click)="editItem(item)" class="text-green-500 hover:text-green-700">
-          <fa-icon [icon]="['fas', 'edit']"></fa-icon> Edit
-        </button>
-   
-        <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
-          <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
-        </button>
-      </div>
+                <button   (click)="addSubsection(item)"class="text-blue-500 hover:text-blue-700">
+                  <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add Subsection
+                </button>
+                <button (click)="editItem(item)" class="text-green-500 hover:text-green-700">
+                  <fa-icon [icon]="['fas', 'edit']"></fa-icon> 
+                </button>
+          
+                <button (click)="removeItem(item)" class="text-red-500 hover:text-red-700">
+                  <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
+                </button>
+             </div>
               </div>
               <div cdkDropList
               [cdkDropListData]="item.items || []"
@@ -179,15 +179,22 @@
                         (buttonClick)="handleButtonClick(sectionItem.config.type)">
                       </app-button>
                     </ng-container>
-                  </ng-container>
+                </ng-container>
 
                     <!-- Delete Button -->
                     <button (click)="removeItem(sectionItem)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">
                       <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
                     </button>
+                    <button 
+                    type="button" 
+                    (click)="editItem(item)" 
+                    class="absolute top-2 right-10 text-blue-500 hover:text-blue-700"
+                    aria-label="Edit field">
+                    <fa-icon [icon]="['fas', 'edit']"></fa-icon>
+                  </button>
                   </div>
                 </div> 
-      <!--subsection in section-->
+             <!--subsection in section-->
       <div *ngIf="item.children?.length > 0" class="mt-4">
         <!--  subsections -->
         <div 
@@ -320,6 +327,13 @@
                           </div>
                         </ng-container>
                       </ng-container>
+                      <button 
+                      type="button" 
+                      (click)="editItem(item)" 
+                      class="absolute top-2 right-10 text-blue-500 hover:text-blue-700"
+                      aria-label="Edit field">
+                      <fa-icon [icon]="['fas', 'edit']"></fa-icon>
+                    </button>
           
                       <button (click)="removeItem(subItem)" 
                               class="absolute top-2 right-2 text-red-500 hover:text-red-700"
@@ -347,11 +361,15 @@
       <!-- Form Inputs -->
           <ng-container *ngSwitchDefault>
             <div cdkDrag class="bg-white p-3 rounded shadow-sm relative hover:shadow-md transition-shadow duration-200">
+       
               <button (click)="removeItem(item)" 
                       class="absolute top-2 right-2 text-red-500 hover:text-red-700"
                       aria-label="Remove field">
                 <fa-icon [icon]="['fas', 'trash-alt']"></fa-icon>
               </button>
+
+            
+              
 
               <ng-container [ngSwitch]="item?.type">
                 <!-- Text Field -->

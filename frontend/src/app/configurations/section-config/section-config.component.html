@@ -27,6 +27,10 @@
 
   <div class="w-full md:w-1/2 border border-gray-300 p-4 rounded">
     <h3 class="font-semibold mb-2">Preview</h3>
-    <app-section [sectionItems]="[]"></app-section>
+    <div class="mb-3 font-medium text-gray-700">
+      {{ sectionForm.get('title')?.value || (mode === 'edit' ? data?.item?.title : 'Section titre') }}
+    </div>
+
+    <app-section [sectionItems]="mode === 'edit' ? originalChildren : []"></app-section>
   </div>
 </div>
