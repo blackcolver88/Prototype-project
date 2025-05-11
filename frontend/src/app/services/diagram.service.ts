@@ -9,6 +9,7 @@ import { map, catchError, tap, switchMap } from 'rxjs/operators';
 export class DiagramService {
   private apiUrl = 'api/diagrams'; // Keep existing endpoint
   private camundaApiUrl = 'http://localhost:8222/workflow-service/engine-rest'; // Match ProcessService URL
+  private workflowBaseUrl = 'http://localhost:8222/workflow-service'; // Add this
 
   constructor(private http: HttpClient) {}
 
@@ -123,5 +124,15 @@ export class DiagramService {
           return forkJoin(processesWithDetails);
         })
       );
+  }
+
+  // Add to DiagramService
+  getUndeployedProcessFiles(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.workflowBaseUrl}/api/list-process-files`);
+  }
+
+  // Add to DiagramService
+  deployFromResources(filename: string): Observable<any> {
+    return this.http.post(`${this.workflowBaseUrl}/api/deploy-from-resources`, { filename });
   }
 }

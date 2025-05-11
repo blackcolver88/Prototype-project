@@ -197,6 +197,11 @@ export class BpmnModelerComponent {
   // Add this property
   createNewProcess: boolean = true;
 
+  // Add these properties to the class
+  showResourceFilesModal: boolean = false;
+  resourceFiles: any[] = [];
+  isLoadingResources: boolean = false;
+
   private routeSubscription: Subscription | null = null;
 
   constructor(
@@ -1088,5 +1093,55 @@ export class BpmnModelerComponent {
     setTimeout(() => {
       document.body.removeChild(notification);
     }, 3000);
+  }
+
+  openResourceFilesModal(): void {
+    this.showResourceFilesModal = true;
+    this.refreshResourceFiles();
+  }
+
+  closeResourceFilesModal(): void {
+    this.showResourceFilesModal = false;
+  }
+
+  refreshResourceFiles(): void {
+    this.isLoadingResources = true;
+    this.resourceFiles = []; // Clear previous results
+    console.log("Attempting to fetch process files...");
+    
+    this.diagramService.getUndeployedProcessFiles()
+      .pipe(take(1))
+      .subscribe({
+        next: (files) => {
+          console.log("Process files received:", files);
+          this.resourceFiles = files;
+          this.isLoadingResources = false;
+        },
+        error: (err) => {
+          console.error("Error fetching process files:", err);
+          this.handleError(new Error(`Failed to load resource files: ${err.status} ${err.statusText}`));
+          this.isLoadingResources = false;
+        }
+      });
+  }
+
+  deployProcessFile(filename: string): void {
+    this.isLoading = true;
+    this.diagramService.deployFromResources(filename)
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          this.isLoading = false;
+          this.showSuccessNotification(`Successfully deployed ${filename}`);
+          this.refreshResourceFiles(); // Refresh the list to update status
+          
+          // Update deployments list for start instance modal
+          this.loadDeployments();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.handleError(err);
+        }
+      });
   }
 }
