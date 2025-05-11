@@ -4,11 +4,15 @@ import com.example.auth_service.Entity.User;
 import com.example.auth_service.Enum.Role;
 import com.example.auth_service.Repository.UserRepository;
 import com.example.auth_service.Service.JwtService;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +24,18 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        LocalDateTime now = LocalDateTime.now();
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_ADMIN)
+                .accountLocked(request.isAccountLocked())
+                .enabled(request.isEnabled())
+                .createdDate(now)      // Set the current date/time
+                .lastModifiedDate(now)
+
                 .build();
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -48,5 +58,15 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+
+    public boolean validateToken(String token) {
+        try {
+            jwtService.extractAllClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

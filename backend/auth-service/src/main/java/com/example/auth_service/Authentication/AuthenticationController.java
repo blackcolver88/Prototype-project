@@ -1,12 +1,11 @@
 package com.example.auth_service.Authentication;
 
 
+import com.example.auth_service.Entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,5 +29,16 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.authenticate(request));
 
     }
+
+
+    @GetMapping("/validate")
+    public ResponseEntity<String> validateToken(@RequestParam String token) {
+        if (service.validateToken(token)) {
+            return ResponseEntity.ok("Token is valid");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
+    }
+
 
 }
