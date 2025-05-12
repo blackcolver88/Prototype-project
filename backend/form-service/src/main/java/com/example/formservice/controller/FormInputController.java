@@ -1,5 +1,6 @@
 package com.example.formservice.controller;
 
+import com.example.formservice.DTO.FormInputUpdateDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.service.FormInputService;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +33,17 @@ public class FormInputController {
         return formInputService.save(formInput);
     }
 
+
+
     @PutMapping("/{id}")
-    public ResponseEntity<FormInput> updateFormInput(@PathVariable Long id, @RequestBody FormInput formInput) {
-        FormInput updated = formInputService.updateFormInput(id, formInput);
+    public ResponseEntity<FormInput> updateFormInput(
+            @PathVariable Long id,
+            @RequestBody FormInputUpdateDTO formInputUpdateDTO
+    ) {
+        FormInput updated = formInputService.updateFormInput(id, formInputUpdateDTO);
         return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFormInput(@PathVariable Long id) {

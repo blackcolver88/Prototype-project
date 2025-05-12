@@ -171,18 +171,14 @@ export class GenericFormInputEditorComponent implements OnInit {
         break;
         
       case 'SELECT_BOX':
-        if (config.options && Array.isArray(config.options)) {
-          if (config.options.length > 0) {
-            if (typeof config.options[0] === 'string') {
-              formValues.optionsString = config.options.join(', ');
-            } else if (typeof config.options[0] === 'object') {
-              formValues.optionsString = config.options
-                .map((opt: any) => opt.label || opt.value)
-                .join(', ');
-            }
-          }
-        }
-        break;
+  if (config.options && Array.isArray(config.options)) {
+    formValues.optionsString = config.options
+      .map((opt: any) => typeof opt === 'string' ? opt : (opt.label || opt.value || ''))
+      .join(', ');
+  } else {
+    formValues.optionsString = '';
+  }
+  break;
         
       case 'CHECKBOX':
       case 'RADIO_BUTTON':
@@ -349,33 +345,21 @@ export class GenericFormInputEditorComponent implements OnInit {
           console.log('Envoi de la mise à jour au serveur:', configuredItem);
           
           this.formInputService.updateFormInput(this.formInputId, configuredItem as FormInput)
-            .subscribe({
-              next: (updatedInput) => {
-                console.log('FormInput mis à jour avec succès:', updatedInput);
-                
-                const mergedItem = {
-                  ...this.data.item,         
-                  id: this.formInputId,      
-                  type: this.inputType,      
-                  title: formData.label,     
-                  required: formData.isRequired, 
-                  config: {                 
-                    ...JSON.parse(configuredItem.config),
-                    label: formData.label,   
-                    isRequired: formData.isRequired 
-                  },
-                  formLayout: this.data.item.formLayout,
-                  ordinalPosition: this.data.item.ordinalPosition || 0,
-                  multipleValues: configuredItem.multipleValues || this.data.item.multipleValues
-                };
-                
-                this.dialogRef.close(mergedItem);
-              },
-              error: (error) => {
-                console.error('Erreur lors de la mise à jour du FormInput:', error);
-                this.dialogRef.close(this.data.item);
-              }
-            });
+  .subscribe({
+    next: (updatedInput) => {
+      console.log('FormInput mis à jour avec succès:', updatedInput);
+      this.dialogRef.close({
+        ...configuredItem,
+        id: this.formInputId,
+        config: JSON.parse(configuredItem.config),
+        multipleValues: configuredItem.multipleValues
+      });
+    },
+    error: (error) => {
+      console.error('Erreur lors de la mise à jour du FormInput:', error);
+      this.dialogRef.close(this.data.item);
+    }
+  });  
         } else {
           console.error('formInputId n\'est pas un nombre valide:', this.formInputId);
           this.dialogRef.close(this.data.item);

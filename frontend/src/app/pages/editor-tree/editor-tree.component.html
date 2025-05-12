@@ -168,13 +168,17 @@
                     
                     <!-- Date Picker -->
                     <ng-container *ngIf="sectionItem?.type === 'datepicker'">
-                      <app-datepicker [label]="sectionItem.config.label">
+                      <app-datepicker [label]="sectionItem.config.label"
+                        [isRequired]="sectionItem.config.isRequired || false">
+
                       </app-datepicker>
                     </ng-container>
 
                     <!-- Basic Date Picker -->
                     <ng-container *ngIf="sectionItem?.type === 'basic_datepicker'">
-                      <app-basic-datepicker [label]="sectionItem.config.label">
+                      <app-basic-datepicker [label]="sectionItem.config.label"
+                        [isRequired]="sectionItem.config.isRequired || false">
+
                       </app-basic-datepicker>
                     </ng-container>
 
@@ -316,13 +320,17 @@
                         
                         <ng-container *ngSwitchCase="'datepicker'">
                           <app-datepicker 
-                            [label]="subItem.config?.label || 'Select Date'">
+                            [label]="subItem.config?.label || 'Select Date'"
+                            [isRequired]="subItem.config?.isRequired || false">
+
                           </app-datepicker>
                         </ng-container>
                         
                         <ng-container *ngSwitchCase="'basic_datepicker'">
                           <app-basic-datepicker 
-                            [label]="subItem.config?.label || 'Select Date'">
+                            [label]="subItem.config?.label || 'Select Date'"
+                            [isRequired]="subItem.config?.isRequired || false">
+
                           </app-basic-datepicker>
                         </ng-container>
                         

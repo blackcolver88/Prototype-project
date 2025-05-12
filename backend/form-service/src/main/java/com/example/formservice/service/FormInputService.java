@@ -1,25 +1,38 @@
 package com.example.formservice.service;
+import com.example.formservice.DTO.FormInputUpdateDTO;
 import com.example.formservice.DTO.FormInputWithValues;
 import com.example.formservice.entities.FormInput;
+import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormValue;
 import com.example.formservice.entities.MultipleValue;
 import com.example.formservice.entities.enums.FormInputType;
 import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.formservice.repository.FormLayoutRepository;
+import com.example.formservice.repository.FormValueRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FormInputService {
     private final FormInputRepository formInputRepository;
     private final FormValueService formValueService;
+    private final FormLayoutRepository formLayoutRepository;
+    private final FormValueRepository formValueRepository;
 
-    public FormInputService(FormInputRepository formInputRepository, FormValueService formValueService) {
+
+    public FormInputService(FormInputRepository formInputRepository, FormValueService formValueService,
+                            FormLayoutRepository formLayoutRepository, FormValueRepository formValueRepository  ) {
         this.formInputRepository = formInputRepository;
         this.formValueService = formValueService;
+        this.formLayoutRepository = formLayoutRepository;
+        this.formValueRepository = formValueRepository;
     }
 
     public List<FormInput> findAll() {
@@ -38,18 +51,66 @@ public class FormInputService {
         formInputRepository.deleteById(id);
     }
 
-    public FormInput updateFormInput(Long id, FormInput formInput) {
+    public FormInput updateFormInput(Long id, FormInputUpdateDTO formInputUpdateDTO) {
         FormInput existing = formInputRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("FormInput not found with id " + id));
 
-        existing.setTitle(formInput.getTitle());
-        existing.setType(formInput.getType());
-        existing.setRequired(formInput.isRequired());
-        existing.setFormLayout(formInput.getFormLayout());
-        existing.setMultipleValues(formInput.getMultipleValues());
+        if (formInputUpdateDTO.getTitle() != null) {
+            existing.setTitle(formInputUpdateDTO.getTitle());
+        }
+
+        if (formInputUpdateDTO.getType() != null) {
+            existing.setType(formInputUpdateDTO.getType());
+        }
+
+        existing.setRequired(formInputUpdateDTO.isRequired());
+
+        if (formInputUpdateDTO.getOrdinalPosition() != null) {
+            existing.setOrdinalPosition(formInputUpdateDTO.getOrdinalPosition());
+        }
+
+        if (formInputUpdateDTO.getFormLayoutId() != null) {
+            FormLayout formLayout = formLayoutRepository.findById(formInputUpdateDTO.getFormLayoutId())
+                    .orElseThrow(() -> new ResourceNotFoundException("FormLayout not found"));
+            existing.setFormLayout(formLayout);
+        }
+
+        if (formInputUpdateDTO.getFormValueId() != null) {
+            FormValue formValue = formValueRepository.findById(formInputUpdateDTO.getFormValueId())
+                    .orElseThrow(() -> new ResourceNotFoundException("FormValue not found"));
+            existing.setFormValue(formValue);
+        }
+
+        if (isMultipleValueType(existing.getType())) {
+            List<String> multipleValuesDTO = formInputUpdateDTO.getMultipleValues();
+
+            if (multipleValuesDTO != null && !multipleValuesDTO.isEmpty()) {
+                if (existing.getMultipleValues() != null) {
+                    existing.getMultipleValues().clear();
+                } else {
+                    existing.setMultipleValues(new ArrayList<>());
+                }
+
+                List<MultipleValue> newMultipleValues = multipleValuesDTO.stream()
+                        .map(value -> {
+                            MultipleValue multipleValue = new MultipleValue();
+                            multipleValue.setValeurs(List.of(value));
+                            multipleValue.setFormInput(existing);
+                            return multipleValue;
+                        })
+                        .collect(Collectors.toList());
+
+                existing.getMultipleValues().addAll(newMultipleValues);
+            }
+        }
 
         return formInputRepository.save(existing);
     }
+
+    private boolean isMultipleValueType(FormInputType type) {
+        return type == FormInputType.SELECT_BOX;
+    }
+
     public List<FormInputWithValues> getFormInputsWithValuesByFormId(Long formId) {
         List<FormInput> formInputs = formInputRepository.findByFormLayoutFormId(formId);
 

@@ -19,6 +19,8 @@ public class FormInput {
     private FormInputType type;
 
     private boolean required;
+
+
     
     @Column(name = "ordinal_position")
     private Integer ordinalPosition = 0;
