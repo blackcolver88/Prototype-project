@@ -8,10 +8,11 @@ import { EditFormComponent } from './user/pages/edit-form/edit-form.component';
 import { AdminSubmissionComponent } from './pages/admin-submission/admin-submission.component';
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
-
+import { LoginPageComponent } from './pages/login-page/login-page.component';
+import { authGuard } from './core/auth/guards/authGuard';
 
 export const routes: Route[] = [
-  { path: '', redirectTo: '/form-template', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'form-template', loadChildren:() => import('./pages/form-template/form-template.module').then((m) => m.FormTemplateModule) },
   { path: 'editor-tree/:id', component: EditorTreeComponent },
   { path: 'forms', component: FormsComponent },
@@ -22,7 +23,5 @@ export const routes: Route[] = [
   { path: 'list_submissions', component: AdminSubmissionComponent },
   { path: 'diagram', component: BpmnModelerComponent },
   { path: 'processes', component: ProcessesPageComponent },
-
-
-
+  { path: 'login', loadComponent: () => import('./pages/login-page/login-page.component').then(m => m.LoginPageComponent) },
 ];
