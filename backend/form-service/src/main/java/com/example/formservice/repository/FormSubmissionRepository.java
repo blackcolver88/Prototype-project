@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public interface FormSubmissionRepository extends JpaRepository<FormSubmission, Long> {
 
-    @Query("SELECT fs FROM FormSubmission fs WHERE fs.user.id = :userId")
-    List<FormSubmission> findByUserId(Long userId);
+    @Query("SELECT fs FROM FormSubmission fs WHERE fs.userId = :userId")
+    List<FormSubmission> findByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT fs FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
+    @Query("SELECT fs FROM FormSubmission fs WHERE fs.userId = :userId AND fs.idForm = :formId")
     List<FormSubmission> findByUserIdAndFormId(@Param("userId") Long userId, @Param("formId") Long formId);
 
-    @Query("SELECT CASE WHEN COUNT(fs) > 0 THEN true ELSE false END FROM FormSubmission fs WHERE fs.user.id = :userId AND fs.idForm = :formId")
-    boolean existsByUser_IdAndIdForm(@Param("userId") Long userId, @Param("formId") Long formId);
+    @Query("SELECT CASE WHEN COUNT(fs) > 0 THEN true ELSE false END FROM FormSubmission fs WHERE fs.userId = :userId AND fs.idForm = :formId")
+    boolean existsByUserIdAndIdForm(@Param("userId") Long userId, @Param("formId") Long formId);
 }

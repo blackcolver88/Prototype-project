@@ -1,8 +1,10 @@
-import {Component, HostListener, ElementRef, ViewChild} from '@angular/core';
+import {Component, HostListener, ElementRef, ViewChild, OnInit} from '@angular/core';
 import { addIcons } from 'ionicons';
 import { logoIonic } from 'ionicons/icons';
 import { IonicModule } from "@ionic/angular";
-import {RouterModule} from "@angular/router";
+import {Router, RouterModule} from "@angular/router";
+import { AuthService } from '../../services/Auth.service';
+import { UserService, UserProfile } from '../../services/user-profile.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,38 +15,44 @@ import {RouterModule} from "@angular/router";
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
 
-  @ViewChild("profile_default") profile?: ElementRef;
-  @ViewChild("navbar_default") navbar?: ElementRef;
+  @ViewChild('menu') menu!: ElementRef;
+  @ViewChild('profile') profile!: ElementRef;
 
+  isAuthenticated = false;
+  currentUser: UserProfile | null = null;
 
-  constructor() {
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+    private router: Router
+  ) {
     addIcons({ logoIonic });
   }
-
-  onToggleProfile(): void {
-    const elm = this.profile?.nativeElement;
-    elm.classList.toggle('hidden')
+  ngOnInit() {
+    this.authService.isAuthenticated$.subscribe(
+      isAuth => this.isAuthenticated = isAuth
+    );
+    
+    this.userService.currentUser$.subscribe(
+      user => this.currentUser = user
+    );
   }
 
-  onToggleMenu(): void {
-    const elm=this.navbar?.nativeElement;
-    elm.classList.toggle('hidden')
+  toggleMenu() {
+    this.menu.nativeElement.classList.toggle('hidden');
+  }
+  
+  toggleProfile() {
+    this.profile.nativeElement.classList.toggle('hidden');
+  }
+  
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const targetElement = event.target as HTMLElement;
 
-    if (this.profile && !this.profile.nativeElement.contains(targetElement) &&
-      !targetElement.closest('#user-menu-button')) {
-      this.profile.nativeElement.classList.add('hidden');
-    }
-
-    if (this.navbar && !this.navbar.nativeElement.contains(targetElement) &&
-      !targetElement.closest('[data-collapse-toggle="navbar_default"]')) {
-      this.navbar.nativeElement.classList.add('hidden');
-    }
-  }
 }

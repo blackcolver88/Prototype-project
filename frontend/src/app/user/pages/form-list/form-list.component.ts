@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormResponsesComponent } from '../form-responses/form-responses.component';
 import { CommonModule } from '@angular/common';
+import { TokenService } from '../../../services/token.service';
 
 @Component({
   selector: 'app-form-list',
@@ -13,17 +14,20 @@ import { CommonModule } from '@angular/common';
 })
 export class FormListComponent implements OnInit {
   forms: any[] = [];
-   userId/*: number*/ = 1; 
+  userId = 1; 
   formId!: number;
 
   constructor(
     private formSubmissionService: FormSubmissionService,
     private router: Router,
-    private dialog: MatDialog 
+    private dialog: MatDialog,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit() {
-    this.formSubmissionService.getUserFormSubmissions(this.userId).subscribe(
+    this.userId = this.tokenService.getUserId() || 1;
+
+    this.formSubmissionService.getUserFormSubmissions().subscribe(
       (data) => {
         this.forms = data.map((submission: any) => ({
           id: submission.id,

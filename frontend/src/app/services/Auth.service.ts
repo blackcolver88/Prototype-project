@@ -1,6 +1,6 @@
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthResponse } from '../model/AuthResponse';
 import { LoginRequest } from '../model/LoginRequest';
@@ -28,13 +28,28 @@ export class AuthService {
     }
   }
   
-  // Rest of the service remains the same...
-  login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/authenticate`, request)
+  login(credentials: { email: string, password: string }): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/authenticate`, credentials)
       .pipe(
         tap(response => {
-          this.tokenService.saveToken(response.token);
-          this.isAuthenticatedSubject.next(true);
+          if (response && response.token) {
+            // Save token
+            this.tokenService.saveToken(response.token);
+            
+            // Validate we can get the user ID
+            const userId = this.tokenService.getUserId();
+            if (!userId) {
+              console.warn('Token saved but user ID could not be extracted');
+            } else {
+              console.log('Authentication successful for user ID:', userId);
+            }
+            
+            this.isAuthenticatedSubject.next(true);
+          }
+        }),
+        catchError(error => {
+          this.isAuthenticatedSubject.next(false);
+          return throwError(() => error);
         })
       );
   }

@@ -24,6 +24,7 @@ import { FormSubmissionService } from '../../../services/form-submission.service
 import { FormInput } from '../../../model/FormInput';
 import { MultipleValue } from '../../../model/MultipleValue';
 import { finalize } from 'rxjs/operators'; // Add this import at the top
+import { TokenService } from '../../../services/token.service';
 
 @Component({
   selector: 'app-edit-form',
@@ -58,7 +59,8 @@ export class EditFormComponent {
     private formTemplateService: FormTemplateService,
     private cdr: ChangeDetectorRef, 
     private multipleValueService: MultipleValueService, 
-    private formSubmissionService: FormSubmissionService
+    private formSubmissionService: FormSubmissionService,
+    private tokenService: TokenService
   ) {}
   
   ngOnInit() {
@@ -72,9 +74,8 @@ export class EditFormComponent {
         return;
       }
   
-      this.userId = +userId;
+      this.userId = userId === 'current' ? this.tokenService.getUserId() || 1 : +userId;
       this.submissionId = +submissionId;
-  
       this.loadFormTemplateWithSubmissionId(this.submissionId);
     });
   }

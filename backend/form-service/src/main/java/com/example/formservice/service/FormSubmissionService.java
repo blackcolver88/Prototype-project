@@ -1,6 +1,7 @@
 package com.example.formservice.service;
 
 import com.example.formservice.DTO.FormValueDTO;
+import com.example.formservice.DTO.UserDTO;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormSubmission;
 import com.example.formservice.entities.FormTemplate;
@@ -8,11 +9,13 @@ import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormSubmissionRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import com.example.formservice.repository.FormValueRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,16 +26,17 @@ public class FormSubmissionService {
     private final FormInputRepository formInputRepository;
     private final FormTemplateRepository formTemplateRepository;
     private final FormValueRepository formValueRepository;
+    private final UserService userService;
 
+    @Autowired
     public FormSubmissionService(FormSubmissionRepository formSubmissionRepository, FormInputRepository formInputRepository,
-                                 FormTemplateRepository formTemplateRepository,
-                                  FormValueRepository formValueRepository) {
+                                  FormTemplateRepository formTemplateRepository, FormValueRepository formValueRepository,
+                                  UserService userService) {
         this.formSubmissionRepository = formSubmissionRepository;
         this.formInputRepository = formInputRepository;
         this.formTemplateRepository = formTemplateRepository;
         this.formValueRepository = formValueRepository;
-
-
+        this.userService = userService;
     }
 
     public List<FormSubmission> findAll() {
@@ -59,14 +63,25 @@ public class FormSubmissionService {
             throw new IllegalArgumentException("FormSubmission with id " + id + " does not exist");
         }
     }
+
     public boolean existsByUserIdAndFormId(Long userId, Long formId) {
-        return formSubmissionRepository.existsByUser_IdAndIdForm(userId, formId);
+        return formSubmissionRepository.existsByUserIdAndIdForm(userId, formId);
     }
 
     public List<FormSubmission> getFormSubmissionsByUserId(Long userId) {
-        return formSubmissionRepository.findByUserId(userId);
-    }
+        List<FormSubmission> submissions = formSubmissionRepository.findByUserId(userId);
 
+        Optional<UserDTO> userInfo = userService.getUserById(userId);
+
+        if (userInfo.isPresent()) {
+            UserDTO user = userInfo.get();
+            for (FormSubmission submission : submissions) {
+                submission.setUserTask(user.getFirstname() + " " + user.getLastname());
+            }
+        }
+
+        return submissions;
+    }
 
     private List<FormValueDTO> getFormValuesWithTitles(Long submissionId) {
         return formValueRepository.findByFormSubmissionId(submissionId).stream()
@@ -78,10 +93,10 @@ public class FormSubmissionService {
                 })
                 .collect(Collectors.toList());
     }
+
     public List<FormSubmission> getFormSubmissionsByUserAndForm(Long userId, Long formId) {
         return formSubmissionRepository.findByUserIdAndFormId(userId, formId);
     }
-
 
     public Optional<FormTemplate> getFormTemplateBySubmissionId(Long submissionId) {
         Optional<FormSubmission> submission = formSubmissionRepository.findById(submissionId);
@@ -96,13 +111,4 @@ public class FormSubmissionService {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("date").descending());
         return formSubmissionRepository.findAll(pageable);
     }
-
-
-
-
-
-
-
-
-
 }

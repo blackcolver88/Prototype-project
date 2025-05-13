@@ -1,4 +1,3 @@
-
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FormSubmission } from '../../../model/FormSubmission';
@@ -27,8 +26,8 @@ export class FormResponsesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.userId = this.data.user.id; 
-    this.formId = this.data.idForm; 
+    this.userId = this.data.userId; 
+    this.formId = this.data.formId || this.data.idForm; 
 
     if (!this.userId || !this.formId) {
       console.error('Missing userId or formId in dialog data', this.data);
@@ -43,9 +42,9 @@ export class FormResponsesComponent implements OnInit {
     console.log('Loading submissions for:', this.userId, this.formId);
 
     this.formSubmissionService.getFormSubmissionsByUserAndForm(this.userId, this.formId).subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
         this.submissions = Array.isArray(data)
-          ? data.map(submission => ({
+          ? data.map((submission: any) => ({
               ...submission,
               formValues: Array.isArray(submission.formValues)
                 ? submission.formValues
@@ -55,7 +54,7 @@ export class FormResponsesComponent implements OnInit {
 
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: Error) => {
         console.error('Error fetching form submissions:', error);
         this.submissions = [];
         this.loading = false;

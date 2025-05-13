@@ -1,5 +1,5 @@
-import {Route} from '@angular/router';
-import {EditorTreeComponent} from "./pages/editor-tree/editor-tree.component";
+import { Route } from '@angular/router';
+import { EditorTreeComponent } from "./pages/editor-tree/editor-tree.component";
 import { FormsComponent } from './user/pages/forms/forms.component';
 import { FormvalueComponent } from './user/pages/formvalue/formvalue.component';
 import { FormResponsesComponent } from './user/pages/form-responses/form-responses.component';
@@ -13,15 +13,19 @@ import { authGuard } from './core/auth/guards/authGuard';
 
 export const routes: Route[] = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'form-template', loadChildren:() => import('./pages/form-template/form-template.module').then((m) => m.FormTemplateModule) },
-  { path: 'editor-tree/:id', component: EditorTreeComponent },
-  { path: 'forms', component: FormsComponent },
-  { path: 'formvalue/:id', component: FormvalueComponent },
-  { path: 'responses/:userId/:formId', component: FormResponsesComponent },
-  { path: 'list', component: FormListComponent },
-  { path: 'edit/:userId/:submissionId', component: EditFormComponent },
-  { path: 'list_submissions', component: AdminSubmissionComponent },
-  { path: 'diagram', component: BpmnModelerComponent },
-  { path: 'processes', component: ProcessesPageComponent },
   { path: 'login', loadComponent: () => import('./pages/login-page/login-page.component').then(m => m.LoginPageComponent) },
+  { 
+    path: 'form-template', 
+    loadChildren:() => import('./pages/form-template/form-template.module').then((m) => m.FormTemplateModule),
+    canActivate: [authGuard] 
+  },
+  { path: 'editor-tree/:id', component: EditorTreeComponent, canActivate: [authGuard] },
+  { path: 'forms', component: FormsComponent, canActivate: [authGuard] },
+  { path: 'formvalue/:id', component: FormvalueComponent, canActivate: [authGuard] },
+  { path: 'responses/:userId/:formId', component: FormResponsesComponent, canActivate: [authGuard] },
+  { path: 'list', component: FormListComponent, canActivate: [authGuard] },
+  { path: 'edit/:userId/:submissionId', component: EditFormComponent, canActivate: [authGuard] },
+  { path: 'list_submissions', component: AdminSubmissionComponent, canActivate: [authGuard] },
+  { path: 'diagram', component: BpmnModelerComponent, canActivate: [authGuard] },
+  { path: 'processes', component: ProcessesPageComponent, canActivate: [authGuard] },
 ];

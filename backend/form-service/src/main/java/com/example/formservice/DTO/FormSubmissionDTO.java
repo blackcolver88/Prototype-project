@@ -43,7 +43,7 @@ public class FormSubmissionDTO {
         FormSubmissionDTO dto = new FormSubmissionDTO(
                 submission.getId(),
                 submission.getDate(),
-                submission.getUser().getTask(),
+                submission.getUserTask(),
                 formTitle,
                 submission.getFormValues().stream()
                         .map(FormValue::getValue)

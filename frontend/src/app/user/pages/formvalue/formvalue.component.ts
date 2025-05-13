@@ -25,6 +25,7 @@ import { MultipleValue } from '../../../model/MultipleValue';
 import { FormValueRequest } from '../../../model/FormValueRequest';
 import { FormSubmissionService } from '../../../services/form-submission.service';
 import { ProcessSelectorComponent } from '../../../components/process-selector/process-selector.component';
+import { TokenService } from '../../../services/token.service';
 
 
 @Component({
@@ -67,15 +68,25 @@ export class FormvalueComponent {
     private formTemplateService: FormTemplateService,
     private cdr: ChangeDetectorRef, 
     private multipleValueService: MultipleValueService, 
-    private formSubmissionService: FormSubmissionService
+    private formSubmissionService: FormSubmissionService,
+    private tokenService: TokenService  // Add this line
   ) {}
 
   ngOnInit() {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.templateId = params.get('id')!;
+      
+      // Check if user is logged in
+      const userId = this.tokenService.getUserId();
+      if (!userId) {
+        console.warn('User not authenticated, redirecting to login');
+        this.router.navigate(['/login']);
+        return;
+      }
+      
+      this.userId = userId;
       this.loadFormTemplateWithLayouts(this.templateId);
       this.checkFormSubmissionStatus();
-
     });
   }
 
@@ -298,6 +309,11 @@ export class FormvalueComponent {
   }
 
   submitForm() {
+    if (!this.tokenService.isTokenValid()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    
     if (this.isFormSubmitted) {
       alert('You have already submitted this form.');
       console.warn('You have already submitted this form.');
@@ -317,9 +333,12 @@ export class FormvalueComponent {
     
     const formValues = this.collectFormValues();
     
-    // Call the new method with process key
     this.formSubmissionService
-      .submitFormWithProcess(this.userId, +this.templateId, formValues, this.selectedProcessKey)
+      .submitFormWithProcess(
+        +this.templateId,
+        formValues,
+        this.selectedProcessKey
+      )
       .subscribe({
         next: (result) => {
           this.isFormSubmitted = true; 
@@ -328,7 +347,12 @@ export class FormvalueComponent {
         error: (error) => {
           console.error('Error submitting form:', error);
           
-          if (error.status === 404 && error.error.includes('No deployment found')) {
+          if (error.message === 'You need to log in to access this feature') {
+            this.router.navigate(['/login']);
+            return;
+          }
+          
+          if (error.status === 404 && error.error?.includes('No deployment found')) {
             this.validationErrors = ['The selected process is not properly deployed. Please select another process.'];
             this.showValidationErrors = true;
           }
@@ -336,13 +360,11 @@ export class FormvalueComponent {
       });
   }
 
-
   disableFormFields() {
     this.traverseFormItems(this.editorItems, (item) => {
       item.disabled = this.isFormSubmitted;
     });
   }
-
 
   clearForm() {
     this.formValues = new Map();

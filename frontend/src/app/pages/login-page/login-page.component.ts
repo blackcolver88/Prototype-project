@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/Auth.service';
+import { UserService, UserProfile } from '../../services/user-profile.service';
+import { TokenService } from '../../services/token.service';
 
 @Component({
   selector: 'app-login-page',
@@ -16,6 +18,8 @@ export class LoginPageComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
+  private tokenService = inject(TokenService);
 
   loginForm!: FormGroup;
   error = '';
@@ -29,8 +33,8 @@ export class LoginPageComponent implements OnInit {
       remember: [false]
     });
 
-    // Get return URL from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    // Get return URL from route parameters or default to '/form-template'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/form-template';
   }
 
   onSubmit(): void {
@@ -45,7 +49,22 @@ export class LoginPageComponent implements OnInit {
     
     this.authService.login({ email, password })
       .subscribe({
-        next: () => {
+        next: (response) => {
+          // Debug the token
+          console.log("LOGIN RESPONSE:", response);
+          
+          const token = this.tokenService.getToken();
+          if (token) {
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              console.log("FULL TOKEN PAYLOAD:", payload);
+            } catch (e) {
+              console.error("Could not parse token", e);
+            }
+          }
+          
+          // After successful login, load the user profile
+          this.userService.loadCurrentUser();
           this.router.navigate([this.returnUrl]);
         },
         error: err => {
