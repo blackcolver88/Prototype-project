@@ -9,13 +9,12 @@ import com.example.formservice.entities.enums.FormInputType;
 import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormValueRepository;
+import com.example.formservice.repository.MultipleValueRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +24,17 @@ public class FormInputService {
     private final FormValueService formValueService;
     private final FormLayoutRepository formLayoutRepository;
     private final FormValueRepository formValueRepository;
+    private final MultipleValueRepository multipleValueRepository;
 
 
     public FormInputService(FormInputRepository formInputRepository, FormValueService formValueService,
-                            FormLayoutRepository formLayoutRepository, FormValueRepository formValueRepository  ) {
+                            FormLayoutRepository formLayoutRepository, FormValueRepository formValueRepository ,
+                            MultipleValueRepository multipleValueRepository) {
         this.formInputRepository = formInputRepository;
         this.formValueService = formValueService;
         this.formLayoutRepository = formLayoutRepository;
         this.formValueRepository = formValueRepository;
+        this.multipleValueRepository = multipleValueRepository;
     }
 
     public List<FormInput> findAll() {
@@ -81,26 +83,30 @@ public class FormInputService {
             existing.setFormValue(formValue);
         }
 
+
         if (isMultipleValueType(existing.getType())) {
             List<String> multipleValuesDTO = formInputUpdateDTO.getMultipleValues();
 
-            if (multipleValuesDTO != null && !multipleValuesDTO.isEmpty()) {
+            if (multipleValuesDTO != null) {
                 if (existing.getMultipleValues() != null) {
+                    List<MultipleValue> toRemove = new ArrayList<>(existing.getMultipleValues());
                     existing.getMultipleValues().clear();
+
+                    for (MultipleValue mv : toRemove) {
+                        multipleValueRepository.delete(mv);
+                    }
                 } else {
                     existing.setMultipleValues(new ArrayList<>());
                 }
 
-                List<MultipleValue> newMultipleValues = multipleValuesDTO.stream()
-                        .map(value -> {
-                            MultipleValue multipleValue = new MultipleValue();
-                            multipleValue.setValeurs(List.of(value));
-                            multipleValue.setFormInput(existing);
-                            return multipleValue;
-                        })
-                        .collect(Collectors.toList());
-
-                existing.getMultipleValues().addAll(newMultipleValues);
+                for (String value : multipleValuesDTO) {
+                    if (value != null && !value.trim().isEmpty()) {
+                        MultipleValue multipleValue = new MultipleValue();
+                        multipleValue.setValeurs(List.of(value));
+                        multipleValue.setFormInput(existing);
+                        existing.getMultipleValues().add(multipleValue);
+                    }
+                }
             }
         }
 
@@ -108,7 +114,9 @@ public class FormInputService {
     }
 
     private boolean isMultipleValueType(FormInputType type) {
-        return type == FormInputType.SELECT_BOX;
+        return type == FormInputType.SELECT_BOX ||
+                type == FormInputType.RADIO_BUTTON ||
+                type == FormInputType.CHECKBOX;
     }
 
     public List<FormInputWithValues> getFormInputsWithValuesByFormId(Long formId) {

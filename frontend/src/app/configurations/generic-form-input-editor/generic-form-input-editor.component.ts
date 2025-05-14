@@ -5,6 +5,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { FormInputType } from '../../model/FormInputType';
 import { FormInputService } from '../../services/form-input.service';
 import { FormInput } from '../../model/FormInput';
+import { MultipleValue } from '../../model/MultipleValue';
 
 @Component({
   selector: 'app-generic-form-input-editor',
@@ -138,9 +139,8 @@ export class GenericFormInputEditorComponent implements OnInit {
   }
 
   private patchFormValues(): void {
-    console.log('Début de patchFormValues pour le type:', this.inputType);
-    console.log('Données de l\'item:', this.data.item);
-    
+    if (!this.data.item) return;
+
     let config: any = {};
     try {
       if (typeof this.data.item.config === 'string') {
@@ -152,85 +152,86 @@ export class GenericFormInputEditorComponent implements OnInit {
       console.error('Erreur lors du parsing de la configuration:', e);
       config = {};
     }
-    
-    console.log('Configuration récupérée:', config);
-    
-    const formValues: any = {};
-    
-    formValues.label = this.data.item.title || config.label || '';
-    
-    formValues.isRequired = this.data.item.required || config.required || config.isRequired || false;
-    
+
+    this.formInputForm.patchValue({
+      label: this.data.item.title || config.label || '',
+      isRequired: this.data.item.required || config.required || config.isRequired || false
+    });
+
     switch (this.inputType) {
       case 'TEXTFIELD':
-        formValues.type = config.type || 'text';
+        this.formInputForm.patchValue({ type: config.type || 'text' });
         break;
-        
+
       case 'TEXTAREA':
-        formValues.rows = config.rows || 3;
+        this.formInputForm.patchValue({ rows: config.rows || 3 });
         break;
-        
+
       case 'SELECT_BOX':
-  if (config.options && Array.isArray(config.options)) {
-    formValues.optionsString = config.options
-      .map((opt: any) => typeof opt === 'string' ? opt : (opt.label || opt.value || ''))
-      .join(', ');
-  } else {
-    formValues.optionsString = '';
-  }
-  break;
-        
-      case 'CHECKBOX':
-      case 'RADIO_BUTTON':
-        console.log('Traitement des options pour', this.inputType);
         if (config.options && Array.isArray(config.options)) {
-          console.log('Options trouvées:', config.options);
-          
-          while (this.options.length) {
-            this.options.removeAt(0);
-          }
-          
-          config.options.forEach((option: any) => {
-            const normalizedOption = typeof option === 'string'
-              ? { label: option, value: this.generateValueFromLabel(option), checked: false }
-              : option;
-            
-            console.log('Ajout de l\'option:', normalizedOption);
-            this.addOption(normalizedOption);
-          });
-        } else {
-          console.log('Aucune option trouvée dans la configuration');
-          
-          if (this.data.item.multipleValues && Array.isArray(this.data.item.multipleValues)) {
-            console.log('Options trouvées dans multipleValues:', this.data.item.multipleValues);
-            
-            while (this.options.length) {
-              this.options.removeAt(0);
-            }
-            
-            this.data.item.multipleValues.forEach((mv: any) => {
-              const option = {
-                label: mv.value,
-                value: mv.value,
-                checked: mv.isDefault || false
-              };
-              console.log('Ajout de l\'option depuis multipleValues:', option);
-              this.addOption(option);
-            });
-          }
+          const optionsString = config.options
+            .map((opt: any) => typeof opt === 'string' ? opt : (opt.label || opt.value || ''))
+            .filter((opt: string) => opt.trim() !== '')
+            .join(', ');
+          this.formInputForm.patchValue({ optionsString });
         }
         break;
+
+      case 'CHECKBOX':
+      case 'RADIO_BUTTON':
+        while (this.options.length !== 0) {
+          this.options.removeAt(0);
+        }
+
+        const uniqueOptions = new Map<string, any>();
+
+        if (config.options && Array.isArray(config.options)) {
+          config.options.forEach((option: any) => {
+            const label = typeof option === 'string' ? option : (option.label || '');
+            if (label.trim() && !uniqueOptions.has(label)) {
+              uniqueOptions.set(label, {
+                label,
+                value: typeof option === 'string' ? option : (option.value || label)
+              });
+            }
+          });
+        }
+
+        if (this.data.item.multipleValues && Array.isArray(this.data.item.multipleValues)) {
+          this.data.item.multipleValues.forEach((mv: any) => {
+            if (mv.valeurs && Array.isArray(mv.valeurs)) {
+              mv.valeurs.forEach((val: string) => {
+                try {
+                  let option: any;
+                  if (typeof val === 'string' && val.startsWith('{')) {
+                    option = JSON.parse(val);
+                  } else {
+                    option = { label: val, value: val };
+                  }
+                  
+                  if (!uniqueOptions.has(option.label)) {
+                    uniqueOptions.set(option.label, option);
+                  }
+                } catch (e) {
+                  console.error('Erreur lors du parsing de la valeur:', val, e);
+                }
+              });
+            }
+          });
+        }
+
+        Array.from(uniqueOptions.values()).forEach(option => {
+          this.addOption(option);
+        });
+        break;
     }
-    
-    console.log('Valeurs appliquées au formulaire:', formValues);
-    this.formInputForm.patchValue(formValues);
   }
 
   get options(): FormArray {
     return this.formInputForm.get('options') as FormArray;
   }
 
-  addOption(option: any = { label: '', value: '', checked: false }): void {
+  addOption(option: any = { label: '', value: '' }): void {
     const value = option.value || this.generateValueFromLabel(option.label || '');
     
     const optionGroup = this.fb.group({
@@ -254,7 +255,7 @@ export class GenericFormInputEditorComponent implements OnInit {
     this.options.removeAt(index);
   }
 
-  save(): void {
+save(): void {
     if (this.formInputForm.valid) {
       const formData = this.formInputForm.value;
       
@@ -262,63 +263,73 @@ export class GenericFormInputEditorComponent implements OnInit {
       console.log('Type de composant:', this.inputType);
       
       const configObj: any = {
-        ...formData,
         label: formData.label,
-        required: formData.isRequired,
-        isRequired: formData.isRequired 
+        required: formData.isRequired
       };
       
-      let optionsArray: any[] = [];
-      let multipleValuesArray: any[] = [];
+      let optionsArray: Array<{label: string; value: string}> = [];
+      let multipleValuesArray: MultipleValue[] = [];
       
       switch (this.inputType) {
-        case 'SELECT_BOX':
+     case 'SELECT_BOX':
+  if (formData.optionsString) {
+    const rawOptions = formData.optionsString
+      .split(',')
+      .map((opt: string) => opt.trim())
+      .filter((opt: string) => opt !== '');
+    optionsArray = rawOptions.map((opt: string) => ({
+      label: opt,
+      value: this.generateValueFromLabel(opt)
+    }));
+    multipleValuesArray = optionsArray.map((opt: {label: string; value: string}) => ({
+      valeurs: [JSON.stringify(opt)]
+    }));
+    configObj.options = optionsArray;
+  }
+  break;
           if (formData.optionsString) {
-            optionsArray = formData.optionsString
+            const rawOptions = formData.optionsString
               .split(',')
-              .map((option: string) => option.trim())
-              .filter((option: string) => option.length > 0)
-              .map((label: string) => ({
-                label,
-                value: this.generateValueFromLabel(label)
-              }));
-              
-            multipleValuesArray = optionsArray.map(opt => ({
-              value: opt.value,
-              isDefault: false
+              .map((opt: string) => opt.trim())
+              .filter((opt: string) => opt !== '');
+            optionsArray = rawOptions.map((opt: string) => ({
+              label: opt,
+              value: this.generateValueFromLabel(opt)
             }));
+            multipleValuesArray = optionsArray.map((opt: {label: string; value: string}) => ({
+              valeurs: [JSON.stringify(opt)]
+            }));
+            
+            configObj.options = optionsArray;
           }
-          
-          delete configObj.optionsString;
-          configObj.options = optionsArray;
           break;
           
         case 'RADIO_BUTTON':
         case 'CHECKBOX':
           if (this.options.controls.length > 0) {
             optionsArray = this.options.controls.map(control => control.value);
-            configObj.options = optionsArray;
+            
+            configObj.options = optionsArray.map(opt => ({
+              label: opt.label,
+              value: opt.value || this.generateValueFromLabel(opt.label)
+            }));
             
             multipleValuesArray = optionsArray.map(opt => ({
-              value: opt.label,
-              isDefault: opt.checked || false
+              valeurs: [JSON.stringify({label: opt.label, value: opt.value})]
             }));
           }
           break;
       }
       
-      // Créer l'objet FormInput complet
-      const configuredItem: any = {
+      const configuredItem: FormInput = {
         type: this.inputType,
         title: formData.label,
         name: formData.label.toLowerCase().replace(/\s+/g, '_'),
         required: formData.isRequired,
         config: JSON.stringify(configObj)
-      };
+      } as unknown as FormInput;
       
-      
-      if (multipleValuesArray.length > 0 && 
-          (this.inputType === 'SELECT_BOX' || this.inputType === 'RADIO_BUTTON' || this.inputType === 'CHECKBOX')) {
+      if (this.inputType === 'SELECT_BOX' || this.inputType === 'RADIO_BUTTON' || this.inputType === 'CHECKBOX') {
         configuredItem.multipleValues = multipleValuesArray;
       }
       
@@ -344,41 +355,34 @@ export class GenericFormInputEditorComponent implements OnInit {
         if (typeof this.formInputId === 'number') {
           console.log('Envoi de la mise à jour au serveur:', configuredItem);
           
-          this.formInputService.updateFormInput(this.formInputId, configuredItem as FormInput)
-  .subscribe({
-    next: (updatedInput) => {
-      console.log('FormInput mis à jour avec succès:', updatedInput);
-      this.dialogRef.close({
-        ...configuredItem,
-        id: this.formInputId,
-        config: JSON.parse(configuredItem.config),
-        multipleValues: configuredItem.multipleValues
-      });
-    },
-    error: (error) => {
-      console.error('Erreur lors de la mise à jour du FormInput:', error);
-      this.dialogRef.close(this.data.item);
-    }
-  });  
+          this.formInputService.updateFormInput(this.formInputId, configuredItem)
+            .subscribe({
+              next: (updatedInput) => {
+                console.log('FormInput mis à jour avec succès:', updatedInput);
+                this.dialogRef.close({
+                  ...configuredItem,
+                  id: this.formInputId,
+                  config: configuredItem.config ? JSON.parse(configuredItem.config) : {},
+                  multipleValues: configuredItem.multipleValues
+                });
+              },
+              error: (error) => {
+                console.error('Erreur lors de la mise à jour du FormInput:', error);
+                this.dialogRef.close(this.data.item);
+              }
+            });
         } else {
           console.error('formInputId n\'est pas un nombre valide:', this.formInputId);
           this.dialogRef.close(this.data.item);
         }
       } else {
-        const uiItem = {
-          ...configuredItem,
-          config: {
-            ...JSON.parse(configuredItem.config),
-            label: formData.label,
-            isRequired: formData.isRequired
-          }
-        };
-        this.dialogRef.close(uiItem);
+        this.dialogRef.close(configuredItem);
       }
     } else {
       this.formInputForm.markAllAsTouched();
     }
   }
+
 
   cancel(): void {
     this.dialogRef.close();

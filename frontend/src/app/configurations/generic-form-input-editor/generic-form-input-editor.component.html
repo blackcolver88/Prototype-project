@@ -96,25 +96,14 @@
                 type="text" 
                 formControlName="label" 
                 placeholder="Option label" 
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 mb-2"
                 required>
 
                 <input 
                 type="hidden" 
                 formControlName="value">
-              <div class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  formControlName="checked" 
-                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                <span class="ml-2 text-sm text-gray-700">Default</span>
-              </div>
-              <button 
-                type="button" 
-                (click)="removeOption(i)" 
-                class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                X
-              </button>
+
+
             </div>
           </div>
           

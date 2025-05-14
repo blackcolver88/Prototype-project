@@ -1155,27 +1155,39 @@ removeItem(item: any) {
         if (!item.config) {
           item.config = {};
         }
-  
-        const values =
-          input.multipleValues && input.multipleValues[0]
-            ? input.multipleValues[0].valeurs
-            : [];
-  
+
+        const multipleValues = Array.isArray(input.multipleValues) ? input.multipleValues : [];
+        console.log('Multiple values for input', input.id, ':', multipleValues);
+        const values = multipleValues.map(mv => mv.valeurs).flat();
+        console.log('Extracted values:', values);
+
         if (input.type === 'CHECKBOX' || input.type === 'RADIO_BUTTON') {
+          // Pour CHECKBOX et RADIO_BUTTON, normaliser toutes les valeurs au format {label, value}
           item.config.options = values.map((val: string) => {
             try {
-              if (typeof val === 'string' && val.startsWith('{')) {
-                return JSON.parse(val);
+              if (typeof val === 'string') {
+                if (val.startsWith('{')) {
+                  return JSON.parse(val);
+                } else {
+                  return { label: val, value: val };
+                }
+              } else if (typeof val === 'object' && val !== null) {
+                return val;
               }
-              return val;
+              return { label: String(val), value: String(val) };
             } catch (e) {
-              console.error('Error parsing value:', val, e);
-              return val;
+              console.error('Error processing value:', val, e);
+              return { label: String(val), value: String(val) };
             }
           });
+          console.log('Updated config options for', input.type, ':', item.config.options);
         } else if (input.type === 'SELECT_BOX') {
-          item.config.options = values.join(',');
+          item.config.options = values;
+          item.config.optionsString = values.join(', ');
+          console.log('Updated SELECT_BOX options:', item.config.options);
         }
+
+        item.multipleValues = multipleValues;
       }
     };
   

@@ -36,4 +36,6 @@ public class FormInput {
     @OneToMany(mappedBy = "formInput", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<MultipleValue> multipleValues;
+
+
 }
