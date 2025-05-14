@@ -26,15 +26,21 @@ export class FormResponsesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.userId = this.data.userId; 
-    this.formId = this.data.formId || this.data.idForm; 
-
-    if (!this.userId || !this.formId) {
-      console.error('Missing userId or formId in dialog data', this.data);
-      return;
+    this.userId = this.data.userId;
+    this.formId = this.data.formId;
+    
+    if (this.data.specificSubmission) {
+      // If we have a specific submission, use it directly
+      this.submissions = [this.data.specificSubmission];
+      this.loading = false;
+    } else {
+      // Fallback to loading all submissions (preserving existing behavior)
+      if (!this.userId || !this.formId) {
+        console.error('Missing userId or formId in dialog data', this.data);
+        return;
+      }
+      this.loadFormSubmissions();
     }
-
-    this.loadFormSubmissions();
   }
 
   loadFormSubmissions() {

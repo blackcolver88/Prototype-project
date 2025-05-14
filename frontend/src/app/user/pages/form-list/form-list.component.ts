@@ -42,29 +42,46 @@ export class FormListComponent implements OnInit {
     );
   }
 
-showFormResponses(formId: number) {
-  this.formSubmissionService.getFormSubmissionById(formId).subscribe(
-    (submission: any) => {
-      const dialogData = {
-        ...submission,
-        userId: this.userId,  
-        formId: formId    
-      };
-      
-      const dialogRef = this.dialog.open(FormResponsesComponent, {
-        width: '400px',
-        data: dialogData,
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        console.log('The dialog was closed');
-      });
-    },
-    (error) => {
-      console.error('Error fetching form submission:', error);
-    }
-  );
-}
+  showFormResponses(submissionId: number) {
+    // First, get the specific submission by ID
+    this.formSubmissionService.getFormSubmissionById(submissionId).subscribe(
+      (submission: any) => {
+        // Get the form ID from the submission
+        const formId = submission.idForm;
+        
+        // Get the properly formatted form values for this specific submission
+        this.formSubmissionService.getFormSubmissionsByUserAndForm(this.userId, formId).subscribe(
+          (allSubmissionsForForm: any[]) => {
+            // Find only the specific submission we clicked on
+            const targetSubmission = allSubmissionsForForm.find(s => s.id === submissionId);
+            
+            if (!targetSubmission) {
+              console.error('Could not find submission with ID:', submissionId);
+              return;
+            }
+            
+            // Pass only this specific submission to the dialog
+            const dialogData = {
+              userId: this.userId,
+              formId: formId,
+              specificSubmission: targetSubmission
+            };
+            
+            const dialogRef = this.dialog.open(FormResponsesComponent, {
+              width: '400px',
+              data: dialogData,
+            });
+          },
+          (error) => {
+            console.error('Error fetching form submissions:', error);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error fetching form submission:', error);
+      }
+    );
+  }
 
   onEditClick(formId: number | undefined) {
     if (formId) {
