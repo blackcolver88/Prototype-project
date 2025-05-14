@@ -24,6 +24,7 @@ import { FormSubmissionService } from '../../../services/form-submission.service
 import { FormInput } from '../../../model/FormInput';
 import { MultipleValue } from '../../../model/MultipleValue';
 import { finalize } from 'rxjs/operators'; // Add this import at the top
+import { TokenService } from '../../../services/token.service';
 
 @Component({
   selector: 'app-edit-form',
@@ -58,26 +59,32 @@ export class EditFormComponent {
     private formTemplateService: FormTemplateService,
     private cdr: ChangeDetectorRef, 
     private multipleValueService: MultipleValueService, 
-    private formSubmissionService: FormSubmissionService
+    private formSubmissionService: FormSubmissionService,
+    private tokenService: TokenService
   ) {}
   
-ngOnInit() {
-  this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-    const userId = params.get('userId');
-    const submissionId = params.get('submissionId');
-
-    if (!userId || !submissionId) {
-      console.error('Missing parameters in the URL.');
-      this.errorMessage = 'Paramètres manquants dans l\'URL. Veuillez vérifier l\'URL.';
-      return;
-    }
-
-    this.userId = +userId;
-    this.submissionId = +submissionId;
-    
-    this.loadFormTemplateWithSubmissionId(this.submissionId);
-  });
-}
+  ngOnInit() {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const userId = params.get('userId');
+      const submissionId = params.get('submissionId');
+  
+      if (!userId || !submissionId) {
+        console.error('Missing parameters in the URL.');
+        this.errorMessage = 'Paramètres manquants dans l\'URL. Veuillez vérifier l\'URL.';
+        return;
+      }
+  
+      // Gestion du cas spécial "current" pour l'utilisateur
+      this.userId = userId === 'current' 
+        ? this.tokenService.getUserId() || 1 
+        : +userId;
+  
+      this.submissionId = +submissionId;
+  
+      this.loadFormTemplateWithSubmissionId(this.submissionId);
+    });
+  }
+  
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();

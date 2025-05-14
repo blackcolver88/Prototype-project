@@ -18,14 +18,23 @@ public class FormSubmission {
 
     private Long idForm;
 
+    @Column(name = "user_id")
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("formSubmissions")  // Ignore the formSubmissions property in User
-    private User user;
+    // Add a transient field to store user data when needed
+    @Transient
+    private String userTask;
 
     @OneToMany(mappedBy = "formSubmission", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("formSubmission")  // Ignore the formSubmission property in FormValue
     private List<FormValue> formValues = new ArrayList<>();
+
+    public void setUserTask(String firstName, String lastName) {
+        this.userTask = firstName + " " + lastName;
+    }
+
+    public String getUserTask() {
+        return this.userTask != null ? this.userTask : "Unknown User";
+    }
 
 }

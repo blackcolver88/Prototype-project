@@ -1,6 +1,7 @@
 package com.example.auth_service.Service;
 
 
+import com.example.auth_service.Entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,7 +31,7 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-
+        extraClaims.put("id", ((User)userDetails).getId());
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

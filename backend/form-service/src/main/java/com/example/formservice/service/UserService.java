@@ -1,41 +1,54 @@
 package com.example.formservice.service;
 
-import com.example.formservice.entities.User;
-import com.example.formservice.repository.UserRepository;
+import com.example.formservice.DTO.UserDTO;
+import com.example.formservice.client.AuthServiceClient;
 import org.springframework.stereotype.Service;
-import java.util.List;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private final AuthServiceClient authServiceClient;
+
+    public UserService(AuthServiceClient authServiceClient) {
+        this.authServiceClient = authServiceClient;
     }
 
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(Math.toIntExact(id));
-    }
-
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-
-    public void deleteById(Long id) {
-        userRepository.deleteById(Math.toIntExact(id));
-    }
-
-    public User updateUser(Long id, User user) {
-        if (userRepository.existsById(Math.toIntExact(id))) {
-            user.setId(id);
-            return userRepository.save(user);
-        } else {
-            throw new IllegalArgumentException("User with id " + id + " does not exist");
+    public Optional<UserDTO> getUserById(Long id) {
+        try {
+            String authHeader = getAuthorizationHeader();
+            if (authHeader == null) {
+                return Optional.empty();
+            }
+            UserDTO user = authServiceClient.getUserById(id, authHeader);
+            return Optional.ofNullable(user);
+        } catch (Exception e) {
+            return Optional.empty();
         }
+    }
+
+    public boolean validateUser(Long userId) {
+        try {
+            String authHeader = getAuthorizationHeader();
+            if (authHeader == null) {
+                return false;
+            }
+            return authServiceClient.validateUser(userId, authHeader);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String getAuthorizationHeader() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            HttpServletRequest request = requestAttributes.getRequest();
+            return request.getHeader("Authorization");
+        }
+        return null;
     }
 }
