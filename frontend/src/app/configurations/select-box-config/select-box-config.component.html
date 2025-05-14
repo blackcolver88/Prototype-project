@@ -24,16 +24,14 @@
     </div>
 
     <div class="space-y-2">
-      <label for="options" class="block font-semibold"
-        >Options (comma-separated)</label
-      >
-      <input
-        id="options"
-        formControlName="options"
-        type="text"
-        class="w-full border border-gray-300 p-2 rounded"
-        placeholder="Option 1, Option 2, Option 3"
-      />
+      <label class="block font-semibold">Options</label>
+      <div formArrayName="options" class="space-y-2">
+        <div *ngFor="let option of options.controls; let i=index" [formGroupName]="i" class="flex space-x-2">
+          <input formControlName="label" placeholder="Enter option text" class="flex-1 border border-gray-300 p-2 rounded" />
+          <button type="button" (click)="removeOption(i)" class="text-red-500 px-2">×</button>
+        </div>
+      </div>
+      <button type="button" (click)="addOption()" class="text-blue-500 mt-2">+ Add Option</button>
       <div
         *ngIf="
           selectBoxForm.get('options')?.invalid &&
@@ -75,7 +73,7 @@
     <h3 class="font-semibold mb-2">Preview</h3>
     <app-select-box
       [label]="selectBoxForm.value.title"
-      [options]="getOptionsArray(selectBoxForm.value.options)"
+      [options]="optionLabels"
       [isRequired]="selectBoxForm.value.isRequired"
     ></app-select-box>
   </div>

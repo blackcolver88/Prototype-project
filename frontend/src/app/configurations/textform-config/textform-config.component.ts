@@ -43,15 +43,15 @@ export class TextformConfigComponent implements OnInit {
 
       switch(type) {
         case 'email':
-          placeholder = `Enter ${label} email`;
+          placeholder = `Enter ${label} here`;
           this.textForm.get('textName')?.setValidators([Validators.email]);
           break;
         case 'number':
-          placeholder = `Enter ${label} number`;
+          placeholder = `Enter ${label} here`;
           this.textForm.get('textName')?.setValidators([Validators.pattern(/^[0-9]*$/)]);
           break;
          case 'password':
-           placeholder = `Enter ${label} password`;
+           placeholder = `Enter ${label} here`;
            this.textForm.get('textName')?.setValidators([Validators.email]);
            break;
         default:
