@@ -85,89 +85,13 @@ public class FormSubmissionController {
             @PathVariable Long formId,
             @RequestBody FormValuesWrapper formValuesWrapper) {
 
-
-        Optional<User> user = userService.getUserById(userId);
-        Optional<FormTemplate> form = formRepository.findById(formId);
-
-        if (user.isEmpty() || form.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
-        if (submissionExists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Vous avez déjà soumis ce formulaire."));
-        }
-
-        FormSubmission submission = new FormSubmission();
-        submission.setUser(user.get());
-        submission.setDate(LocalDateTime.now());
-        submission.setIdForm(formId);
-
-        List<FormValue> values = new ArrayList<>();
-
-        // Récupérer tous les layouts de premier niveau
-        List<FormLayout> topLevelLayouts = formTemplateService.getFormLayoutById(formId);
-
-        Map<Long, FormInput> formInputsMap = new HashMap<>();
-
-        collectAllFormInputs(topLevelLayouts, formInputsMap);
-
-        System.out.println("Total form inputs found across all sections and subsections: " + formInputsMap.size());
-
-        for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
-            if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty() ||
-                    valueRequest.getFormInputId() == null) {
-                continue;
-            }
-
-            FormInput correspondingInput = formInputsMap.get(valueRequest.getFormInputId());
-            if (correspondingInput == null) {
-                System.out.println("Warning: No FormInput found for ID: " + valueRequest.getFormInputId());
-                continue;
-            }
-
-            FormValue value = new FormValue();
-            value.setValue(String.join(",", valueRequest.getValues()));
-            value.setFormSubmission(submission);
-
-            value.getFormInputs().add(correspondingInput);
-            correspondingInput.setFormValue(value);
-
-            values.add(value);
-        }
-
-        submission.setFormValues(values);
-        FormSubmission savedSubmission = formSubmissionService.save(submission);
-
-        FormSubmissionDTO formSubmissionDTO = new FormSubmissionDTO();
-        formSubmissionDTO.setId(savedSubmission.getId());
-        formSubmissionDTO.setDate(savedSubmission.getDate());
-        formSubmissionDTO.setUserId(user.get().getId());
-        formSubmissionDTO.setTask(user.get().getTask());
-        formSubmissionDTO.setFormId(formId);
-
-        if (formValuesWrapper.getProcessDefinitionKey() != null) {
-            formSubmissionDTO.setProcessDefinitionKey(formValuesWrapper.getProcessDefinitionKey());
-        }
-
-        formSubmissionDTO.setFormValues(values.stream()
-                .map(fv -> {
-                    String title = fv.getFormInputs() != null && !fv.getFormInputs().isEmpty()
-                            ? formInputService.getFormInputTitleById(fv.getFormInputs().get(0).getId())
-                            : "Untitled";
-                    return new FormValueDTO(title, fv.getValue());
-                })
-                .collect(Collectors.toList()));
-
-
         log.info("Received form submission request for userId: {} and formId: {}", userId, formId);
         log.info("Form values wrapper: {}", formValuesWrapper);  // Add this line
-        
+
         try {
             Optional<UserDTO> user = userService.getUserById(userId);
             log.info("User found: {}, details: {}", user.isPresent(), user.orElse(null));
-            
+
             Optional<FormTemplate> form = formRepository.findById(formId);
             log.info("Form found: {}", form.isPresent());
 
@@ -283,6 +207,7 @@ public class FormSubmissionController {
                     .body(Map.of("error", "An error occurred while processing your submission: " + e.getMessage()));
         }
     }
+
 
    
     private void collectAllFormInputs(List<FormLayout> layouts, Map<Long, FormInput> formInputsMap) {
