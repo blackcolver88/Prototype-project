@@ -17,6 +17,7 @@ import com.example.formservice.repository.FormValueRepository;
 import com.example.formservice.repository.MultipleValueRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FormInputService {
@@ -140,8 +141,29 @@ public class FormInputService {
         return titleOptional.orElse("N/A");
     }
 
+    @Transactional
+    public void deleteFormInputSafely(Long id) {
+        // First find the form input to be deleted
+        Optional<FormInput> formInputOpt = formInputRepository.findById(id);
+        if (formInputOpt.isEmpty()) {
+            return;
+        }
 
-
-
-
+        // Find all FormValue entities that reference this FormInput
+        List<FormValue> formValues = formValueService.findFormValuesByFormInputId(id);
+        
+        // Remove the FormInput reference from each FormValue
+        for (FormValue formValue : formValues) {
+            formValue.getFormInputs().removeIf(input -> input.getId().equals(id));
+            // If this was the only FormInput, you might want to delete the FormValue too
+            if (formValue.getFormInputs().isEmpty()) {
+                formValueService.deleteFormValue(formValue.getId());
+            } else {
+                formValueService.saveFormValue(formValue);
+            }
+        }
+        
+        // Now it's safe to delete the FormInput
+        formInputRepository.deleteById(id);
+    }
 }
