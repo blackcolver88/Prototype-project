@@ -192,10 +192,12 @@ export class FormvalueComponent {
     return {
       id: input.id,
       type: input.type,
+      className: className, 
       config: {
         ...config,
         label: label,
         required: input.required,
+        isRequired: input.required,
         className: className
       }
     };
@@ -311,8 +313,20 @@ export class FormvalueComponent {
           item.config = {};
         }
   
-        const values = input.multipleValues && input.multipleValues[0] ?
-          input.multipleValues[0].valeurs : [];
+        let values: any[] = [];
+        
+        if (input.multipleValues && Array.isArray(input.multipleValues)) {
+          input.multipleValues.forEach(mv => {
+            if (mv && Array.isArray(mv.valeurs)) {
+              values = values.concat(mv.valeurs);
+            }
+          });
+        }
+        
+        // S'assurer qu'on a pas de doublons
+        values = Array.from(new Set(values));
+        
+        console.log('DEBUG - Valeurs récupérées pour', input.type, ':', values);
   
         if (input.type === 'RADIO_BUTTON') {
           item.config.options = values.map((val: string) => {

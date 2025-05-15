@@ -425,7 +425,19 @@ private createEditorItemFromInput(input: FormInput): any {
           return;
         }
 
-        const values = input.multipleValues[0]?.valeurs || [];
+        let values: any[] = [];
+        
+        if (input.multipleValues && Array.isArray(input.multipleValues)) {
+          input.multipleValues.forEach(mv => {
+            if (mv && Array.isArray(mv.valeurs)) {
+              values = values.concat(mv.valeurs);
+            }
+          });
+        }
+        
+        values = Array.from(new Set(values));
+        
+        console.log('DEBUG - Valeurs récupérées pour', input.type, ':', values);
         
         if (input.type === 'RADIO_BUTTON') {
           item.config.options = values.map((val: string) => {
