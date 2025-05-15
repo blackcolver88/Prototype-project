@@ -10,6 +10,7 @@ import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.compon
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
+import { RegisterComponent } from './user/pages/register/register.component';
 
 export const routes: Route[] = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -28,4 +29,5 @@ export const routes: Route[] = [
   { path: 'list_submissions', component: AdminSubmissionComponent, canActivate: [authGuard] },
   { path: 'diagram', component: BpmnModelerComponent, canActivate: [authGuard] },
   { path: 'processes', component: ProcessesPageComponent, canActivate: [authGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [authGuard] }
 ];
