@@ -1,34 +1,54 @@
 <div class="admin-submission-container">
-  <table class="submission-table">
-    <thead>
-      <tr>
-        <th>Forms title</th>
-        <th>User</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let submission of submissions">
-        <td>{{ submission.formTitle || 'Formulaire inconnu' }}</td>
-        <td>{{ submission.task || 'Tâche inconnue' }}</td>
-        <td>{{ submission.date | date:'medium' }}</td>
-        <td>
-          <button (click)="showFormResponses(submission.id)" class="btn-show">Détails</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table class="submission-table">
+      <thead>
+        <tr>
+          <th class="table-header">Form Title</th>
+          <th class="table-header">User</th>
+          <th class="table-header">Date</th>
+          <th class="table-header">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let submission of submissions" class="submission-row">
+          <td class="table-cell">{{ submission.formTitle || 'Formulaire inconnu' }}</td>
+          <td class="table-cell">{{ submission.task || 'Tâche inconnue' }}</td>
+          <td class="table-cell">{{ submission.date | date:'medium' }}</td>
+          <td class="table-cell">
+            <button (click)="showFormResponses(submission.id)" class="btn-show" title="View Details">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span class="button-text">View Details</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="pagination-container">
-    <button (click)="goPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
-    <button (click)="goNextPage()" [disabled]="isLastPage()">Suivant</button>
+    <div class="pagination-controls">
+      <button (click)="goPreviousPage()" [disabled]="currentPage === 1" class="pagination-button prev-button" title="Previous page">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        <span>Previous</span>
+      </button>
+      <button (click)="goNextPage()" [disabled]="isLastPage()" class="pagination-button next-button" title="Next page">
+        <span>Next</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
 
     <pagination-controls
       id="custom-pagination-id"
       (pageChange)="onPageChange($event)"
-      previousLabel="Précédent"
-      nextLabel="Suivant"
+      previousLabel="Previous"
+      nextLabel="Next"
       [maxSize]="7"
       [directionLinks]="true"
       [autoHide]="true"

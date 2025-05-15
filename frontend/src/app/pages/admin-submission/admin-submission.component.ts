@@ -50,8 +50,11 @@ export class AdminSubmissionComponent implements OnInit {
   showFormResponses(submissionId: number) {
     this.formSubmissionService.getFormSubmissionById(submissionId).subscribe(
       (submission: any) => {
+        const userId = submission.user?.id || null;
+        console.log('Submission data:', submission);
+        
         const dialogData = {
-          userId: submission.user.id,
+          userId: userId,
           formId: submission.idForm,
           ...submission
         };

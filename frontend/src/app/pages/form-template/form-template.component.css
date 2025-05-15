@@ -1,0 +1,177 @@
+:host {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --secondary-color: #10b981;
+  --secondary-hover: #059669;
+  --accent-color: #8b5cf6;
+  --bg-color: #f9fafb;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s ease-in-out;
+}
+
+div.mt-5 {
+  background-color: var(--bg-color);
+  min-height: calc(100vh - 120px);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+button.text-white.bg-blue-700 {
+  background-color: var(--primary-color);
+  transition: var(--transition);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+button.text-white.bg-blue-700:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+button.text-white.bg-blue-700:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+:host ::ng-deep .ag-theme-quartz {
+  --ag-foreground-color: #374151;
+  --ag-background-color: #ffffff;
+  --ag-header-foreground-color: #1f2937;
+  --ag-header-background-color: #f3f4f6;
+  --ag-odd-row-background-color: #f9fafb;
+  --ag-row-border-color: #e5e7eb;
+  --ag-row-hover-color: #eef2ff;
+  --ag-selected-row-background-color: rgba(59, 130, 246, 0.1);
+  --ag-font-size: 0.9rem;
+  --ag-font-family: inherit;
+  box-shadow: var(--shadow-md);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  transition: var(--transition);
+}
+
+:host ::ng-deep .ag-theme-quartz:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+:host ::ng-deep .ag-header {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+:host ::ng-deep .ag-header-cell {
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+}
+
+:host ::ng-deep .ag-cell {
+  padding: 0.625rem 1rem;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .ag-row {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:host ::ng-deep .ag-row:hover {
+  background-color: var(--ag-row-hover-color);
+}
+
+:host ::ng-deep .ag-cell button,
+:host ::ng-deep .ag-cell a.button {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+:host ::ng-deep .icon-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep .icon-button:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+:host ::ng-deep .icon-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+:host ::ng-deep .ag-cell .icon-button img {
+  width: 24px;
+  height: 24px;
+  transition: all 0.2s ease;
+}
+
+:host ::ng-deep .ag-cell .icon-button:hover img {
+  transform: scale(1.1);
+}
+
+:host ::ng-deep .ag-cell button.edit,
+:host ::ng-deep .ag-cell a.edit {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+:host ::ng-deep .ag-cell button.edit:hover,
+:host ::ng-deep .ag-cell a.edit:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+:host ::ng-deep .ag-cell button.delete,
+:host ::ng-deep .ag-cell a.delete {
+  background-color: #ef4444;
+  color: white;
+}
+
+:host ::ng-deep .ag-cell button.delete:hover,
+:host ::ng-deep .ag-cell a.delete:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+:host ::ng-deep .ag-theme-quartz .ag-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+:host ::ng-deep svg,
+:host ::ng-deep .fa-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host ::ng-deep .ag-theme-quartz .ag-overlay-no-rows-center {
+  background-color: #f9fafb;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}

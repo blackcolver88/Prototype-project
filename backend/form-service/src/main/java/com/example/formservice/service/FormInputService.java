@@ -17,7 +17,6 @@ import com.example.formservice.repository.FormValueRepository;
 import com.example.formservice.repository.MultipleValueRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FormInputService {
