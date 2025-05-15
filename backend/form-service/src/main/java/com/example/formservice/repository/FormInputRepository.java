@@ -13,6 +13,7 @@ public interface FormInputRepository extends JpaRepository<FormInput, Long> {
 
     List<FormInput> findByFormLayoutId(Long formLayoutId);
 
+
     // Replace the old method with this new one that works with ManyToMany
     @Query("SELECT fi FROM FormInput fi JOIN fi.multipleValues mv WHERE mv.id = :valueId")
     FormInput findByMultipleValueId(@Param("valueId") Long valueId);
@@ -38,7 +39,6 @@ public interface FormInputRepository extends JpaRepository<FormInput, Long> {
     @Query("SELECT fi.title FROM FormInput fi WHERE fi.id = :id")
     Optional<String> findTitleById(@Param("id") Long id);
 
-    List<FormInput> findByFormLayoutId(Long formLayoutId);
 
 
 }

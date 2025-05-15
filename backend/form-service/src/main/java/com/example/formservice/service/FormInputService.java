@@ -77,12 +77,14 @@ public class FormInputService {
             existing.setFormLayout(formLayout);
         }
 
-        if (formInputUpdateDTO.getFormValueId() != null) {
-            FormValue formValue = formValueRepository.findById(formInputUpdateDTO.getFormValueId())
-                    .orElseThrow(() -> new ResourceNotFoundException("FormValue not found"));
-            existing.setFormValue(formValue);
-        }
-
+       
+    /*
+    if (formInputUpdateDTO.getFormValueId() != null) {
+        FormValue formValue = formValueRepository.findById(formInputUpdateDTO.getFormValueId())
+                .orElseThrow(() -> new ResourceNotFoundException("FormValue not found"));
+        existing.setFormValue(formValue);
+    }
+    */
 
         if (isMultipleValueType(existing.getType())) {
             List<String> multipleValuesDTO = formInputUpdateDTO.getMultipleValues();
@@ -112,7 +114,6 @@ public class FormInputService {
 
         return formInputRepository.save(existing);
     }
-
     private boolean isMultipleValueType(FormInputType type) {
         return type == FormInputType.SELECT_BOX ||
                 type == FormInputType.RADIO_BUTTON ||
