@@ -86,7 +86,7 @@ public class FormSubmissionController {
             @RequestBody FormValuesWrapper formValuesWrapper) {
 
         log.info("Received form submission request for userId: {} and formId: {}", userId, formId);
-        log.info("Form values wrapper: {}", formValuesWrapper);  // Add this line
+        log.info("Form values wrapper: {}", formValuesWrapper);
 
         try {
             Optional<UserDTO> user = userService.getUserById(userId);
@@ -124,18 +124,13 @@ public class FormSubmissionController {
 
             List<FormValue> values = new ArrayList<>();
 
-            List<FormLayout> layouts = formTemplateService.getFormLayoutById(formId);
+            List<FormLayout> topLevelLayouts = formTemplateService.getFormLayoutById(formId);
 
-            List<FormInput> allFormInputs = new ArrayList<>();
-            for (FormLayout layout : layouts) {
-                List<FormInput> sectionInputs = formInputRepository.findByFormLayoutId(layout.getId());
-                allFormInputs.addAll(sectionInputs);
-            }
+            Map<Long, FormInput> formInputsMap = new HashMap<>();
 
-            Map<Long, FormInput> formInputsMap = allFormInputs.stream()
-                    .collect(Collectors.toMap(FormInput::getId, input -> input));
+            collectAllFormInputs(topLevelLayouts, formInputsMap);
 
-            System.out.println("Total form inputs found across all sections: " + allFormInputs.size());
+            log.info("Total form inputs found across all sections and subsections: {}", formInputsMap.size());
 
             for (FormValueRequest valueRequest : formValuesWrapper.getFormValues()) {
                 if (valueRequest.getValues() == null || valueRequest.getValues().isEmpty()) {
@@ -148,7 +143,7 @@ public class FormSubmissionController {
 
                 FormInput correspondingInput = formInputsMap.get(valueRequest.getFormInputId());
                 if (correspondingInput == null) {
-                    System.out.println("Warning: No FormInput found for ID: " + valueRequest.getFormInputId());
+                    log.warn("Warning: No FormInput found for ID: {}", valueRequest.getFormInputId());
                     continue;
                 }
 
@@ -196,20 +191,21 @@ public class FormSubmissionController {
                         .orElseThrow(() -> new RuntimeException("workflow-service not found"));
                 workflowServiceClient.startProcess(formSubmissionDTO);
             } catch (Exception e) {
-                System.err.println("Failed to notify workflow-service: " + e.getMessage());
+                log.error("Failed to notify workflow-service: {}", e.getMessage());
             }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(savedSubmission);
         } catch (Exception e) {
             log.error("Error processing form submission", e);
-            e.printStackTrace(); // Add this to print the full stack trace
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "An error occurred while processing your submission: " + e.getMessage()));
         }
     }
 
 
-   
+
+
     private void collectAllFormInputs(List<FormLayout> layouts, Map<Long, FormInput> formInputsMap) {
         for (FormLayout layout : layouts) {
             List<FormInput> directInputs = formInputRepository.findByFormLayoutId(layout.getId());

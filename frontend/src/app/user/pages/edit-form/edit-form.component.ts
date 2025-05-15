@@ -397,12 +397,13 @@ export class EditFormComponent {
 }
 
 private createEditorItemFromInput(input: FormInput): any {
+    const label = input.required ? `${input.title} *` : input.title;
     return {
         id: input.id, 
         type: input.type,
         ordinalPosition: input.ordinalPosition,
         config: {
-            label: input.title,
+            label: label,
             textName: input.title,
             placeholder: `Enter ${input.title}`,
             required: input.required,

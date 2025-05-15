@@ -186,13 +186,17 @@ export class FormvalueComponent {
       config = {};
     }
     
+    const className = input.required ? 'required' : '';
+    const label = input.title;
+    
     return {
       id: input.id,
       type: input.type,
       config: {
         ...config,
-        label: input.title,
-        required: input.required
+        label: label,
+        required: input.required,
+        className: className
       }
     };
   }
