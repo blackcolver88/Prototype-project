@@ -4,11 +4,15 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
+@EqualsAndHashCode(exclude = {"parent", "children", "formInputs", "formTemplate"})
+@ToString(exclude = {"parent", "children", "formInputs", "formTemplate"})
 public class FormLayout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

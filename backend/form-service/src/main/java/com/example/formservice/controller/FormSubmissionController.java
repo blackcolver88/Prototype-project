@@ -157,7 +157,6 @@ public class FormSubmissionController {
                 value.setFormSubmission(submission);
 
                 value.getFormInputs().add(correspondingInput);
-                correspondingInput.setFormValue(value);
 
                 values.add(value);
             }
@@ -216,7 +215,6 @@ public class FormSubmissionController {
             FormInput formInput = formInputs.get(i);
             FormValue formValue = formValues.get(i);
 
-            formInput.setFormValue(formValue);
             formInputRepository.save(formInput);
         }
     }
@@ -297,93 +295,24 @@ public class FormSubmissionController {
         }
 
         FormSubmission submission = optionalSubmission.get();
-        if (!submission.getUserId().equals(userId)) { // Using getUserId() instead of getUser().getId()
+        if (!submission.getUserId().equals(userId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "La soumission ne correspond pas à l'utilisateur spécifié."));
         }
 
         try {
-            Map<Long, FormValue> existingValueMap = new HashMap<>();
-
-            List<FormValue> originalFormValues = new ArrayList<>();
-            if (submission.getFormValues() != null) {
-                originalFormValues.addAll(submission.getFormValues());
-
-                for (FormValue existingValue : submission.getFormValues()) {
-                    for (FormInput input : existingValue.getFormInputs()) {
-                        existingValueMap.put(input.getId(), existingValue);
-                    }
-                }
-            }
-
-            Set<FormValue> processedValues = new HashSet<>();
-
-            for (FormValueRequest valueRequest : updatedFormValuesWrapper.getFormValues()) {
-                if (valueRequest.getFormInputId() == null) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("error", "formInputId manquant dans une des valeurs."));
-                }
-
-                List<String> allValues = valueRequest.getValues();
-                if (allValues == null || allValues.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("error", "Aucune valeur fournie pour le champ avec formInputId="
-                                    + valueRequest.getFormInputId()));
-                }
-
-                Optional<FormInput> formInputOpt = formInputService.getFormInputById(valueRequest.getFormInputId());
-                if (formInputOpt.isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("error", "FormInput non trouvé avec ID=" + valueRequest.getFormInputId()));
-                }
-                FormInput formInput = formInputOpt.get();
-
-                FormValue formValue;
-                if (existingValueMap.containsKey(valueRequest.getFormInputId())) {
-                    // Use existing FormValue
-                    formValue = existingValueMap.get(valueRequest.getFormInputId());
-                    // Update the value
-                    formValue.setValue(String.join(",", allValues));
-                } else {
-                    // Create a new FormValue
-                    formValue = new FormValue();
-                    formValue.setValue(String.join(",", allValues));
-                    formValue.setFormSubmission(submission);
-                    formValue.setFormInputs(new ArrayList<>());
-                    formValue.getFormInputs().add(formInput);
-
-                    formInput.setFormValue(formValue);
-                }
-
-                processedValues.add(formValue);
-            }
-
-            if (submission.getFormValues() == null) {
-                submission.setFormValues(new ArrayList<>());
-            } else {
-                List<FormValue> updatedValues = new ArrayList<>();
-
-                for (FormValue original : originalFormValues) {
-                    if (processedValues.contains(original)) {
-                        updatedValues.add(original);
-                        processedValues.remove(original);
-                    }
-                }
-
-                updatedValues.addAll(processedValues);
-
-                submission.getFormValues().clear();
-                submission.getFormValues().addAll(updatedValues);
-            }
-
-            FormSubmission updatedSubmission = formSubmissionService.save(submission);
-
+            // Use a dedicated transactional service method to handle the update
+            FormSubmission updatedSubmission = formSubmissionService.updateSubmissionValues(
+                    submission, updatedFormValuesWrapper.getFormValues());
+            
             return ResponseEntity.ok(updatedSubmission);
-
         } catch (Exception e) {
+            e.printStackTrace(); // Log the full stack trace
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Une erreur est survenue lors de la mise à jour.", "details",
-                            e.getMessage()));
+                    .body(Map.of(
+                        "error", "Une erreur est survenue lors de la mise à jour.", 
+                        "details", e.getMessage()
+                    ));
         }
     }
 
