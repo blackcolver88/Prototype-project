@@ -39,7 +39,7 @@ public class FormInputController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFormInput(@PathVariable Long id) {
-        formInputService.deleteById(id);
+        formInputService.deleteFormInputSafely(id);
         return ResponseEntity.noContent().build();
     }
 }

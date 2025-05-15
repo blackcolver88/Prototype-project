@@ -18,7 +18,8 @@ public class FormValue {
 
     private String value;
 
-    @ManyToMany
+    // Update the ManyToMany relationship with appropriate cascade options
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "form_value_inputs",
         joinColumns = @JoinColumn(name = "form_value_id"),
