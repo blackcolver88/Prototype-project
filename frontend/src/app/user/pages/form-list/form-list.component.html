@@ -1,13 +1,17 @@
-<div class="form-cards-container">
-    <div *ngFor="let form of forms" class="form-card">
-      <img src="{{ form.img }}" alt="img" class="task-image">
+<div class="p-6 max-w-7xl mx-auto">
+  <h1 class="text-2xl font-semibold text-blue-600 mb-6">Mes Reponses</h1>
   
-      <h2>Task: {{ form.task }}</h2>
-  
-      <h3>Title: {{ form.formTitle }}</h3>
-  
-      <p>Date : {{ form.date | date:'medium' }}</p> 
-  
-      <button (click)="showFormResponses(form.id)" class="btn-show">Display</button><br><br>
-      <button (click)="onEditClick(form.id)" class="btn-show">Edit</button>    </div>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <ng-container *ngIf="isBrowser">
+      <ag-grid-angular
+        class="ag-theme-quartz w-full"
+        style="height: calc(100vh - 200px); min-height: 400px;"
+        [rowData]="forms"
+        [columnDefs]="colDefs"
+        [rowSelection]="'single'"
+        [gridOptions]="gridOptions"
+        [suppressCellFocus]="true">
+      </ag-grid-angular>
+    </ng-container>
   </div>
+</div>

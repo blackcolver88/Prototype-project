@@ -1,100 +1,214 @@
 :host {
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
+  --success-color: #10b981;
+  --success-hover: #059669;
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --bg-primary: #ffffff;
-  --bg-secondary: #f3f4f6;
+  --bg-secondary: #f9fafb;
+  --border-color: #e5e7eb;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.form-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+
+.ag-theme-quartz {
+  --ag-foreground-color: var(--text-primary);
+  --ag-background-color: var(--bg-primary);
+  --ag-header-foreground-color: var(--text-primary);
+  --ag-header-background-color: var(--bg-secondary);
+  --ag-odd-row-background-color: transparent;
+  --ag-row-hover-color: rgba(59, 130, 246, 0.05);
+  --ag-selected-row-background-color: rgba(59, 130, 246, 0.1);
+  --ag-borders: none;
+  --ag-border-radius: 8px;
+  --ag-row-border-style: solid;
+  --ag-row-border-width: 1px;
+  --ag-row-border-color: var(--border-color);
+  --ag-header-column-separator-display: block;
+  --ag-header-column-separator-color: var(--border-color);
+  --ag-header-column-resize-handle-color: var(--border-color);
+  --ag-font-size: 14px;
+  --ag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ag-grid-size: 6px;
+  --ag-list-item-height: 32px;
+  --ag-header-height: 48px;
+  --ag-row-height: 56px;
+  --ag-cell-horizontal-padding: 16px;
+  --ag-header-column-separator-width: 1px;
+  --ag-header-cell-hover-background-color: rgba(0, 0, 0, 0.03);
+  --ag-header-cell-moving-background-color: rgba(0, 0, 0, 0.03);
 }
 
-.form-card {
-  background-color: var(--bg-primary);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: 1px solid var(--bg-secondary);
-  box-shadow: var(--shadow-sm);
+.ag-theme-quartz .ag-header {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
-.form-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-color);
+.ag-theme-quartz .ag-header-cell {
+  font-weight: 600;
+  padding: 12px 16px;
 }
 
-.task-image {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  background-color: var(--bg-secondary);
+.ag-theme-quartz .ag-cell {
   display: flex;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+/* Styles pour les boutons d'action */
+.ag-theme-quartz .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+
+
+/* Style pour les cellules sélectionnées */
+.ag-theme-quartz .ag-cell-focus,
+.ag-theme-quartz .ag-cell-range-selected {
+  border: 1px solid var(--primary-color) !important;
+}
+
+/* Style pour les boutons dans les cellules */
+.ag-theme-quartz button {
+  transition: all 0.2s ease;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ag-theme-quartz button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.action-button {
+  padding: 6px 12px;
+  margin: 0 4px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.task-image img {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.form-card h2 {
-  font-size: 1.25rem;
-  color: var(--text-primary);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.form-card h3 {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-
-.form-card p {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-}
-
-.form-card button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin: 0.5rem 0;
-}
-
-.btn-show {
+.action-button.primary {
   background-color: var(--primary-color);
   color: white;
-  border: none;
 }
 
-.btn-show:hover {
+.action-button.primary:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
+
+.action-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.action-button.secondary:hover {
+  background-color: #4b5563;
+}
+
+
+
+.ag-theme-quartz .ag-header-cell-text {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ag-theme-quartz .ag-cell {
+  border-right: 1px solid var(--bg-secondary);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+}
+
+.ag-theme-quartz .ag-header {
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.ag-theme-quartz .ag-header-cell {
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 16px;
+}
+
+.ag-theme-quartz .ag-header-cell::after {
+  display: none;
+}
+
+.ag-theme-quartz .ag-header-cell-resize::after {
+  background-color: var(--border-color);
+  width: 1px;
+}
+
+/* Style pour les lignes */
+.ag-theme-quartz .ag-row {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.ag-theme-quartz .ag-row-odd {
+  background-color: var(--bg-secondary);
+}
+
+/* Style au survol des lignes */
+.ag-theme-quartz .ag-row-hover {
+  background-color: #f1f5f9 !important;
+}
+
+.ag-theme-quartz .ag-cell {
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  border-right: none;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+
+.ag-theme-quartz .ag-paging-button[aria-current="true"] {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.ag-theme-quartz .ag-row-odd {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.ag-theme-quartz .ag-row-hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.ag-theme-quartz .ag-cell-focus,
+.ag-theme-quartz .ag-cell-range-selected {
+  border: 1px solid var(--primary-color) !important;
+}
+
+
 
 .btn-edit {
   background-color: transparent;
