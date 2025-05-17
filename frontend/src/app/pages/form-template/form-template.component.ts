@@ -5,14 +5,14 @@ import { ColDef } from 'ag-grid-community';
 import { Dialog, DialogModule } from "@angular/cdk/dialog";
 import { FormTemplateCreateComponent } from "./components/form-template-create/form-template-create.component";
 import { FormTemplate } from "../../model/FormTemplate";
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormTemplateService } from "../../services/form-template.service";
 
 
 @Component({
   selector: 'app-form-template',
   standalone: true,
-  imports: [AgGridAngular, CommonModule, DialogModule],
+  imports: [AgGridAngular, CommonModule, DialogModule,RouterModule],
   templateUrl: './form-template.component.html',
   styleUrls: ['./form-template.component.css']
 })
@@ -103,7 +103,7 @@ export class FormTemplateComponent implements OnInit {
 
   handleIconClick(id: string) {
     console.log('Navigating to editor-tree for template ID:', id);
-    this.router.navigate(['/editor-tree', id]);
+    this.router.navigate(['/admin/editor-tree', id]);
   }
 
   handleDeleteClick(id: string) {

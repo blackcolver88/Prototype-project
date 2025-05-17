@@ -1,19 +1,46 @@
-<div class="mt-5 mx-auto mr-5 max-w-[80%] transform -translate-x-[10%]">
-  <ng-container *ngIf="isBrowser" class="z-4">
-    <div class="flex justify-center mb-4">
-      <button type="button" (click)="openDialog()" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-        Add new form
-      </button>
+<div class="form-template-container">
+  <div class="table-wrapper">
+    <div class="action-bar">
+      <div class="button-container">
+        <button type="button" (click)="openDialog()" class="btn-add">
+          <span class="btn-icon">+</span> Add new form
+        </button>
+      </div>
     </div>
 
-    <div class="flex justify-center w-full mt-4"> 
-      <ag-grid-angular
-        class="ag-theme-quartz"
-        style="height: 500px; width: 90%;"
-        [rowData]="rowData"
-        [columnDefs]="colDefs"
-        [rowSelection]="'single'">
-      </ag-grid-angular>
-    </div>
-  </ng-container>
+    <table class="form-table" *ngIf="isBrowser">
+      <thead>
+        <tr>
+          <th class="table-header">ID</th>
+          <th class="table-header">Form Title</th>
+          <th class="table-header">Customize</th>
+          <th class="table-header">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let template of rowData" class="form-row">
+          <td class="table-cell">{{ template.id }}</td>
+          <td class="table-cell">{{ template.title }}</td>
+          <td class="table-cell">
+            <button (click)="handleIconClick(template.id?.toString() || '')" class="btn-icon btn-edit" title="Customize Form">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          </td>
+          <td class="table-cell">
+            <button (click)="handleDeleteClick(template.id?.toString() || '')" class="btn-icon btn-delete" title="Delete Form">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

@@ -34,7 +34,7 @@ export class LoginPageComponent implements OnInit {
     });
 
     // Get return URL from route parameters or default to '/form-template'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/form-template';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin';
   }
 
   onSubmit(): void {

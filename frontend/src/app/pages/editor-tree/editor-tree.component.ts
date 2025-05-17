@@ -619,7 +619,7 @@ handleSubmit() {
   (saveFormInputs$ as Observable<void>).subscribe({
     next: () => {
       console.log('All sections and form inputs saved successfully.');
-      this.router.navigate(['/form-template']);
+      this.router.navigate(['admin/form-template']);
     },
     error: (error) => console.error('Error saving form inputs:', error),
   });

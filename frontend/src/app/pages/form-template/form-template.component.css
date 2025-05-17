@@ -1,177 +1,227 @@
 :host {
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
-  --secondary-color: #10b981;
-  --secondary-hover: #059669;
-  --accent-color: #8b5cf6;
-  --bg-color: #f9fafb;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --transition: all 0.3s ease-in-out;
 }
 
-div.mt-5 {
-  background-color: var(--bg-color);
-  min-height: calc(100vh - 120px);
-  padding: 1.5rem;
+.form-template-container {
+  padding: 2rem;
+  background-color: var(--bg-primary);
   border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 120px);
 }
 
-button.text-white.bg-blue-700 {
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.btn-add, .btn-add-user {
   background-color: var(--primary-color);
-  transition: var(--transition);
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  color: white;
   padding: 0.75rem 1.5rem;
+  border: none;
   border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-button.text-white.bg-blue-700:hover {
+.btn-add:hover, .btn-add-user:hover {
   background-color: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-button.text-white.bg-blue-700:focus {
+.btn-add:focus, .btn-add-user:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
-:host ::ng-deep .ag-theme-quartz {
-  --ag-foreground-color: #374151;
-  --ag-background-color: #ffffff;
-  --ag-header-foreground-color: #1f2937;
-  --ag-header-background-color: #f3f4f6;
-  --ag-odd-row-background-color: #f9fafb;
-  --ag-row-border-color: #e5e7eb;
-  --ag-row-hover-color: #eef2ff;
-  --ag-selected-row-background-color: rgba(59, 130, 246, 0.1);
-  --ag-font-size: 0.9rem;
-  --ag-font-family: inherit;
-  box-shadow: var(--shadow-md);
-  border-radius: 0.75rem;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  transition: var(--transition);
+.btn-add-user {
+  background-color: var(--success-color);
+  margin: 2rem auto;
 }
 
-:host ::ng-deep .ag-theme-quartz:hover {
-  box-shadow: var(--shadow-lg);
+.btn-add-user:hover {
+  background-color: var(--success-hover);
 }
 
-:host ::ng-deep .ag-header {
-  border-bottom: 2px solid #e5e7eb;
+.center-button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 1.5rem 0;
 }
 
-:host ::ng-deep .ag-header-cell {
+/* Table Styles */
+.form-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 2rem;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-table th,
+.form-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--bg-secondary);
+}
+
+.form-table th {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   font-weight: 600;
-  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 2px solid var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
 }
 
-:host ::ng-deep .ag-cell {
-  padding: 0.625rem 1rem;
-  line-height: 1.5;
+.form-table td {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
-:host ::ng-deep .ag-row {
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #e5e7eb;
+.form-table tr {
+  transition: all 0.3s ease;
 }
 
-:host ::ng-deep .ag-row:hover {
-  background-color: var(--ag-row-hover-color);
+.form-table tr:nth-child(even) {
+  background-color: rgba(243, 244, 246, 0.5);
 }
 
-:host ::ng-deep .ag-cell button,
-:host ::ng-deep .ag-cell a.button {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
+.form-table tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--bg-secondary);
+  backdrop-filter: blur(8px);
+}
+
+.table-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Button Styles */
+.table-cell button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
-}
-
-:host ::ng-deep .icon-button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
+  gap: 0.5rem;
+  padding: 0.5rem;
   border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
 }
 
-:host ::ng-deep .icon-button:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.btn-icon {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-:host ::ng-deep .icon-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-:host ::ng-deep .ag-cell .icon-button img {
-  width: 24px;
-  height: 24px;
-  transition: all 0.2s ease;
-}
-
-:host ::ng-deep .ag-cell .icon-button:hover img {
-  transform: scale(1.1);
-}
-
-:host ::ng-deep .ag-cell button.edit,
-:host ::ng-deep .ag-cell a.edit {
+.btn-edit {
   background-color: var(--primary-color);
   color: white;
 }
 
-:host ::ng-deep .ag-cell button.edit:hover,
-:host ::ng-deep .ag-cell a.edit:hover {
+.btn-edit:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
-:host ::ng-deep .ag-cell button.delete,
-:host ::ng-deep .ag-cell a.delete {
-  background-color: #ef4444;
+.btn-delete {
+  background-color: var(--danger-color);
   color: white;
 }
 
-:host ::ng-deep .ag-cell button.delete:hover,
-:host ::ng-deep .ag-cell a.delete:hover {
-  background-color: #dc2626;
-  transform: translateY(-1px);
+.btn-delete:hover {
+  background-color: var(--danger-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
-:host ::ng-deep .ag-theme-quartz .ag-spinner {
-  animation: spin 1s linear infinite;
+.table-cell button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
 }
 
+.icon-plus, .icon-user-plus {
+  margin-right: 0.25rem;
+}
+
+/* Animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-:host ::ng-deep svg,
-:host ::ng-deep .fa-icon {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-:host ::ng-deep .ag-theme-quartz .ag-overlay-no-rows-center {
-  background-color: #f9fafb;
+/* Empty state */
+.no-data {
+  background-color: var(--bg-secondary);
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
   text-align: center;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-style: italic;
+  margin: 2rem 0;
 }
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  margin-right: 6px;
+}
+
