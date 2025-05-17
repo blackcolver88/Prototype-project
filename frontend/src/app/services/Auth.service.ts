@@ -73,8 +73,20 @@ export class AuthService {
     return this.http.get(`${this.API_URL}/validate?token=${token}`);
   }
   
+  adminRegister(request: RegisterRequest): Observable<AuthResponse> {
+    console.log('Sending registration request with role:', request.role);
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, request);
+  }
+
   checkAuthStatus(): void {
-    const isAuthenticated = this.tokenService.isTokenValid();
-    this.isAuthenticatedSubject.next(isAuthenticated);
+    const token = this.tokenService.getToken();
+    if (token && this.tokenService.isTokenValid()) {
+      this.isAuthenticatedSubject.next(true);
+    } else {
+      this.isAuthenticatedSubject.next(false);
+      if (token) {
+        this.tokenService.removeToken();
+      }
+    }
   }
 }

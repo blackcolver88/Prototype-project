@@ -19,4 +19,5 @@ public class RegisterRequest {
     private String role;
     private boolean accountLocked;
     private boolean enabled;
+
 }
