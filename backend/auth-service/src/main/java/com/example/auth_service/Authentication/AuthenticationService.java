@@ -25,12 +25,27 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest request) {
         LocalDateTime now = LocalDateTime.now();
+
+        // Parse the role from the request
+        Role userRole;
+        try {
+            // Log the received role value
+            System.out.println("Received role from request: " + request.getRole());
+
+            // Convert string to enum
+            userRole = Role.valueOf(request.getRole());
+        } catch (Exception e) {
+            // Fallback to default role if parsing fails
+            System.err.println("Error parsing role: " + e.getMessage());
+            userRole = Role.ROLE_USER;
+        }
+
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ROLE_ADMIN)
+                .role(userRole) // Use the parsed role instead of hardcoding ROLE_ADMIN
                 .accountLocked(request.isAccountLocked())
                 .enabled(request.isEnabled())
                 .createdDate(now)      // Set the current date/time

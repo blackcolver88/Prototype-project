@@ -1,3 +1,5 @@
+import {Role} from "./Role";
+
 export interface RegisterRequest {
   firstname: string;
   lastname: string;
