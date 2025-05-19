@@ -36,6 +36,7 @@ public class WorkflowController {
                 .putValue("formId", formSubmission.getFormId())
                 .putValue("submissionDate", formSubmission.getDate())
                 .putValue("userId", userId)
+                .putValue("currentUser", userId.toString()) // Add the currentUser variable with userId as string
                 .putValue("task", formSubmission.getTask());
 
         try {
