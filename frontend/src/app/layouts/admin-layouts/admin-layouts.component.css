@@ -80,7 +80,6 @@
     transition: all 0.3s ease;
   }
   
-  /* Style actif avec dégradé bleu */
   .bg-gradient-to-r {
     background-image: linear-gradient(to right, var(--tw-gradient-stops));
   }
@@ -98,32 +97,41 @@
     box-shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
   }
   
-  /* Ajuste la couleur du texte pour une meilleure lisibilité sur fond bleu */
   .text-white {
     color: #ffffff;
   }
-  /* Styles pour la sidebar */
 aside {
-    transition: transform 0.3s ease;
+  width: 260px; 
+  transition: all 0.3s ease;
+}
+
+.sidebar-collapsed {
+  width: 80px !important; 
+}
+
+.sidebar-collapsed .sidebar-text {
+  display: none !important;
+}
+
+.sidebar-collapsed .toggle-btn {
+  margin-right: 0;
+}
+
+main {
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 1280px) {
+  main.xl\:ml-68\.5 {
+    margin-left: 260px; 
+    width: calc(100% - 260px); 
   }
   
-  .sidebar-collapsed {
-    width: 75px !important;
+  main.xl\:ml-20 {
+    margin-left: 80px !important; 
+    width: calc(100% - 80px) !important; 
   }
-  
-  .content-expanded {
-    margin-left: 75px !important;
-    transition: margin-left 0.3s ease;
-  }
-  
-  /* Cacher le texte lorsque la sidebar est réduite */
-  .sidebar-collapsed .nav-text {
-    display: none;
-  }
-  
-  .sidebar-collapsed .ml-1 {
-    display: none;
-  }
+}
   
   .sidebar-collapsed .whitespace-nowrap {
     white-space: normal;
@@ -151,3 +159,11 @@ aside {
   .sidebar-collapsed .bg-gradient-to-tl {
     margin-right: 0 !important;
   }
+.sidebar-collapsed .sidebar-text {
+  display: none !important;
+}
+
+.sidebar-collapsed .fas.fa-chevron-down,
+.sidebar-collapsed .fas.fa-chevron-up {
+  display: none !important;
+}

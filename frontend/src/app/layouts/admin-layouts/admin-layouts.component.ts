@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
@@ -6,25 +6,27 @@ import { addIcons } from 'ionicons';
 import { logoIonic } from 'ionicons/icons';
 import { IonicModule } from '@ionic/angular';
 import { filter, map, mergeMap } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-admin-layouts',
   standalone: true,
-  imports: [RouterModule, RouterOutlet, IonicModule],
+  imports: [RouterModule, RouterOutlet, IonicModule, CommonModule],
   templateUrl: './admin-layouts.component.html',
   styleUrl: './admin-layouts.component.css'
 })
-export class AdminLayoutsComponent implements OnInit {
+export class AdminLayoutsComponent implements OnInit, AfterViewInit {
 
   @ViewChild('menu') menu!: ElementRef;
   @ViewChild('profile') profile!: ElementRef;
+  @ViewChild('sidebar') sidebar!: ElementRef;
+  @ViewChild('mainContent') mainContent!: ElementRef;
 
   isAuthenticated = false;
   currentUser: UserProfile | null = null;
   pageTitle: string = 'Dashboard';
   sidebarCollapsed = false;
-  sidebar!: ElementRef;
-  mainContent!: ElementRef;
+  dropdowns: { [key: string]: boolean } = {};
 
   constructor(
     private authService: AuthService,
@@ -37,17 +39,11 @@ export class AdminLayoutsComponent implements OnInit {
   ngOnInit() {
     const savedState = localStorage.getItem('sidebarCollapsed');
     this.sidebarCollapsed = savedState === 'true';
-  
-    if (this.sidebar && this.mainContent) {
-      if (this.sidebarCollapsed) {
-        this.sidebar.nativeElement.classList.add('sidebar-collapsed');
-        this.mainContent.nativeElement.classList.add('content-expanded');
-      }
-    }
+
     this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
-    
+
     this.userService.currentUser$.subscribe(
       user => this.currentUser = user
     );
@@ -75,10 +71,9 @@ export class AdminLayoutsComponent implements OnInit {
     this.updateTitleFromUrl();
   }
 
-
   private updateTitleFromUrl(): void {
     const urlPath = this.router.url;
-    
+
     if (urlPath.includes('/dashboard') || urlPath === '/admin') {
       this.pageTitle = 'Dashboard';
     } else if (urlPath.includes('/form-template')) {
@@ -90,38 +85,40 @@ export class AdminLayoutsComponent implements OnInit {
     } else {
       this.pageTitle = 'Dashboard';
     }
-    
-    document.title = `ADMIN- ${this.pageTitle}`;
+
+    document.title = `ADMIN - ${this.pageTitle}`;
   }
 
   toggleMenu() {
     this.menu.nativeElement.classList.toggle('hidden');
   }
-  
+
   toggleProfile() {
     this.profile.nativeElement.classList.toggle('hidden');
   }
-
-
 
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
     localStorage.setItem('sidebarCollapsed', String(this.sidebarCollapsed));
+  }
   
-    if (this.sidebar && this.mainContent) {
-      if (this.sidebarCollapsed) {
-        this.sidebar.nativeElement.classList.add('sidebar-collapsed');
-        this.mainContent.nativeElement.classList.add('content-expanded');
-      } else {
-        this.sidebar.nativeElement.classList.remove('sidebar-collapsed');
-        this.mainContent.nativeElement.classList.remove('content-expanded');
-      }
+  ngAfterViewInit() {
+    if (this.sidebarCollapsed && this.sidebar) {
+      this.sidebar.nativeElement.classList.add('sidebar-collapsed');
     }
   }
 
+  toggleDropdown(dropdownKey: string) {
+    this.dropdowns[dropdownKey] = !this.dropdowns[dropdownKey];
+  }
+
+  isDropdownOpen(dropdownKey: string): boolean {
+    return this.dropdowns[dropdownKey] ?? false;
+  }
 
 }

@@ -86,12 +86,12 @@ export class ProcessesPageComponent implements OnInit {
 
   createNewProcess(): void {
     console.log('Creating new process');
-    window.location.href = '/diagram'; 
+    this.router.navigate(['/admin/diagram']);
   }
 
   handleEditClick(processId: string): void {
     console.log('Editing process:', processId);
-    window.location.href = `/diagram?processId=${processId}`;
+    window.location.href = `/admin/diagram?processId=${processId}`;
   }
 
   async handleDeleteClick(processId: string, deploymentId: string): Promise<void> {

@@ -1,13 +1,17 @@
 <body class="m-0 font-sans text-base antialiased font-normal leading-default bg-gray-50 text-slate-500">
     <!-- sidenav  -->
      
-    <aside  #sidebar class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-transform duration-200 xl:left-0 xl:translate-x-0 xl:bg-transparent">
-      <div class="h-19.5">
+    <aside #sidebar class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-all duration-300 xl:left-0 xl:translate-x-0 xl:bg-transparent"
+   [ngClass]="{'sidebar-collapsed': sidebarCollapsed}">
+      <div class="h-19.5 relative flex items-center justify-between">
         <i class="absolute top-0 right-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden" sidenav-close></i>
         <a class="block px-8 py-6 m-0 text-sm whitespace-nowrap text-slate-700" href="javascript:;" target="_blank">
           <img src="assets/st2i.png" class="inline h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="main_logo" />
-          <span class="ml-1 font-semibold transition-all duration-200 ease-nav-brand"></span>
+          <span class="ml-1 font-semibold transition-all duration-200 ease-nav-brand sidebar-text"></span>
         </a>
+        <button (click)="toggleSidebar()" class="toggle-btn p-2 rounded-full border border-gray-200 hover:bg-gray-100 xl:flex hidden mr-4">
+          <i class="fas" [class.fa-angle-left]="!sidebarCollapsed" [class.fa-angle-right]="sidebarCollapsed"></i>
+        </button>
       </div>
 
       <hr class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent" />
@@ -39,7 +43,8 @@
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Dashboard</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" 
+              [class.hidden]="sidebarCollapsed">Dashboard</span>
             </a>
           </li>
 
@@ -56,14 +61,15 @@
                       <g transform="translate(1716.000000, 291.000000)">
                         <g transform="translate(153.000000, 2.000000)">
                           <path class="fill-slate-800 opacity-60" d="M12.25,17.5 L8.75,17.5 L8.75,1.75 C8.75,0.78225 9.53225,0 10.5,0 L31.5,0 C32.46775,0 33.25,0.78225 33.25,1.75 L33.25,12.25 L29.75,12.25 L29.75,3.5 L12.25,3.5 L12.25,17.5 Z"></path>
-                          <path class="fill-slate-800" d="M40.25,14 L24.5,14 C23.53225,14 22.75,14.78225 22.75,15.75 L22.75,38.5 L19.25,38.5 L19.25,22.75 C19.25,21.78225 18.46775,21 17.5,21 L1.75,21 C0.78225,21 0,21.78225 0,22.75 L0,40.25 C0,41.21775 0.78225,42 1.75,42 L40.25,42 C41.21775,42 42,41.21775 42,40.25 L42,15.75 C42,14.78225 41.21775,14 40.25,14 Z M12.25,36.75 L7,36.75 L7,33.25 L12.25,33.25 L12.25,36.75 Z M12.25,29.75 L7,29.75 L7,26.25 L12.25,26.25 L12.25,29.75 Z M35,36.75 L29.75,36.75 L29.75,33.25 L35,33.25 L35,36.75 Z M35,29.75 L29.75,29.75 L29.75,26.25 L35,26.25 L35,29.75 Z M35,22.75 L29.75,22.75 L29.75,19.25 L35,19.25 L35,22.75 Z"></path>
+                          <path class="fill-slate-800" d="M40.25,14 L24.5,14 C23.53225,14 22.75,14.78225 22.75,15.75 L22.75,38.5 L19.25,38.5 L19.25,22.75 C19.25,21.78225 18.46775,21 17.5,21 L1.75,21 C0.78225,21 0,21.78225 0,22.75 L0,40.25 C0,41.21775 0.78225,42 1.75,42 L40.25,42 C41.21775,42 42,41.21775 42,40.25 L42,15.75 C42,14.78225 41.21775,14 40.25,14 Z M12.25,36.75 L7,36.75 L7,33.25 L12.25,33.25 L12.25,36.75 Z M12.25,29.75 L7,29.75 L7,26.25 L12.25,26.25 L12.25,29.75 Z M35,36.75
+                           L29.75,36.75 L29.75,33.25 L35,33.25 L35,36.75 Z M35,29.75 L29.75,29.75 L29.75,26.25 L35,26.25 L35,29.75 Z M35,22.75 L29.75,22.75 L29.75,19.25 L35,19.25 L35,22.75 Z"></path>
                         </g>
                       </g>
                     </g>
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Forms</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">Forms</span>
             </a>
           </li>
 
@@ -87,7 +93,7 @@
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">List submission</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text"[class.hidden]="sidebarCollapsed">List submission</span>
             </a>
           </li>
 
@@ -112,7 +118,7 @@
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">User management</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">User management</span>
             </a>
           </li>
   
@@ -121,38 +127,12 @@
             <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase opacity-60">Account pages</h6>
           </li>
 
-    
-
-          <li class="mt-0.5 w-full">
-            <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
-            routerLink="/admin/diagram"
-            routerLinkActive="bg-gradient-to-r from-blue-500 to-blue-700 shadow-soft-xl font-semibold text-white"
-            [routerLinkActiveOptions]="{ exact: true }">              <div class="shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
-                <svg width="12px" height="12px" viewBox="0 0 40 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <title>document</title>
-                  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                    <g transform="translate(-1870.000000, -591.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                      <g transform="translate(1716.000000, 291.000000)">
-                        <g transform="translate(154.000000, 300.000000)">
-                          <path class="fill-slate-800 opacity-60" d="M40,40 L36.3636364,40 L36.3636364,3.63636364 L5.45454545,3.63636364 L5.45454545,0 L38.1818182,0 C39.1854545,0 40,0.814545455 40,1.81818182 L40,40 Z"></path>
-                          <path class="fill-slate-800" d="M30.9090909,7.27272727 L1.81818182,7.27272727 C0.814545455,7.27272727 0,8.08727273 0,9.09090909 L0,41.8181818 C0,42.8218182 0.814545455,43.6363636 1.81818182,43.6363636 L30.9090909,43.6363636 C31.9127273,43.6363636 32.7272727,42.8218182 32.7272727,41.8181818 L32.7272727,9.09090909 C32.7272727,8.08727273 31.9127273,7.27272727 30.9090909,7.27272727 Z M18.1818182,34.5454545 L7.27272727,34.5454545 L7.27272727,30.9090909 L18.1818182,30.9090909 L18.1818182,34.5454545 Z M25.4545455,27.2727273 L7.27272727,27.2727273 L7.27272727,23.6363636 L25.4545455,23.6363636 L25.4545455,27.2727273 Z M25.4545455,20 L7.27272727,20 L7.27272727,16.3636364 L25.4545455,16.3636364 L25.4545455,20 Z"></path>
-                        </g>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-              </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Camunda Modeler</span>
-            </a>
-          </li>
-
           <li class="mt-0.5 w-full">
             <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
             routerLink="/admin/processes"
             routerLinkActive="bg-gradient-to-r from-blue-500 to-blue-700 shadow-soft-xl font-semibold text-white"
             [routerLinkActiveOptions]="{ exact: true }">              <div class="shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
                 <svg width="12px" height="20px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <title>spaceship</title>
                   <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                     <g transform="translate(-1720.000000, -592.000000)" fill="#FFFFFF" fill-rule="nonzero">
                       <g transform="translate(1716.000000, 291.000000)">
@@ -170,9 +150,34 @@
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft">Processes</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">Processes</span>
             </a>
           </li>
+    
+
+          <li class="mt-0.5 w-full">
+            <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
+            routerLink="/admin/diagram"
+            routerLinkActive="bg-gradient-to-r from-blue-500 to-blue-700 shadow-soft-xl font-semibold text-white"
+            [routerLinkActiveOptions]="{ exact: true }">              <div class="shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white bg-center stroke-0 text-center xl:p-2.5">
+                <svg width="12px" height="12px" viewBox="0 0 40 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g transform="translate(-1870.000000, -591.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                      <g transform="translate(1716.000000, 291.000000)">
+                        <g transform="translate(154.000000, 300.000000)">
+                          <path class="fill-slate-800 opacity-60" d="M40,40 L36.3636364,40 L36.3636364,3.63636364 L5.45454545,3.63636364 L5.45454545,0 L38.1818182,0 C39.1854545,0 40,0.814545455 40,1.81818182 L40,40 Z"></path>
+                          <path class="fill-slate-800" d="M30.9090909,7.27272727 L1.81818182,7.27272727 C0.814545455,7.27272727 0,8.08727273 0,9.09090909 L0,41.8181818 C0,42.8218182 0.814545455,43.6363636 1.81818182,43.6363636 L30.9090909,43.6363636 C31.9127273,43.6363636 32.7272727,42.8218182 32.7272727,41.8181818 L32.7272727,9.09090909 C32.7272727,8.08727273 31.9127273,7.27272727 30.9090909,7.27272727 Z M18.1818182,34.5454545 L7.27272727,34.5454545 L7.27272727,30.9090909 L18.1818182,30.9090909 L18.1818182,34.5454545 Z M25.4545455,27.2727273 L7.27272727,27.2727273 L7.27272727,23.6363636 L25.4545455,23.6363636 L25.4545455,27.2727273 Z M25.4545455,20 L7.27272727,20 L7.27272727,16.3636364 L25.4545455,16.3636364 L25.4545455,20 Z"></path>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">Camunda Modeler</span>
+            </a>
+          </li>
+
+      
         </ul>
       </div>
       
@@ -182,7 +187,7 @@
 
     <!-- end sidenav -->
 
-    <main #mainContent class="ease-soft-in-out xl:ml-68.5 relative h-full max-h-screen rounded-xl transition-all duration-200">
+    <main #mainContent class="ease-soft-in-out relative h-full max-h-screen rounded-xl transition-all duration-300" [ngClass]="{'xl:ml-68.5': !sidebarCollapsed, 'xl:ml-20': sidebarCollapsed}">
       <!-- Navbar -->
       <nav class="relative flex flex-wrap items-center justify-between px-0 py-2 mx-6 transition-all shadow-none duration-250 ease-soft-in rounded-2xl lg:flex-nowrap lg:justify-start" navbar-main navbar-scroll="true">
         <div class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit">

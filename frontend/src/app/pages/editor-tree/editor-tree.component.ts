@@ -546,17 +546,34 @@ private findSubsectionById(subsectionId: string | null): any {
 handleSubmit() {
   console.log('Starting form submission process');
   const sectionItemsMap = new Map<string, any[]>();
+  const subsectionItemsMap = new Map<string, any[]>();
 
-  // Assign temporary IDs to new sections and map their items
   this.editorItems.forEach((item) => {
     if (!item.id && item.type === 'Section') {
-      item.tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      item.tempId = `temp_section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       if (item.items) {
         const itemsWithSection = item.items.map((formItem: any) => ({
           ...formItem,
           tempSectionId: item.tempId,
         }));
         sectionItemsMap.set(item.tempId, itemsWithSection);
+      }
+      
+      if (item.children && item.children.length > 0) {
+        item.children.forEach((subsection: any) => {
+          if (!subsection.id && subsection.type === 'Subsection') {
+            subsection.tempId = `temp_subsection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            subsection.parentSectionTempId = item.tempId;
+            
+            if (subsection.items && subsection.items.length > 0) {
+              const itemsWithSubsection = subsection.items.map((formItem: any) => ({
+                ...formItem,
+                tempSubsectionId: subsection.tempId
+              }));
+              subsectionItemsMap.set(subsection.tempId, itemsWithSubsection);
+            }
+          }
+        });
       }
     }
   });
@@ -592,9 +609,24 @@ handleSubmit() {
               if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
                 const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
                 const originalItems = sectionItemsMap.get(item.tempId) || [];
+                
+                let updatedChildren = [];
+                if (item.children && item.children.length > 0) {
+                  updatedChildren = item.children.map((subsection: any) => {
+                    if (subsection.parentSectionTempId === item.tempId) {
+                      return {
+                        ...subsection,
+                        parentSectionId: savedLayout.id
+                      };
+                    }
+                    return subsection;
+                  });
+                }
+                
                 return {
                   ...savedLayout,
                   type: 'Section',
+                  children: updatedChildren,
                   items: originalItems.map((origItem) => ({
                     ...origItem,
                     tempSectionId: undefined,
@@ -608,27 +640,107 @@ handleSubmit() {
         )
     : of(null);
 
+  const saveSubsections$ = new Subject<void>();
   const saveFormInputs$ = new Subject<void>();
+  
   (saveSections$ as Observable<void>).subscribe({
+    next: () => {
+      this.saveSubsectionsToSections(() => saveSubsections$.next());
+    },
+    error: (error: any) => console.error('Error saving sections:', error),
+  });
+  
+  (saveSubsections$ as Observable<void>).subscribe({
     next: () => {
       this.saveFormInputsToSections(() => saveFormInputs$.next());
     },
-    error: (error: any) => console.error('Error saving sections:', error),
+    error: (error: any) => console.error('Error saving subsections:', error),
   });
 
   (saveFormInputs$ as Observable<void>).subscribe({
     next: () => {
-      console.log('All sections and form inputs saved successfully.');
+      console.log('All sections, subsections and form inputs saved successfully.');
       this.router.navigate(['admin/form-template']);
     },
     error: (error) => console.error('Error saving form inputs:', error),
   });
 }
 
+  saveSubsectionsToSections(onComplete?: () => void) {
+    const subsectionRequests: Observable<any>[] = [];
+    
+    this.editorItems.forEach((section) => {
+      if (section.type === 'Section' && section.id) {
+        const sectionId = section.id;
+        
+        if (section.children?.length > 0) {
+          section.children.forEach((subsection: any) => {
+            if (!subsection.id && subsection.type === 'Subsection') {
+              const subsectionData = {
+                title: subsection.title || 'Subsection',
+                type: 'Subsection',
+                formTemplate: { id: +this.templateId }
+              };
+              
+              const saveSubsection$ = this.formTemplateService.addSubsectionToSection(sectionId, subsectionData)
+                .pipe(
+                  catchError(error => {
+                    console.error(`Error saving subsection to section ${sectionId}:`, error);
+                    return of(null);
+                  }),
+                  map(savedSubsection => {
+                    if (savedSubsection) {
+                      const subsectionIndex = section.children.findIndex((s: any) => s === subsection);
+                      if (subsectionIndex !== -1) {
+                        section.children[subsectionIndex] = {
+                          ...savedSubsection,
+                          type: 'Subsection',
+                          items: subsection.items || []
+                        };
+                        
+                        if (subsection.tempId && subsection.items?.length > 0) {
+                          subsection.items.forEach((item: any) => {
+                            item.tempSubsectionId = undefined;
+                            item.targetSubsectionId = savedSubsection.id;
+                          });
+                        }
+                      }
+                    }
+                    return savedSubsection;
+                  })
+                );
+              
+              subsectionRequests.push(saveSubsection$);
+            }
+          });
+        }
+      }
+    });
+    
+    if (subsectionRequests.length === 0) {
+      if (onComplete) onComplete();
+      return;
+    }
+    
+    forkJoin(subsectionRequests)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (savedSubsections) => {
+          console.log('Subsections saved successfully:', savedSubsections);
+          if (onComplete) onComplete();
+        },
+        error: (error) => {
+          console.error('Error saving subsections:', error);
+          if (onComplete) onComplete();
+        }
+      });
+  }
+
   saveFormInputsToSections(onComplete?: () => void) {
     const formInputRequests: any[] = [];
     const multiChoiceItems: { item: any; layoutId: number }[] = [];
-        this.editorItems.forEach((section) => {
+    
+    this.editorItems.forEach((section) => {
       if (section.type === 'Section') {
         const sectionLayoutId = section.id;
   
