@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './admin-layouts.component.html',
   styleUrl: './admin-layouts.component.css'
 })
-export class AdminLayoutsComponent implements OnInit, AfterViewInit {
+export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('menu') menu!: ElementRef;
   @ViewChild('profile') profile!: ElementRef;
@@ -105,12 +105,28 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit {
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
     localStorage.setItem('sidebarCollapsed', String(this.sidebarCollapsed));
+
+    // For mobile: toggle the sidebar visibility
+    if (window.innerWidth < 768) {
+      if (this.sidebar.nativeElement.classList.contains('-translate-x-full')) {
+        this.sidebar.nativeElement.classList.remove('-translate-x-full');
+        this.sidebar.nativeElement.classList.add('translate-x-0');
+      } else {
+        this.sidebar.nativeElement.classList.remove('translate-x-0');
+        this.sidebar.nativeElement.classList.add('-translate-x-full');
+      }
+    }
   }
-  
+
   ngAfterViewInit() {
     if (this.sidebarCollapsed && this.sidebar) {
       this.sidebar.nativeElement.classList.add('sidebar-collapsed');
     }
+
+    // Initialize responsive layout
+    setTimeout(() => {
+      this.handleResponsiveLayout();
+    }, 0);
   }
 
   toggleDropdown(dropdownKey: string) {
@@ -121,4 +137,29 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit {
     return this.dropdowns[dropdownKey] ?? false;
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.handleResponsiveLayout();
+  }
+
+  private handleResponsiveLayout() {
+    const isMobile = window.innerWidth < 768;
+
+    // Handle sidebar visibility on mobile
+    if (isMobile) {
+      // On mobile, always hide sidebar initially
+      if (!this.sidebar.nativeElement.classList.contains('-translate-x-full') &&
+          !this.sidebar.nativeElement.classList.contains('translate-x-0')) {
+        this.sidebar.nativeElement.classList.add('-translate-x-full');
+      }
+    } else {
+      // On desktop, remove mobile-specific classes
+      this.sidebar.nativeElement.classList.remove('-translate-x-full');
+      this.sidebar.nativeElement.classList.remove('translate-x-0');
+    }
+  }
+
+  ngOnDestroy() {
+    // Clean up any subscriptions or event listeners if needed
+  }
 }

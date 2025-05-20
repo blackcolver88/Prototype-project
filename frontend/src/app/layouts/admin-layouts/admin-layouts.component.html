@@ -1,11 +1,11 @@
 <body class="m-0 font-sans text-base antialiased font-normal leading-default bg-gray-50 text-slate-500">
     <!-- sidenav  -->
-     
-    <aside #sidebar class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-4 ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-all duration-300 xl:left-0 xl:translate-x-0 xl:bg-transparent"
+
+    <aside #sidebar class="max-w-62.5 ease-nav-brand z-990 fixed inset-y-0 my-0 md:my-4 ml-0 md:ml-4 block w-full -translate-x-full flex-wrap items-center justify-between overflow-y-auto rounded-0 md:rounded-2xl border-0 bg-white p-0 antialiased shadow-none transition-all duration-300 xl:left-0 xl:translate-x-0 xl:bg-transparent"
    [ngClass]="{'sidebar-collapsed': sidebarCollapsed}">
       <div class="h-19.5 relative flex items-center justify-between">
-        <i class="absolute top-0 right-0 hidden p-4 opacity-50 cursor-pointer fas fa-times text-slate-400 xl:hidden" sidenav-close></i>
-        <a class="block px-8 py-6 m-0 text-sm whitespace-nowrap text-slate-700" href="javascript:;" target="_blank">
+        <button (click)="toggleSidebar()" class="absolute top-2 right-2 p-2 opacity-70 cursor-pointer fas fa-times text-slate-400 md:hidden"></button>
+        <a class="block px-4 md:px-8 py-4 md:py-6 m-0 text-sm whitespace-nowrap text-slate-700" href="javascript:;" target="_blank">
           <img src="assets/st2i.png" class="inline h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="main_logo" />
           <span class="ml-1 font-semibold transition-all duration-200 ease-nav-brand sidebar-text"></span>
         </a>
@@ -43,13 +43,13 @@
                   </g>
                 </svg>
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" 
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text"
               [class.hidden]="sidebarCollapsed">Dashboard</span>
             </a>
           </li>
 
           <li class="mt-0.5 w-full">
-            <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors" 
+            <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
             routerLink="/admin/form-template"
             routerLinkActive="bg-gradient-to-r from-blue-500 to-blue-700 shadow-soft-xl font-semibold text-white"
              [routerLinkActiveOptions]="{ exact: true }">
@@ -121,7 +121,7 @@
               <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">User management</span>
             </a>
           </li>
-  
+
 
           <li class="w-full mt-4">
             <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase opacity-60">Account pages</h6>
@@ -153,7 +153,7 @@
               <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">Processes</span>
             </a>
           </li>
-    
+
 
           <li class="mt-0.5 w-full">
             <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
@@ -177,37 +177,39 @@
             </a>
           </li>
 
-      
+
         </ul>
       </div>
-      
+
 
     </aside>
-    
+
 
     <!-- end sidenav -->
 
-    <main #mainContent class="ease-soft-in-out relative h-full max-h-screen rounded-xl transition-all duration-300" [ngClass]="{'xl:ml-68.5': !sidebarCollapsed, 'xl:ml-20': sidebarCollapsed}">
+    <main #mainContent class="ease-soft-in-out relative h-full max-h-screen rounded-xl transition-all duration-300 px-2 md:px-4" [ngClass]="{'xl:ml-68.5': !sidebarCollapsed, 'xl:ml-20': sidebarCollapsed}">
       <!-- Navbar -->
-      <nav class="relative flex flex-wrap items-center justify-between px-0 py-2 mx-6 transition-all shadow-none duration-250 ease-soft-in rounded-2xl lg:flex-nowrap lg:justify-start" navbar-main navbar-scroll="true">
-        <div class="flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit">
-          <button (click)="toggleSidebar()" class="p-2 text-gray-500 hover:text-blue-600 focus:outline-none xl:hidden">
-            <i class="fas" [class.fa-angle-left]="!sidebarCollapsed" [class.fa-angle-right]="sidebarCollapsed"></i>
-          </button>
-          <nav>
-            <!-- breadcrumb -->
-            <ol class="flex flex-wrap pt-1 mr-12 bg-transparent rounded-lg sm:mr-16">
-              <li class="text-sm leading-normal">
-                <a class="opacity-50 text-slate-700" href="javascript:;">Pages</a>
-              </li>
-              <li class="text-sm pl-2 capitalize leading-normal text-slate-700 before:float-left before:pr-2 before:text-gray-600 before:content-['/']" aria-current="page">{{ pageTitle }}</li>
-            </ol>
-            <h6 class="mb-0 font-bold capitalize">{{ pageTitle }}</h6>
-          </nav>
+      <nav class="relative flex flex-wrap items-center justify-between px-0 py-2 mx-2 md:mx-6 transition-all shadow-none duration-250 ease-soft-in rounded-2xl lg:flex-nowrap lg:justify-start" navbar-main navbar-scroll="true">
+        <div class="flex items-center justify-between w-full px-2 md:px-4 py-1 mx-auto flex-wrap-inherit">
+          <div class="flex items-center">
+            <button (click)="toggleSidebar()" class="p-2 text-gray-500 hover:text-blue-600 focus:outline-none">
+              <i class="fas" [class.fa-angle-left]="!sidebarCollapsed" [class.fa-angle-right]="sidebarCollapsed"></i>
+            </button>
+            <nav>
+              <!-- breadcrumb -->
+              <ol class="hidden md:flex flex-wrap pt-1 mr-4 md:mr-12 bg-transparent rounded-lg sm:mr-16 breadcrumb">
+                <li class="text-sm leading-normal">
+                  <a class="opacity-50 text-slate-700" href="javascript:;">Pages</a>
+                </li>
+                <li class="text-sm pl-2 capitalize leading-normal text-slate-700 before:float-left before:pr-2 before:text-gray-600 before:content-['/']" aria-current="page">{{ pageTitle }}</li>
+              </ol>
+              <h6 class="mb-0 font-bold capitalize">{{ pageTitle }}</h6>
+            </nav>
+          </div>
 
           <div class="flex items-center mt-2 grow sm:mt-0 sm:mr-6 md:mr-0 lg:flex lg:basis-auto">
             <div class="flex items-center md:ml-auto md:pr-4">
-             
+
             </div>
             <ul class="flex flex-row justify-end pl-0 mb-0 list-none md-max:w-full">
               <!-- online builder btn  -->
@@ -227,7 +229,7 @@
                       </div>
                     </button>
                   </div>
-        
+
                   <div #profile class="hidden absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                     role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1" id="profile_default">
                     <div class="px-4 py-2 text-sm text-gray-700">
@@ -252,7 +254,7 @@
                   </div>
                 </a>
               </li>
-     
+
 
               <!-- notifications -->
 
@@ -335,21 +337,23 @@
 
       <!-- end Navbar -->
 
-      <router-outlet></router-outlet>
+      <div class="p-2 md:p-4">
+        <router-outlet></router-outlet>
+      </div>
 
       <footer class="pt-4">
-          <div class="w-full px-6 mx-auto">
+          <div class="w-full px-2 md:px-6 mx-auto">
             <div class="flex flex-wrap items-center -mx-3 lg:justify-between">
               <div class="w-full max-w-full px-3 mt-0 mb-6 shrink-0 lg:mb-0 lg:w-1/2 lg:flex-none">
                 <div class="text-sm leading-normal text-center text-slate-500 lg:text-left">
-                  ©
-                  <script>
-                    document.write(new Date().getFullYear() + ",");
-                  </script>
+                  © <span id="current-year"></span>,
                   made with <i class="fa fa-heart"></i> by
                   <a href="https://www.creative-tim.com" class="font-semibold text-slate-700" target="_blank">Creative Tim</a>
                   for a better web.
                 </div>
+                <script>
+                  document.getElementById('current-year').textContent = new Date().getFullYear();
+                </script>
               </div>
               <div class="w-full max-w-full px-3 mt-0 shrink-0 lg:w-1/2 lg:flex-none">
                 <ul class="flex flex-wrap justify-center pl-0 mb-0 list-none lg:justify-end">
@@ -370,9 +374,9 @@
             </div>
           </div>
         </footer>
-      <!-- end cards --> 
+      <!-- end cards -->
     </main>
-    
+
     <div fixed-plugin>
       <a fixed-plugin-button class="bottom-7.5 right-7.5 text-xl z-990 shadow-soft-lg rounded-circle fixed cursor-pointer bg-white px-4 py-2 text-slate-700">
         <i class="py-2 pointer-events-none fa fa-cog"> </i>
