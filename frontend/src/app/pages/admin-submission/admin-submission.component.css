@@ -16,6 +16,57 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.button-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.items-per-page label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.items-per-page select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.items-per-page select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
 /* Tableau */
 .submission-table {
   width: 100%;
@@ -139,65 +190,70 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
-.pagination-container {
+.pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 1.5rem;
   padding: 1rem 0;
   border-top: 1px solid var(--bg-secondary);
 }
 
-.pagination-container button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
+.pagination-info {
   font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  color: var(--text-secondary);
 }
 
-.pagination-container button:not(:disabled) {
+.pagination-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: white;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  border-color: #cbd5e1;
+}
+
+.pagination-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.pagination-button.active {
   background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
 }
 
-.pagination-container button:not(:disabled):hover {
-  background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-}
-
-.pagination-container button:disabled {
-  background-color: #e5e7eb;
-  color: #9ca3af;
+.pagination-button:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-:host ::ng-deep .ngx-pagination {
+.pagination-ellipsis {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-:host ::ng-deep .ngx-pagination .ngx-pagination-page {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-:host ::ng-deep .ngx-pagination .ngx-pagination-page:hover:not(.ngx-pagination-page-active) {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-:host ::ng-deep .ngx-pagination .ngx-pagination-page-active {
-  background-color: var(--primary-color);
-  color: white;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
@@ -214,9 +270,18 @@
     padding: 0.75rem 1rem;
   }
 
-  .pagination-container {
+  .action-bar {
     flex-direction: column;
-    align-items: flex-start;
     gap: 1rem;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .pagination-buttons {
+    flex-wrap: wrap;
   }
 }
