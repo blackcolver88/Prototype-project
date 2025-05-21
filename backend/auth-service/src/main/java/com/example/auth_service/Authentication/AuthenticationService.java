@@ -3,6 +3,7 @@ package com.example.auth_service.Authentication;
 import com.example.auth_service.Entity.User;
 import com.example.auth_service.Enum.Role;
 import com.example.auth_service.Repository.UserRepository;
+import com.example.auth_service.Service.EmailService;
 import com.example.auth_service.Service.JwtService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     public AuthenticationResponse register(RegisterRequest request) {
         LocalDateTime now = LocalDateTime.now();
@@ -40,19 +42,31 @@ public class AuthenticationService {
             userRole = Role.ROLE_USER;
         }
 
+        // Store the original password to send in the email
+        String originalPassword = request.getPassword();
+
         var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(userRole) // Use the parsed role instead of hardcoding ROLE_ADMIN
+                .password(passwordEncoder.encode(originalPassword))
+                .role(userRole)
                 .accountLocked(request.isAccountLocked())
                 .enabled(request.isEnabled())
-                .createdDate(now)      // Set the current date/time
+                .createdDate(now)
                 .lastModifiedDate(now)
-
                 .build();
         repository.save(user);
+
+        // Send welcome email with credentials
+        emailService.sendWelcomeEmail(
+            user.getEmail(),
+            user.getFirstname(),
+            user.getLastname(),
+            originalPassword,
+            userRole.name()
+        );
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
