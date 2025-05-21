@@ -15,6 +15,7 @@ import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
 import { ListUsersComponent } from './admin/list-users/list-users.component';
+import { UserLayoutsComponent } from './layouts/user-layouts/user-layouts.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -72,6 +73,21 @@ export const routes: Routes = [
 
     ] 
   }, 
+
+  {
+    path: 'user',
+    component: UserLayoutsComponent,
+    canActivate: [authGuard],
+    children: [ 
+      { 
+        path: 'profile', 
+        component: UserLayoutsComponent,
+        canActivate: [authGuard],
+        data: { title: 'Profile' } 
+      },
+    ] 
+  }, 
+  
    
 
   { path: 'editor-tree/:id', component: EditorTreeComponent, canActivate: [authGuard] },

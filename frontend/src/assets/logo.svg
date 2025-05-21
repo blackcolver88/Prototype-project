@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="60px" viewBox="0 0 200 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Company Logo</title>
+    <g id="Logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="LogoGroup" transform="translate(10.000000, 5.000000)">
+            <circle id="Circle" fill="#3498DB" cx="25" cy="25" r="25"></circle>
+            <path d="M25,10 C31.0751322,10 36,14.9248678 36,21 C36,27.0751322 31.0751322,32 25,32 C18.9248678,32 14,27.0751322 14,21 C14,14.9248678 18.9248678,10 25,10 Z M25,36 C36.0456949,36 45,38.6862915 45,42 L45,50 L5,50 L5,42 C5,38.6862915 13.9543051,36 25,36 Z" id="User" fill="#FFFFFF"></path>
+            <text id="CompanyName" font-family="Arial-BoldMT, Arial" font-size="18" font-weight="bold" fill="#2C3E50">
+                <tspan x="60" y="30">ProtoApp</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
