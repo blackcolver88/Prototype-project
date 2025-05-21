@@ -15,14 +15,14 @@ import { Role } from '../../model/Role';
 export class UserModalComponent {
   @Output() close = new EventEmitter<void>();
   @Output() userCreated = new EventEmitter<RegisterRequest>();
-  
+
   registerForm: FormGroup;
   errorMessage: string = '';
   successMessage: string = '';
   isSubmitting: boolean = false;
-  
+
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private authService: AuthService
   ) {
     this.registerForm = this.fb.group({
@@ -66,10 +66,11 @@ export class UserModalComponent {
       next: (response) => {
         console.log('User registration successful', response);
         this.successMessage = `User ${registerData.firstname} ${registerData.lastname} has been successfully registered with role: ${registerData.role}`;
+        this.errorMessage = ''; // Clear any error message
         this.registerForm.reset();
         this.registerForm.patchValue({ role: '' });
         this.userCreated.emit(registerData);
-        
+
         setTimeout(() => {
           this.closeModal();
         }, 2000);
@@ -77,6 +78,7 @@ export class UserModalComponent {
       error: (error) => {
         console.error('Registration failed', error);
         this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        this.successMessage = ''; // Clear any success message
         this.isSubmitting = false;
       },
       complete: () => {
