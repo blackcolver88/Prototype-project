@@ -36,6 +36,12 @@
   width: 100%;
 }
 
+.button-container-centered {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
 .btn-add, .btn-add-user {
   background-color: var(--primary-color);
   color: white;

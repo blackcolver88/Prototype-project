@@ -8,12 +8,13 @@ import { FormTemplate } from "../../model/FormTemplate";
 import { Router, RouterModule } from '@angular/router';
 import { FormTemplateService } from "../../services/form-template.service";
 import { FormsModule } from '@angular/forms';
+import { ConfirmModalComponent } from './confirm-modal.component';
 
 
 @Component({
   selector: 'app-form-template',
   standalone: true,
-  imports: [AgGridAngular, CommonModule, DialogModule, RouterModule, FormsModule],
+  imports: [AgGridAngular, CommonModule, DialogModule, RouterModule, FormsModule, ConfirmModalComponent],
   templateUrl: './form-template.component.html',
   styleUrls: ['./form-template.component.css']
 })
@@ -25,6 +26,10 @@ export class FormTemplateComponent implements OnInit {
   itemsPerPage: number = 5;
   totalPages: number = 1;
   pageSizeOptions: number[] = [5, 10, 15, 20];
+  
+  showConfirmModal = false;
+  templateToDelete: number | null = null;
+  confirmMessage = '';
 
   colDefs: ColDef[] = [
     { field: "id", headerName: "ID" },
@@ -124,10 +129,23 @@ export class FormTemplateComponent implements OnInit {
 
   handleDeleteClick(id: string) {
     const formTemplateId = parseInt(id, 10);
-    if (confirm("Are you sure you want to delete this form ?")) {
-      this.formTemplateService.deleteFormTemplate(formTemplateId).subscribe({
+    this.templateToDelete = formTemplateId;
+    
+    const templateToDelete = this.allTemplates.find(template => template.id === formTemplateId);
+    if (templateToDelete) {
+      this.confirmMessage = `Are you sure you want to delete the form "${templateToDelete.title}"?`;
+    } else {
+      this.confirmMessage = `Are you sure you want to delete this form?`;
+    }
+    
+    this.showConfirmModal = true;
+  }
+  
+  confirmDelete(): void {
+    if (this.templateToDelete !== null) {
+      this.formTemplateService.deleteFormTemplate(this.templateToDelete).subscribe({
         next: () => {
-          this.allTemplates = this.allTemplates.filter(template => template.id !== formTemplateId);
+          this.allTemplates = this.allTemplates.filter(template => template.id !== this.templateToDelete);
           
           this.totalPages = Math.ceil(this.allTemplates.length / this.itemsPerPage);
           
@@ -136,14 +154,23 @@ export class FormTemplateComponent implements OnInit {
           }
           
           this.updatePageData();
+          this.showConfirmModal = false;
+          this.templateToDelete = null;
           
           this.changeDetector.detectChanges();
         },
         error: (error) => {
           console.error("Error deleting form template:", error);
+          this.showConfirmModal = false;
+          this.templateToDelete = null;
         }
       });
     }
+  }
+  
+  cancelDelete(): void {
+    this.showConfirmModal = false;
+    this.templateToDelete = null;
   }
   
   getMaxItems(): number {

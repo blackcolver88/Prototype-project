@@ -14,6 +14,7 @@ import { RegisterComponent } from './user/pages/register/register.component';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
+import { ListUsersComponent } from './admin/list-users/list-users.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -62,6 +63,11 @@ export const routes: Routes = [
          component: RegisterComponent,
          canActivate: [authGuard],
          data: { title: 'Register' } 
+        },
+        { path: 'users',
+         component: ListUsersComponent,
+         canActivate: [authGuard],
+         data: { title: 'List users' } 
         },
 
     ] 

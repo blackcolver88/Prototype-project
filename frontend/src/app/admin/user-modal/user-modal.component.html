@@ -1,0 +1,80 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <button type="button" class="close-button" (click)="closeModal()">&times;</button>
+      <h2 class="modal-title">Create a new user</h2>
+    </div>
+    
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="firstname">First name</label>
+          <input type="text" formControlName="firstname" id="firstname" placeholder="John">
+          <div *ngIf="f['firstname'].touched && f['firstname'].errors" class="error-text">
+            <div *ngIf="f['firstname'].errors['required']">First name is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastname">Last name</label>
+          <input type="text" formControlName="lastname" id="lastname" placeholder="Doe">
+          <div *ngIf="f['lastname'].touched && f['lastname'].errors" class="error-text">
+            <div *ngIf="f['lastname'].errors['required']">Last name is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" formControlName="email" id="email" placeholder="name@company.com">
+          <div *ngIf="f['email'].touched && f['email'].errors" class="error-text">
+            <div *ngIf="f['email'].errors['required']">Email is required</div>
+            <div *ngIf="f['email'].errors['email']">Please enter a valid email address</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select formControlName="role" id="role">
+            <option value="">Select a role</option>
+            <option value="ROLE_HR">HR</option>
+            <option value="ROLE_USER">User</option>
+          </select>
+          <div *ngIf="f['role'].touched && f['role'].errors" class="error-text">
+            <div *ngIf="f['role'].errors['required']">Please select a role</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" formControlName="password" id="password" placeholder="••••••••">
+          <div *ngIf="f['password'].touched && f['password'].errors" class="error-text">
+            <div *ngIf="f['password'].errors['required']">Password is required</div>
+            <div *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">Confirm password</label>
+          <input type="password" formControlName="confirmPassword" id="confirm-password" placeholder="••••••••">
+          <div *ngIf="f['confirmPassword'].touched && (f['confirmPassword'].errors || registerForm.hasError('passwordMismatch'))" class="error-text">
+            <div *ngIf="f['confirmPassword'].errors?.['required']">Please confirm your password</div>
+            <div *ngIf="registerForm.hasError('passwordMismatch')">Passwords do not match</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || isSubmitting" class="submit-button">
+        {{ isSubmitting ? 'Creating account...' : 'Create an account' }}
+      </button>
+    </form>
+  </div>
+</div>

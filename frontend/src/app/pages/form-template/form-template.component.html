@@ -1,7 +1,11 @@
 <div class="form-template-container">
   <div class="table-wrapper">
+    <app-confirm-modal *ngIf="showConfirmModal" 
+                     [message]="confirmMessage" 
+                     (confirm)="confirmDelete()" 
+                     (cancel)="cancelDelete()"></app-confirm-modal>
     <div class="action-bar">
-      <div class="button-container">
+      <div class="button-container-centered">
         <button type="button" (click)="openDialog()" class="btn-add">
           <span class="btn-icon">+</span> Add new form
         </button>
@@ -19,7 +23,6 @@
     <table class="form-table" *ngIf="isBrowser">
       <thead>
         <tr>
-          <th class="table-header">ID</th>
           <th class="table-header">Form Title</th>
           <th class="table-header">Customize</th>
           <th class="table-header">Delete</th>
@@ -27,7 +30,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let template of rowData" class="form-row">
-          <td class="table-cell">{{ template.id }}</td>
           <td class="table-cell">{{ template.title }}</td>
           <td class="table-cell">
             <button (click)="handleIconClick(template.id?.toString() || '')" class="btn-icon btn-edit" title="Customize Form">

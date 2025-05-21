@@ -3,11 +3,15 @@ package com.example.auth_service.Authentication;
 
 import com.example.auth_service.DTO.UserDTO;
 import com.example.auth_service.Entity.User;
+import com.example.auth_service.Enum.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.auth_service.Service.UserService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -64,6 +68,22 @@ public class AuthenticationController {
         dto.setRole(user.getRole().name());
         return dto;
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers().stream()
+                .filter(user -> !Role.ROLE_ADMIN.equals(user.getRole())) 
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }
