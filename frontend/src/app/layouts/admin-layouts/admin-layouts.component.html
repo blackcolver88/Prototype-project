@@ -9,8 +9,11 @@
           <img src="assets/st2i.png" class="inline h-full max-w-full transition-all duration-200 ease-nav-brand max-h-8" alt="main_logo" />
           <span class="ml-1 font-semibold transition-all duration-200 ease-nav-brand sidebar-text"></span>
         </a>
-        <button (click)="toggleSidebar()" class="toggle-btn p-2 rounded-full border border-gray-200 hover:bg-gray-100 xl:flex hidden mr-4">
-          <i class="fas" [class.fa-angle-left]="!sidebarCollapsed" [class.fa-angle-right]="sidebarCollapsed"></i>
+        <button (click)="toggleSidebar()" class="toggle-btn p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition-all duration-300 flex mr-4">
+          <div class="arrow-icon transition-transform duration-300 ease-in-out"
+               [class.rotate-180]="sidebarCollapsed">
+            &#8249;
+          </div>
         </button>
       </div>
 
@@ -191,9 +194,6 @@
       <nav class="relative flex flex-wrap items-center justify-between px-0 py-2 mx-2 md:mx-6 transition-all shadow-none duration-250 ease-soft-in rounded-2xl lg:flex-nowrap lg:justify-start" navbar-main navbar-scroll="true">
         <div class="flex items-center justify-between w-full px-2 md:px-4 py-1 mx-auto flex-wrap-inherit">
           <div class="flex items-center">
-            <button (click)="toggleSidebar()" class="p-2 text-gray-500 hover:text-blue-600 focus:outline-none">
-              <i class="fas" [class.fa-angle-left]="!sidebarCollapsed" [class.fa-angle-right]="sidebarCollapsed"></i>
-            </button>
             <nav>
               <!-- breadcrumb -->
               <ol class="hidden md:flex flex-wrap pt-1 mr-4 md:mr-12 bg-transparent rounded-lg sm:mr-16 breadcrumb">
@@ -244,14 +244,14 @@
                   </div>
                 </div>
 
-              <li class="flex items-center pl-4 xl:hidden">
-                <a href="javascript:;" class="block p-0 text-sm transition-all ease-nav-brand text-slate-500" sidenav-trigger>
-                  <div class="w-4.5 overflow-hidden">
-                    <i class="ease-soft mb-0.75 relative block h-0.5 rounded-sm bg-slate-500 transition-all"></i>
-                    <i class="ease-soft mb-0.75 relative block h-0.5 rounded-sm bg-slate-500 transition-all"></i>
-                    <i class="ease-soft relative block h-0.5 rounded-sm bg-slate-500 transition-all"></i>
+              <li class="flex items-center pl-4 md:hidden">
+                <button (click)="toggleSidebar()" class="mobile-toggle-btn p-2 text-slate-500 hover:text-blue-600 focus:outline-none transition-all duration-300 rounded-lg hover:bg-gray-100">
+                  <div class="hamburger-icon">
+                    <div class="hamburger-line"></div>
+                    <div class="hamburger-line"></div>
+                    <div class="hamburger-line"></div>
                   </div>
-                </a>
+                </button>
               </li>
 
 
