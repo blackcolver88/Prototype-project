@@ -118,6 +118,82 @@ aside {
   margin-right: 0;
 }
 
+/* Enhanced Toggle Button Styles */
+.toggle-btn, .sidebar-toggle-btn, .mobile-toggle-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:hover, .sidebar-toggle-btn:hover, .mobile-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #f8fafc;
+}
+
+.toggle-btn:active, .sidebar-toggle-btn:active, .mobile-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Arrow Animation */
+.toggle-btn i, .sidebar-toggle-btn i {
+  font-size: 16px;
+  color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-btn:hover i, .sidebar-toggle-btn:hover i {
+  color: #3b82f6;
+  transform: scale(1.1);
+}
+
+/* Arrow Icon Styles */
+.arrow-icon {
+  font-size: 20px;
+  font-weight: bold;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+  transform-origin: center;
+}
+
+.arrow-icon.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Hamburger Icon Styles */
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 18px;
+  height: 14px;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: #64748b;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+/* Mobile toggle button specific styles */
+.mobile-toggle-btn:hover .hamburger-line {
+  background-color: #3b82f6;
+}
+
 main {
   transition: all 0.3s ease;
   min-height: 100vh;
