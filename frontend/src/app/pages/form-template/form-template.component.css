@@ -190,6 +190,17 @@
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
+.btn-process {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.btn-process:hover {
+  background-color: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+}
+
 .table-cell button svg {
   width: 18px;
   height: 18px;

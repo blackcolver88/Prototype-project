@@ -4,11 +4,13 @@ import com.example.formservice.DTO.*;
 import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
+import com.example.formservice.entities.FormTemplateProcess;
 import com.example.formservice.entities.enums.FormLayoutType;
 import com.example.formservice.exception.ResourceNotFoundException;
 import com.example.formservice.repository.FormInputRepository;
 import com.example.formservice.repository.FormLayoutRepository;
 import com.example.formservice.repository.FormTemplateRepository;
+import com.example.formservice.repository.FormTemplateProcessRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +22,18 @@ public class FormTemplateService {
     private final FormTemplateRepository formTemplateRepository;
     private final FormLayoutRepository formLayoutRepository;
     private final FormInputRepository formInputRepository;
+    private final FormTemplateProcessRepository formTemplateProcessRepository;
 
 
 
     public FormTemplateService(FormTemplateRepository formTemplateRepository,
-                               FormLayoutRepository formLayoutRepository, FormInputRepository formInputRepository) {
+                               FormLayoutRepository formLayoutRepository,
+                               FormInputRepository formInputRepository,
+                               FormTemplateProcessRepository formTemplateProcessRepository) {
         this.formTemplateRepository = formTemplateRepository;
         this.formLayoutRepository = formLayoutRepository;
         this.formInputRepository = formInputRepository;
+        this.formTemplateProcessRepository = formTemplateProcessRepository;
 
 
     }
@@ -78,12 +84,12 @@ public class FormTemplateService {
 
         FormTemplate formTemplate = templateOptional.get();
 
-        List<FormLayout> allLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);       
+        List<FormLayout> allLayouts = formLayoutRepository.findByFormTemplateIdOrdered(formTemplateId);
         formTemplate.getFormLayouts().sort((a, b) -> {
             Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
             Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
             if (posA.equals(posB)) {
-                return a.getId().compareTo(b.getId()); 
+                return a.getId().compareTo(b.getId());
             }
             return posA.compareTo(posB);
         });
@@ -172,7 +178,7 @@ public class FormTemplateService {
         return allFormInputs;
     }
 
-  
+
     private void collectFormInputsRecursively(FormLayout layout, List<FormInput> allFormInputs) {
         for (FormLayout childLayout : layout.getChildren()) {
             allFormInputs.addAll(formInputRepository.findByFormLayoutIdOrdered(childLayout.getId()));
@@ -189,18 +195,18 @@ public class FormTemplateService {
         for (FormLayoutOrderDTO orderDTO : layoutOrders) {
             FormLayout layout = formLayoutRepository.findById(orderDTO.getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormLayout not found with id: " + orderDTO.getId()));
-            
+
             if (!layout.getFormTemplate().getId().equals(templateId)) {
                 throw new IllegalArgumentException("FormLayout does not belong to the specified template");
             }
-            
+
             layout.setOrdinalPosition(orderDTO.getOrdinalPosition());
             formLayoutRepository.save(layout);
         }
-        
+
         FormTemplate result = formTemplateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found"));
-        
+
         result.getFormLayouts().sort((a, b) -> {
             Integer posA = a.getOrdinalPosition() != null ? a.getOrdinalPosition() : 0;
             Integer posB = b.getOrdinalPosition() != null ? b.getOrdinalPosition() : 0;
@@ -209,7 +215,7 @@ public class FormTemplateService {
             }
             return posA.compareTo(posB);
         });
-        
+
         return result;
     }
 
@@ -221,15 +227,15 @@ public class FormTemplateService {
         for (FormInputOrderDTO orderDTO : inputOrders) {
             FormInput input = formInputRepository.findById(orderDTO.getId())
                     .orElseThrow(() -> new IllegalArgumentException("FormInput not found with id: " + orderDTO.getId()));
-            
+
             if (!input.getFormLayout().getFormTemplate().getId().equals(templateId)) {
                 throw new IllegalArgumentException("FormInput does not belong to the specified template");
             }
-            
+
             input.setOrdinalPosition(orderDTO.getOrdinalPosition());
             formInputRepository.save(input);
         }
-        
+
         return getFormInputsByTemplateId(templateId);
     }
 
@@ -354,7 +360,7 @@ public class FormTemplateService {
         layout.setChildren(subsections);
 
         for (FormLayout subsection : subsections) {
-            loadSubsectionsAndInputs(subsection); 
+            loadSubsectionsAndInputs(subsection);
         }
 
         List<FormInput> formInputs = formInputRepository.findByFormLayoutIdOrdered(layout.getId());
@@ -402,5 +408,47 @@ public class FormTemplateService {
                 s -> s.getOrdinalPosition() != null ? s.getOrdinalPosition() : 0));
 
         return section;
+    }
+
+    // Process association methods
+    @Transactional
+    public ProcessAssociationResponse associateProcesses(Long templateId, ProcessAssociationRequest request) {
+        FormTemplate formTemplate = formTemplateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("FormTemplate not found with id: " + templateId));
+
+        // Clear existing associations
+        formTemplateProcessRepository.deleteByFormTemplateId(templateId);
+
+        // Add new associations
+        List<FormTemplateProcess> newAssociations = new ArrayList<>();
+        for (ProcessAssociationRequest.ProcessInfo processInfo : request.getProcesses()) {
+            FormTemplateProcess association = new FormTemplateProcess(
+                    processInfo.getProcessDefinitionKey(),
+                    processInfo.getProcessName(),
+                    formTemplate
+            );
+            newAssociations.add(formTemplateProcessRepository.save(association));
+        }
+
+        return new ProcessAssociationResponse(templateId, newAssociations);
+    }
+
+    @Transactional(readOnly = true)
+    public ProcessAssociationResponse getAssociatedProcesses(Long templateId) {
+        if (!formTemplateRepository.existsById(templateId)) {
+            throw new IllegalArgumentException("FormTemplate not found with id: " + templateId);
+        }
+
+        List<FormTemplateProcess> associations = formTemplateProcessRepository.findByFormTemplateId(templateId);
+        return new ProcessAssociationResponse(templateId, associations);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAvailableProcessKeys(Long templateId) {
+        if (!formTemplateRepository.existsById(templateId)) {
+            throw new IllegalArgumentException("FormTemplate not found with id: " + templateId);
+        }
+
+        return formTemplateProcessRepository.findProcessDefinitionKeysByFormTemplateId(templateId);
     }
 }

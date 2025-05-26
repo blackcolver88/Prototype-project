@@ -1,0 +1,58 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2>Manage Processes for "{{ data.formTitle }}"</h2>
+    <button class="close-button" (click)="cancel()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading processes...</p>
+    </div>
+
+    <div *ngIf="error" class="error">
+      <p>{{ error }}</p>
+      <button class="retry-button" (click)="loadProcesses()">Retry</button>
+    </div>
+
+    <div *ngIf="!loading && !error" class="process-list">
+      <p class="instruction">Select the processes that should be available for this form:</p>
+      
+      <div *ngIf="availableProcesses.length === 0" class="no-processes">
+        <p>No processes are currently deployed.</p>
+      </div>
+
+      <div *ngFor="let process of availableProcesses" class="process-item">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            [checked]="process.selected"
+            (change)="onProcessToggle(process)"
+            class="checkbox-input"
+          />
+          <span class="checkbox-custom"></span>
+          <div class="process-info">
+            <span class="process-name">{{ process.processName }}</span>
+            <span class="process-key">{{ process.processDefinitionKey }}</span>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button class="cancel-button" (click)="cancel()">Cancel</button>
+    <button 
+      class="save-button" 
+      (click)="save()" 
+      [disabled]="loading"
+    >
+      Save
+    </button>
+  </div>
+</div>

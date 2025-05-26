@@ -165,15 +165,15 @@
                     <div class="flex justify-between items-center mb-2">
                       <h4 class="font-semibold text-gray-600">{{ subsection.title || 'Subsection' }}</h4>
                     </div>
-                    
+
                     <div *ngFor="let subItem of subsection.items" class="mb-2">
                       <div class="bg-white p-3 rounded shadow-sm relative">
                         <!-- Text Field -->
                         <ng-container *ngIf="subItem?.type === 'TEXTFIELD'">
-                          <app-textform 
-                            [label]="subItem.config?.label || 'Text Field'" 
+                          <app-textform
+                            [label]="subItem.config?.label || 'Text Field'"
                             [textName]="subItem.config?.textName || ''"
-                            [type]="subItem.config?.type || 'text'" 
+                            [type]="subItem.config?.type || 'text'"
                             [placeholder]="subItem.config?.placeholder || ''"
                             [isRequired]="subItem.config?.isRequired || false"
                             [isDisabled]="isFormSubmitted"
@@ -181,10 +181,10 @@
                           >
                           </app-textform>
                         </ng-container>
-                        
+
                         <!-- Password Field -->
                         <ng-container *ngIf="subItem?.type === 'PASSWORD'">
-                          <app-password 
+                          <app-password
                             [label]="subItem.config?.label || 'Password'"
                             [placeholder]="subItem.config?.placeholder || 'Enter password'"
                             [isRequired]="subItem.config?.isRequired || false"
@@ -193,11 +193,11 @@
                           >
                           </app-password>
                         </ng-container>
-                        
+
                         <!-- Email Field -->
                         <ng-container *ngIf="subItem?.type === 'EMAIL'">
-                          <app-email 
-                            [label]="subItem.config?.label || 'Email'" 
+                          <app-email
+                            [label]="subItem.config?.label || 'Email'"
                             [placeholder]="subItem.config?.placeholder || 'Enter email'"
                             [isRequired]="subItem.config?.isRequired || false"
                             [isDisabled]="isFormSubmitted"
@@ -205,12 +205,12 @@
                           >
                           </app-email>
                         </ng-container>
-                        
+
                         <!-- Checkbox Group -->
                         <ng-container *ngIf="subItem?.type === 'CHECKBOX'">
-                          <app-checkbox 
+                          <app-checkbox
                             [groupLabel]="subItem.config?.label || 'Checkbox Group'"
-                            [name]="subItem.config?.name || 'checkbox-group'" 
+                            [name]="subItem.config?.name || 'checkbox-group'"
                             [options]="subItem.config?.options || []"
                             [isRequired]="subItem.config?.isRequired || false"
                             [isDisabled]="isFormSubmitted"
@@ -219,10 +219,10 @@
                           >
                           </app-checkbox>
                         </ng-container>
-                        
+
                         <!-- Phone Number -->
                         <ng-container *ngIf="subItem?.type === 'NUMBER'">
-                          <app-phone-number 
+                          <app-phone-number
                             [label]="subItem.config?.label || 'Phone Number'"
                             [placeholder]="subItem.config?.placeholder || 'Enter phone number'"
                             [isRequired]="subItem.config?.isRequired || false"
@@ -231,10 +231,10 @@
                           >
                           </app-phone-number>
                         </ng-container>
-                        
+
                         <!-- Text Area -->
                         <ng-container *ngIf="subItem?.type === 'textarea'">
-                          <app-text-area 
+                          <app-text-area
                             [label]="subItem.config?.label || 'Text Area'"
                             [placeholder]="subItem.config?.placeholder || 'Enter text here'"
                             [isRequired]="subItem.config?.isRequired || false"
@@ -243,7 +243,7 @@
                           >
                           </app-text-area>
                         </ng-container>
-                        
+
                         <!-- Radio Group -->
                         <ng-container *ngIf="subItem?.type === 'RADIO_BUTTON'">
                           <app-radio-button
@@ -257,7 +257,7 @@
                           >
                           </app-radio-button>
                         </ng-container>
-                        
+
                         <!-- Select Box -->
                         <ng-container *ngIf="subItem?.type === 'SELECT_BOX'">
                           <app-select-box
@@ -270,10 +270,10 @@
                           >
                           </app-select-box>
                         </ng-container>
-                        
+
                         <!-- Date Picker -->
                         <ng-container *ngIf="subItem?.type === 'datepicker'">
-                          <app-datepicker 
+                          <app-datepicker
                             [label]="subItem.config?.label || 'Select Date'"
                             [isRequired]="subItem.config?.isRequired || false"
                             [isDisabled]="isFormSubmitted"
@@ -281,10 +281,10 @@
                           >
                           </app-datepicker>
                         </ng-container>
-                        
+
                         <!-- Basic Date Picker -->
                         <ng-container *ngIf="subItem?.type === 'basic_datepicker'">
-                          <app-basic-datepicker 
+                          <app-basic-datepicker
                             [label]="subItem.config?.label || 'Select Date'"
                             [isRequired]="subItem.config?.isRequired || false"
                             [isDisabled]="isFormSubmitted"
@@ -312,7 +312,7 @@
                     >
                     </app-textform>
                   </ng-container>
-    
+
                   <!-- Password Field -->
                   <ng-container *ngIf="item?.type === 'PASSWORD'">
                     <app-password
@@ -321,7 +321,7 @@
                     >
                     </app-password>
                   </ng-container>
-    
+
                   <!-- Email -->
                   <ng-container *ngIf="item?.type === 'EMAIL'">
                     <app-email
@@ -330,7 +330,7 @@
                     >
                     </app-email>
                   </ng-container>
-    
+
                   <!-- Checkbox Group -->
                   <ng-container *ngIf="item?.type === 'CHECKBOX'">
                     <app-checkbox
@@ -342,7 +342,7 @@
                     >
                     </app-checkbox>
                   </ng-container>
-    
+
                   <!-- Phone Number -->
                   <ng-container *ngIf="item?.type === 'NUMBER'">
                     <app-phone-number
@@ -351,12 +351,12 @@
                     >
                     </app-phone-number>
                   </ng-container>
-    
+
                   <!-- Text Area -->
                   <ng-container *ngIf="item?.type === 'textarea'">
                     <app-text-area [label]="item.label"> </app-text-area>
                   </ng-container>
-    
+
                   <!-- Radio Group -->
                   <ng-container *ngIf="item?.type === 'RADIO_BUTTON'">
                     <app-radio-button
@@ -370,7 +370,7 @@
                     >
                     </app-radio-button>
                   </ng-container>
-    
+
                   <!-- Select Box -->
                   <ng-container *ngIf="item?.type === 'SELECT_BOX'">
                     <app-select-box
@@ -380,18 +380,18 @@
                     >
                     </app-select-box>
                   </ng-container>
-    
+
                   <!-- Date Picker -->
                   <ng-container *ngIf="item?.type === 'datepicker'">
                     <app-datepicker [label]="item.config.label"> </app-datepicker>
                   </ng-container>
-    
+
                   <!-- Basic Date Picker -->
                   <ng-container *ngIf="item?.type === 'basic_datepicker'">
                     <app-basic-datepicker [label]="item.config.label">
                     </app-basic-datepicker>
                   </ng-container>
-    
+
                   <!-- Button -->
                   <ng-container *ngIf="item?.type === 'button'">
                     <app-button
@@ -410,8 +410,9 @@
     </ng-container>
 
     <div class="mt-4 mb-4">
-      <app-process-selector 
+      <app-process-selector
         [selectedProcessKey]="selectedProcessKey"
+        [formTemplateId]="templateId ? +templateId : null"
         (processSelected)="onProcessSelected($event)">
       </app-process-selector>
     </div>

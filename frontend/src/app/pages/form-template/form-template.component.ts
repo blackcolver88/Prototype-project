@@ -9,6 +9,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormTemplateService } from "../../services/form-template.service";
 import { FormsModule } from '@angular/forms';
 import { ConfirmModalComponent } from './confirm-modal.component';
+import { ProcessSelectionDialogComponent } from './components/process-selection-dialog/process-selection-dialog.component';
 
 
 @Component({
@@ -21,12 +22,12 @@ import { ConfirmModalComponent } from './confirm-modal.component';
 export class FormTemplateComponent implements OnInit {
   allTemplates: FormTemplate[] = [];
   rowData: FormTemplate[] = [];
-  
+
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 1;
   pageSizeOptions: number[] = [5, 10, 15, 20];
-  
+
   showConfirmModal = false;
   templateToDelete: number | null = null;
   confirmMessage = '';
@@ -72,6 +73,7 @@ export class FormTemplateComponent implements OnInit {
     if (this.isBrowser) {
       (window as any).handleIconClick = this.handleIconClick.bind(this);
       (window as any).handleDeleteClick = this.handleDeleteClick.bind(this);
+      (window as any).handleProcessClick = this.handleProcessClick.bind(this);
     }
   }
 
@@ -88,11 +90,11 @@ export class FormTemplateComponent implements OnInit {
           icon: template.icon || '../../../assets/icons/customise.svg',
           icon2: template.icon2 || '../../../assets/icons/delete.svg',
         }));
-        
+
         this.totalPages = Math.ceil(this.allTemplates.length / this.itemsPerPage);
-        
+
         this.updatePageData();
-        
+
         this.changeDetector.detectChanges();
       },
       error: (error) => {
@@ -112,11 +114,11 @@ export class FormTemplateComponent implements OnInit {
       const result = value as FormTemplate | undefined;
       if (result) {
         this.allTemplates = [...this.allTemplates, result];
-        
+
         this.totalPages = Math.ceil(this.allTemplates.length / this.itemsPerPage);
-        
+
         this.goToPage(this.totalPages);
-        
+
         this.changeDetector.detectChanges();
       }
     });
@@ -130,33 +132,33 @@ export class FormTemplateComponent implements OnInit {
   handleDeleteClick(id: string) {
     const formTemplateId = parseInt(id, 10);
     this.templateToDelete = formTemplateId;
-    
+
     const templateToDelete = this.allTemplates.find(template => template.id === formTemplateId);
     if (templateToDelete) {
       this.confirmMessage = `Are you sure you want to delete the form "${templateToDelete.title}"?`;
     } else {
       this.confirmMessage = `Are you sure you want to delete this form?`;
     }
-    
+
     this.showConfirmModal = true;
   }
-  
+
   confirmDelete(): void {
     if (this.templateToDelete !== null) {
       this.formTemplateService.deleteFormTemplate(this.templateToDelete).subscribe({
         next: () => {
           this.allTemplates = this.allTemplates.filter(template => template.id !== this.templateToDelete);
-          
+
           this.totalPages = Math.ceil(this.allTemplates.length / this.itemsPerPage);
-          
+
           if (this.currentPage > this.totalPages && this.totalPages > 0) {
             this.currentPage = this.totalPages;
           }
-          
+
           this.updatePageData();
           this.showConfirmModal = false;
           this.templateToDelete = null;
-          
+
           this.changeDetector.detectChanges();
         },
         error: (error) => {
@@ -167,50 +169,77 @@ export class FormTemplateComponent implements OnInit {
       });
     }
   }
-  
+
   cancelDelete(): void {
     this.showConfirmModal = false;
     this.templateToDelete = null;
   }
-  
+
   getMaxItems(): number {
     return Math.min(this.currentPage * this.itemsPerPage, this.allTemplates.length);
   }
-  
+
   updatePageData(): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = Math.min(startIndex + this.itemsPerPage, this.allTemplates.length);
     this.rowData = this.allTemplates.slice(startIndex, endIndex);
   }
-  
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.updatePageData();
     }
   }
-  
+
   previousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.updatePageData();
     }
   }
-  
+
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.updatePageData();
     }
   }
-  
+
   onPageSizeChange(): void {
     this.totalPages = Math.ceil(this.allTemplates.length / this.itemsPerPage);
-    
+
     if (this.currentPage > this.totalPages) {
       this.currentPage = this.totalPages || 1;
     }
-    
+
     this.updatePageData();
+  }
+
+  handleProcessClick(id: string) {
+    const formTemplateId = parseInt(id, 10);
+    const template = this.allTemplates.find(t => t.id === formTemplateId);
+
+    if (!template) {
+      console.error('Template not found for id:', id);
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ProcessSelectionDialogComponent, {
+      data: {
+        formTemplateId: formTemplateId,
+        formTitle: template.title || 'Unknown Form'
+      },
+      disableClose: false,
+      panelClass: 'custom-dialog-container',
+      backdropClass: 'custom-dialog-backdrop',
+    });
+
+    dialogRef.closed.subscribe((result) => {
+      if (result) {
+        console.log('Process associations updated:', result);
+        // Optionally refresh the template list or show a success message
+      }
+    });
   }
 }

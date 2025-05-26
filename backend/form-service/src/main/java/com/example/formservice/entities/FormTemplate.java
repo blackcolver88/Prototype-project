@@ -17,5 +17,8 @@ public class FormTemplate {
     @OneToMany(mappedBy = "formTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormLayout> formLayouts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "formTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FormTemplateProcess> formTemplateProcesses = new ArrayList<>();
+
 
 }
