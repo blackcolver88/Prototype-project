@@ -8,7 +8,6 @@ import { EditFormComponent } from './user/pages/edit-form/edit-form.component';
 import { AdminSubmissionComponent } from './pages/admin-submission/admin-submission.component';
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
-import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
 import { RegisterComponent } from './user/pages/register/register.component';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
@@ -16,6 +15,7 @@ import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.com
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
 import { ListUsersComponent } from './admin/list-users/list-users.component';
 import { UserLayoutsComponent } from './layouts/user-layouts/user-layouts.component';
+import { ProfilComponent } from './user/pages/profil/profil.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -80,11 +80,28 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [ 
       { 
+        path: '', 
+        redirectTo: 'profile',
+        pathMatch: 'full'
+      },
+      { 
         path: 'profile', 
-        component: UserLayoutsComponent,
+        component: ProfilComponent,
         canActivate: [authGuard],
         data: { title: 'Profile' } 
       },
+      { 
+        path: 'forms', 
+        component: FormsComponent, 
+        canActivate: [authGuard],
+        data: { title: 'Forms' }
+      },
+      { 
+        path: 'list', 
+        component: FormListComponent, 
+        canActivate: [authGuard],
+        data: { title: 'Responses' }
+      }
     ] 
   }, 
   

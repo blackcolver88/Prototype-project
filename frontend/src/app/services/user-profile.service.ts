@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { TokenService } from './token.service';
@@ -12,13 +12,23 @@ export interface UserProfile {
   firstname: string;
   lastname: string;
   role: string;
+  password?: string; 
+  // photo?: string;
+
 }
+
+
+@Injectable({
+  providedIn: 'root'
+})
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private readonly API_URL = `${environment.apiUrl}/auth-service/api/v1/auth/users`;
+  private readonly API = `${environment.apiUrl}/auth-service/api/v1/auth`;
   private currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
@@ -63,5 +73,19 @@ export class UserService {
   }
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${userId}`);
+  }
+  updateUser(id: number, user: Partial<UserProfile>): Observable<UserProfile> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${this.tokenService.getToken()}`
+    });
+  
+    return this.http.put<UserProfile>(`${this.API}/modifier/${id}`, user, { headers });
+  }
+  uploadUserPhoto(userId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.put(`${this.API}/ModifierPhoto/${userId}`, formData);
   }
 }

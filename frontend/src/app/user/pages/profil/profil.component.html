@@ -1,0 +1,67 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <h2 class="profile-title">Edit your profile</h2>
+      <p class="profile-subtitle">Update your personal information</p>
+      
+      <form [formGroup]="userProfileForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="firstname">
+            <i class="fas fa-user"></i> First Name
+          </label>
+          <input type="text" class="form-control" formControlName="firstname" placeholder="Your first name" id="firstname">
+          <div *ngIf="userProfileForm.get('firstname')?.invalid && userProfileForm.get('firstname')?.touched" class="validation-error">
+            First name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastname">
+            <i class="fas fa-user"></i> Last Name
+          </label>
+          <input type="text" class="form-control" formControlName="lastname" placeholder="Your last name" id="lastname">
+          <div *ngIf="userProfileForm.get('lastname')?.invalid && userProfileForm.get('lastname')?.touched" class="validation-error">
+            Last name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">
+            <i class="fas fa-envelope"></i> Email
+          </label>
+          <input type="email" class="form-control" formControlName="email" placeholder="Your email" id="email">
+          <div *ngIf="userProfileForm.get('email')?.invalid && userProfileForm.get('email')?.touched" class="validation-error">
+            <span *ngIf="userProfileForm.get('email')?.errors?.['required']">Email is required</span>
+            <span *ngIf="userProfileForm.get('email')?.errors?.['email']">Invalid email format</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">
+            <i class="fas fa-lock"></i> New Password
+          </label>
+          <input type="password" class="form-control" formControlName="password" placeholder="Leave blank to keep current password" id="password">
+          <div *ngIf="userProfileForm.get('password')?.touched && userProfileForm.get('password')?.errors?.['minlength']" class="validation-error">
+            Password must be at least 6 characters long
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">
+            <i class="fas fa-lock"></i> Confirm New Password
+          </label>
+          <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm your new password" id="confirmPassword">
+          <div *ngIf="userProfileForm.get('confirmPassword')?.touched && userProfileForm.get('confirmPassword')?.errors?.['passwordMismatch']" class="validation-error">
+            Passwords do not match
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-success" [disabled]="userProfileForm.invalid">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
