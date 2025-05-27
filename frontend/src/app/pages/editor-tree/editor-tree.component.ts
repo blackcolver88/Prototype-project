@@ -132,7 +132,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         event.previousIndex,
         event.currentIndex
       );
-  
+
       // Check if we need to update section order in the database
       const reorderedSections = this.editorItems.filter(
         (item) => item.id && item.type === 'Section'
@@ -142,10 +142,10 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
       }
       return;
     }
-  
+
     const draggedItem = event.item.data;
     if (!draggedItem) return;
-  
+
     if (event.container.id === this.acquiredItems.id) {
       if (draggedItem.name === 'Section') {
         this.createStandaloneSection(event.currentIndex);
@@ -155,10 +155,10 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
           this.editorItems,
           targetIndex
         );
-  
+
         if (nearestSectionIndex !== -1) {
           const targetSection = this.editorItems[nearestSectionIndex];
-          
+
           if (targetSection.children && targetSection.children.length > 0) {
             this.addItemToSubsection(draggedItem, targetSection.children[0]);
           } else {
@@ -184,7 +184,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     if (!subsection.items) {
       subsection.items = [];
     }
-    
+
     this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
       .pipe(takeUntil(this.destroy$))
       .subscribe((itemResult) => {
@@ -299,12 +299,12 @@ private findSubsectionById(subsectionId: string | null): any {
     if (!section.items) {
       section.items = [];
     }
-    
+
     if (draggedItem.name === 'Subsection') {
       this.addSubsection(section);
       return;
     }
-    
+
     this.openDialog(this.getConfigComponent(draggedItem.name), draggedItem, 0)
       .pipe(takeUntil(this.destroy$))
       .subscribe((itemResult) => {
@@ -318,7 +318,7 @@ private findSubsectionById(subsectionId: string | null): any {
 
   private createSectionWithItem(draggedItem: any, targetIndex: number): void {
     if (draggedItem.name === 'Section') return;
-    
+
     const dialogRef = this.dialog.open(SectionConfigComponent, {
       width: '70vw',
       height: '80vh',
@@ -330,7 +330,7 @@ private findSubsectionById(subsectionId: string | null): any {
       panelClass: 'custom-dialog-container',
       backdropClass: 'custom-dialog-backdrop',
     });
-  
+
     dialogRef.closed
       .pipe(takeUntil(this.destroy$))
       .subscribe((sectionResult) => {
@@ -338,9 +338,9 @@ private findSubsectionById(subsectionId: string | null): any {
           const section = {
             ...sectionResult,
             items: [],
-            children: [] 
+            children: []
           };
-  
+
           this.openDialog(
             this.getConfigComponent(draggedItem.name),
             draggedItem,
@@ -442,10 +442,10 @@ private findSubsectionById(subsectionId: string | null): any {
       .subscribe({
         next: (formTemplate) => {
           this.formTitle = formTemplate.title ?? '';
-          
+
           if (formTemplate.formLayouts && formTemplate.formLayouts.length > 0) {
             this.editorItems = this.processFormLayouts(formTemplate.formLayouts);
-            
+
             const allInputs = this.collectAllFormInputs(formTemplate.formLayouts);
             if (allInputs.length > 0) {
               this.loadFormInputsWithMultipleValues(allInputs);
@@ -453,7 +453,7 @@ private findSubsectionById(subsectionId: string | null): any {
           } else {
             this.editorItems = [];
           }
-          
+
           this.cdr.detectChanges();
         },
         error: (error) => {
@@ -468,16 +468,16 @@ private findSubsectionById(subsectionId: string | null): any {
           id: layout.id,
           type: layout.type,
           title: layout.title,
-          items: [], 
-          children: [] 
+          items: [],
+          children: []
         };
-        
+
         // Process form inputs directly in this section
         if (layout.formInputs && layout.formInputs.length > 0) {
           section.items = layout.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
         }
-        
-        // Process subsections 
+
+        // Process subsections
         if (layout.children && layout.children.length > 0) {
           section.children = layout.children.map((child: any) => {
             const subsection = {
@@ -486,23 +486,23 @@ private findSubsectionById(subsectionId: string | null): any {
               title: child.title,
               items: []
             };
-            
+
             // Process form inputs in this subsection
             if (child.formInputs && child.formInputs.length > 0) {
               subsection.items = child.formInputs.map((input: any) => this.mapFormInputToEditorItem(input));
             }
-            
+
             return subsection;
           });
         }
-        
+
         return section;
       }
-      
+
       return layout;
     });
   }
-  
+
   private mapFormInputToEditorItem(input: any): any {
     let config;
     try {
@@ -511,7 +511,7 @@ private findSubsectionById(subsectionId: string | null): any {
       console.error('Error parsing input config:', e);
       config = {};
     }
-    
+
     return {
       id: input.id,
       type: input.type,
@@ -519,19 +519,19 @@ private findSubsectionById(subsectionId: string | null): any {
         ...config,
         label: input.title,
         required: input.required,
-        isRequired: input.required 
+        isRequired: input.required
       }
     };
   }
-  
+
   private collectAllFormInputs(layouts: any[]): FormInput[] {
     const allInputs: FormInput[] = [];
-    
+
     layouts.forEach(layout => {
       if (layout.formInputs && layout.formInputs.length > 0) {
         allInputs.push(...layout.formInputs);
       }
-      
+
       if (layout.children && layout.children.length > 0) {
         layout.children.forEach((subsection: any) => {
           if (subsection.formInputs && subsection.formInputs.length > 0) {
@@ -540,31 +540,44 @@ private findSubsectionById(subsectionId: string | null): any {
         });
       }
     });
-    
+
     return allInputs;
   }
 handleSubmit() {
   console.log('Starting form submission process');
+  console.log('Current editorItems:', this.editorItems);
   const sectionItemsMap = new Map<string, any[]>();
   const subsectionItemsMap = new Map<string, any[]>();
 
+  // Process all sections (both new and existing)
   this.editorItems.forEach((item) => {
-    if (!item.id && item.type === 'Section') {
-      item.tempId = `temp_section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      if (item.items) {
-        const itemsWithSection = item.items.map((formItem: any) => ({
-          ...formItem,
-          tempSectionId: item.tempId,
-        }));
-        sectionItemsMap.set(item.tempId, itemsWithSection);
+    if (item.type === 'Section') {
+      console.log(`Processing section: ${item.title || 'Untitled'}, ID: ${item.id || 'NEW'}`);
+
+      // Only assign tempId to new sections (without ID)
+      if (!item.id) {
+        item.tempId = `temp_section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`Assigned tempId to new section: ${item.tempId}`);
+        if (item.items) {
+          const itemsWithSection = item.items.map((formItem: any) => ({
+            ...formItem,
+            tempSectionId: item.tempId,
+          }));
+          sectionItemsMap.set(item.tempId, itemsWithSection);
+          console.log(`Added ${item.items.length} items to new section`);
+        }
+      } else {
+        console.log(`Existing section with ID ${item.id} has ${item.items?.length || 0} items`);
       }
-      
+
+      // Process subsections for both new and existing sections
       if (item.children && item.children.length > 0) {
         item.children.forEach((subsection: any) => {
           if (!subsection.id && subsection.type === 'Subsection') {
             subsection.tempId = `temp_subsection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            subsection.parentSectionTempId = item.tempId;
-            
+            // For new sections, use tempId; for existing sections, use actual ID
+            subsection.parentSectionTempId = item.tempId || item.id;
+
             if (subsection.items && subsection.items.length > 0) {
               const itemsWithSubsection = subsection.items.map((formItem: any) => ({
                 ...formItem,
@@ -578,110 +591,140 @@ handleSubmit() {
     }
   });
 
-  const layoutsToSave = this.editorItems.filter(
-    (item) => !item.id && item.type === 'Section'
-  );
+  // Only save sections that are actually new (don't have IDs)
+  // Remove children from sections before sending to backend since they need to be saved separately
+  const layoutsToSave = this.editorItems
+    .filter((item) => !item.id && item.type === 'Section')
+    .map(section => ({
+      ...section,
+      children: undefined // Remove children - they will be saved separately
+    }));
 
-  const saveSections$ = layoutsToSave.length > 0
-    ? this.formTemplateService
-        .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
-        .pipe(
-          takeUntil(this.destroy$),
-          map((updatedFormTemplate: FormTemplate) => {
-            const tempIdToSavedLayoutMap = new Map<string, any>();
-            if (updatedFormTemplate.formLayouts) {
-              const newLayouts = updatedFormTemplate.formLayouts
-                .filter(
-                  (layout) =>
-                    !this.editorItems.some((existing) => existing.id === layout.id)
-                )
-                .sort((a, b) => a.id - b.id);
-              layoutsToSave.forEach((originalLayout, index) => {
-                if (originalLayout.tempId && newLayouts[index]) {
-                  tempIdToSavedLayoutMap.set(
-                    originalLayout.tempId,
-                    newLayouts[index]
-                  );
-                }
-              });
-            }
-            this.editorItems = this.editorItems.map((item) => {
-              if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
-                const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
-                const originalItems = sectionItemsMap.get(item.tempId) || [];
-                
-                let updatedChildren = [];
-                if (item.children && item.children.length > 0) {
-                  updatedChildren = item.children.map((subsection: any) => {
-                    if (subsection.parentSectionTempId === item.tempId) {
-                      return {
-                        ...subsection,
-                        parentSectionId: savedLayout.id
-                      };
-                    }
-                    return subsection;
-                  });
-                }
-                
-                return {
-                  ...savedLayout,
-                  type: 'Section',
-                  children: updatedChildren,
-                  items: originalItems.map((origItem) => ({
-                    ...origItem,
-                    tempSectionId: undefined,
-                    targetSectionId: savedLayout.id,
-                  })),
-                };
+  console.log(`Found ${layoutsToSave.length} new sections to save`);
+
+  // Create a sequential flow that handles all cases
+  const executeFlow = () => {
+    // Step 1: Save new sections (if any)
+    const saveSections$ = layoutsToSave.length > 0
+      ? this.formTemplateService
+          .addFormLayoutsToFormTemplate(+this.templateId, layoutsToSave)
+          .pipe(
+            takeUntil(this.destroy$),
+            map((updatedFormTemplate: FormTemplate) => {
+              const tempIdToSavedLayoutMap = new Map<string, any>();
+              if (updatedFormTemplate.formLayouts) {
+                const newLayouts = updatedFormTemplate.formLayouts
+                  .filter(
+                    (layout) =>
+                      !this.editorItems.some((existing) => existing.id === layout.id)
+                  )
+                  .sort((a, b) => a.id - b.id);
+                layoutsToSave.forEach((originalLayout, index) => {
+                  if (originalLayout.tempId && newLayouts[index]) {
+                    tempIdToSavedLayoutMap.set(
+                      originalLayout.tempId,
+                      newLayouts[index]
+                    );
+                  }
+                });
               }
-              return item;
-            });
-          })
-        )
-    : of(null);
+              this.editorItems = this.editorItems.map((item) => {
+                if (item.tempId && tempIdToSavedLayoutMap.has(item.tempId)) {
+                  const savedLayout = tempIdToSavedLayoutMap.get(item.tempId);
+                  const originalItems = sectionItemsMap.get(item.tempId) || [];
 
-  const saveSubsections$ = new Subject<void>();
-  const saveFormInputs$ = new Subject<void>();
-  
-  (saveSections$ as Observable<void>).subscribe({
-    next: () => {
-      this.saveSubsectionsToSections(() => saveSubsections$.next());
-    },
-    error: (error: any) => console.error('Error saving sections:', error),
-  });
-  
-  (saveSubsections$ as Observable<void>).subscribe({
-    next: () => {
-      this.saveFormInputsToSections(() => saveFormInputs$.next());
-    },
-    error: (error: any) => console.error('Error saving subsections:', error),
-  });
+                  let updatedChildren = [];
+                  if (item.children && item.children.length > 0) {
+                    updatedChildren = item.children.map((subsection: any) => {
+                      if (subsection.parentSectionTempId === item.tempId) {
+                        return {
+                          ...subsection,
+                          parentSectionId: savedLayout.id
+                        };
+                      }
+                      return subsection;
+                    });
+                  }
 
-  (saveFormInputs$ as Observable<void>).subscribe({
-    next: () => {
-      console.log('All sections, subsections and form inputs saved successfully.');
-      this.router.navigate(['admin/form-template']);
-    },
-    error: (error) => console.error('Error saving form inputs:', error),
-  });
+                  return {
+                    ...savedLayout,
+                    type: 'Section',
+                    children: updatedChildren,
+                    items: originalItems.map((origItem) => ({
+                      ...origItem,
+                      tempSectionId: undefined,
+                      targetSectionId: savedLayout.id,
+                    })),
+                  };
+                }
+                return item;
+              });
+              console.log('Sections saved successfully');
+              return true;
+            })
+          )
+      : of(true); // Return true immediately if no sections to save
+
+    // Step 2: Save new subsections (if any)
+    const saveSubsections$ = saveSections$.pipe(
+      switchMap(() => {
+        return new Observable(observer => {
+          this.saveSubsectionsToSections(() => {
+            console.log('Subsections processing completed');
+            observer.next(true);
+            observer.complete();
+          });
+        });
+      })
+    );
+
+    // Step 3: Save new form inputs (if any)
+    const saveFormInputs$ = saveSubsections$.pipe(
+      switchMap(() => {
+        return new Observable(observer => {
+          this.saveFormInputsToSections(() => {
+            console.log('Form inputs processing completed');
+            observer.next(true);
+            observer.complete();
+          });
+        });
+      })
+    );
+
+    // Execute the flow
+    saveFormInputs$.subscribe({
+      next: () => {
+        console.log('All sections, subsections and form inputs saved successfully.');
+        this.router.navigate(['admin/form-template']);
+      },
+      error: (error) => {
+        console.error('Error in save flow:', error);
+      }
+    });
+  };
+
+  // Start the execution
+  executeFlow();
 }
 
   saveSubsectionsToSections(onComplete?: () => void) {
     const subsectionRequests: Observable<any>[] = [];
-    
+
     this.editorItems.forEach((section) => {
       if (section.type === 'Section' && section.id) {
         const sectionId = section.id;
-        
+
         if (section.children?.length > 0) {
           section.children.forEach((subsection: any) => {
+            // Only process subsections that don't have an ID (new subsections)
             if (!subsection.id && subsection.type === 'Subsection') {
+              console.log(`Processing subsection for section ${sectionId}:`, subsection);
               const subsectionData = {
                 title: subsection.title || 'Subsection',
                 type: 'Subsection',
                 formTemplate: { id: +this.templateId }
               };
-              
+
               const saveSubsection$ = this.formTemplateService.addSubsectionToSection(sectionId, subsectionData)
                 .pipe(
                   catchError(error => {
@@ -697,7 +740,7 @@ handleSubmit() {
                           type: 'Subsection',
                           items: subsection.items || []
                         };
-                        
+
                         if (subsection.tempId && subsection.items?.length > 0) {
                           subsection.items.forEach((item: any) => {
                             item.tempSubsectionId = undefined;
@@ -709,19 +752,19 @@ handleSubmit() {
                     return savedSubsection;
                   })
                 );
-              
+
               subsectionRequests.push(saveSubsection$);
             }
           });
         }
       }
     });
-    
+
     if (subsectionRequests.length === 0) {
       if (onComplete) onComplete();
       return;
     }
-    
+
     forkJoin(subsectionRequests)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -739,36 +782,47 @@ handleSubmit() {
   saveFormInputsToSections(onComplete?: () => void) {
     const formInputRequests: any[] = [];
     const multiChoiceItems: { item: any; layoutId: number }[] = [];
-    
+
     this.editorItems.forEach((section) => {
       if (section.type === 'Section') {
         const sectionLayoutId = section.id;
-  
+
+        // Skip sections that don't have an ID (they haven't been saved yet)
+        if (!sectionLayoutId) {
+          console.warn('Section has no ID, skipping form inputs for this section:', section);
+          return;
+        }
+
         if (section.items?.length > 0) {
           section.items.forEach((item: any, itemIndex: number) => {
+            // Only skip items that have an ID (already saved) or are not form inputs
             if (item.id || !item.type || item.type === 'Section') {
               return;
             }
-  
+
+            // Only process items that don't have an ID (new items that need to be saved)
+            console.log(`Processing new item in section ${sectionLayoutId}:`, item);
             this.prepareFormInputRequest(item, sectionLayoutId, itemIndex, formInputRequests, multiChoiceItems);
           });
         }
-  
+
         if (section.children?.length > 0) {
           section.children.forEach((subsection: any) => {
             if (!subsection.id) {
               console.warn('Subsection has no ID, cannot add form inputs to it:', subsection);
               return;
             }
-            
+
             const subsectionLayoutId = subsection.id;
-            
+
             if (subsection.items?.length > 0) {
               subsection.items.forEach((item: any, itemIndex: number) => {
+                // Only skip items that have an ID (already saved) or are not form inputs
                 if (item.id || !item.type || item.type === 'Subsection') {
                   return;
                 }
-  
+
+                // Only process items that don't have an ID (new items that need to be saved)
                 this.prepareFormInputRequest(item, subsectionLayoutId, itemIndex, formInputRequests, multiChoiceItems);
               });
             }
@@ -776,22 +830,24 @@ handleSubmit() {
         }
       }
     });
-  
+
+    console.log('Form inputs to save:', formInputRequests.length);
     if (formInputRequests.length === 0) {
+      console.log('No new form inputs to save, completing...');
       if (onComplete) onComplete();
       return;
     }
-  
+
     const saveOperations: Observable<any>[] = formInputRequests.map(request => {
       const { formInput, formLayoutId } = request;
-      
+
       let layout = null;
       for (const section of this.editorItems) {
         if (section.id === formLayoutId) {
           layout = section;
           break;
         }
-        
+
         if (section.children) {
           const subsection = section.children.find((sub: any) => sub.id === formLayoutId);
           if (subsection) {
@@ -800,12 +856,14 @@ handleSubmit() {
           }
         }
       }
-      
+
       if (!layout) {
         console.error(`Could not find layout with ID ${formLayoutId}`);
         return of(null);
       }
-      
+
+      console.log(`Saving form input to ${layout.type} with ID ${formLayoutId}:`, formInput);
+
       if (layout.type === 'Subsection') {
         return this.formTemplateService.addFormInputToSubsection(formLayoutId, formInput)
           .pipe(
@@ -824,13 +882,17 @@ handleSubmit() {
           );
       }
     });
-  
+
     forkJoin(saveOperations)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (savedInputs) => {
           console.log('Form inputs saved successfully:', savedInputs);
           const validSavedInputs = savedInputs.filter(input => input !== null);
+
+          // Update the items with their new IDs from the server response
+          this.updateItemsWithSavedIds(validSavedInputs, formInputRequests);
+
           this.processMultiChoiceItems(multiChoiceItems, validSavedInputs, onComplete);
         },
         error: (error) => {
@@ -839,9 +901,53 @@ handleSubmit() {
         },
       });
   }
-  
 
-// Méthode helper pour préparer les requêtes
+  // Helper method to update items with their saved IDs from server response
+  private updateItemsWithSavedIds(savedInputs: any[], formInputRequests: any[]): void {
+    savedInputs.forEach((savedInput, index) => {
+      if (savedInput && formInputRequests[index]) {
+        const { formLayoutId } = formInputRequests[index];
+        const savedInputTitle = savedInput.title;
+
+        // Find the corresponding item in editorItems and update it with the ID
+        this.editorItems.forEach((section) => {
+          if (section.type === 'Section') {
+            // Check section items
+            if (section.items && section.id === formLayoutId) {
+              const itemToUpdate = section.items.find((item: any) =>
+                !item.id &&
+                item.type === savedInput.type &&
+                (item.config?.label || item.config?.groupLabel || item.config?.title || '') === savedInputTitle
+              );
+              if (itemToUpdate) {
+                itemToUpdate.id = savedInput.id;
+                console.log(`Updated item with ID ${savedInput.id}:`, itemToUpdate);
+              }
+            }
+
+            // Check subsection items
+            if (section.children) {
+              section.children.forEach((subsection: any) => {
+                if (subsection.items && subsection.id === formLayoutId) {
+                  const itemToUpdate = subsection.items.find((item: any) =>
+                    !item.id &&
+                    item.type === savedInput.type &&
+                    (item.config?.label || item.config?.groupLabel || item.config?.title || '') === savedInputTitle
+                  );
+                  if (itemToUpdate) {
+                    itemToUpdate.id = savedInput.id;
+                    console.log(`Updated subsection item with ID ${savedInput.id}:`, itemToUpdate);
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+// Helper method to prepare form input requests
 private prepareFormInputRequest(
   item: any,
   layoutId: number,
@@ -876,7 +982,7 @@ private prepareFormInputRequest(
 
   addSubsection(section: any): void {
     const sectionId = section.id;
-    
+
     const dialogRef = this.dialog.open(SubsectionConfigComponent, {
       width: '70vw',
       height: '50vh',
@@ -885,7 +991,7 @@ private prepareFormInputRequest(
       panelClass: 'custom-dialog-container',
       backdropClass: 'custom-dialog-backdrop',
     });
-  
+
     dialogRef.closed.pipe(takeUntil(this.destroy$)).subscribe((subsectionResult) => {
       if (subsectionResult) {
         const subsectionData = {
@@ -893,7 +999,7 @@ private prepareFormInputRequest(
           type: 'Subsection',
           formTemplate: { id: +this.templateId }
         };
-        
+
         if (sectionId) {
           this.formTemplateService.addSubsectionToSection(sectionId, subsectionData)
             .pipe(takeUntil(this.destroy$))
@@ -902,13 +1008,13 @@ private prepareFormInputRequest(
                 if (!section.children) {
                   section.children = [];
                 }
-                
+
                 section.children.push({
                   ...savedSubsection,
                   type: 'Subsection',
                   items: []
                 });
-                
+
                 console.log('Subsection added successfully:', savedSubsection);
                 this.cdr.detectChanges();
               },
@@ -920,13 +1026,13 @@ private prepareFormInputRequest(
           if (!section.children) {
             section.children = [];
           }
-          
+
           section.children.push({
             ...subsectionData,
             tempId: `temp_subsection_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             items: []
           });
-          
+
           this.cdr.detectChanges();
         }
       }
@@ -1125,7 +1231,7 @@ removeItem(item: any) {
 
       return of(null);
     });
-    
+
     forkJoin(saveRequests)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -1146,16 +1252,16 @@ removeItem(item: any) {
         event.previousIndex,
         event.currentIndex
       );
-  
-      subsection.items = [...subsection.items]; 
-  
+
+      subsection.items = [...subsection.items];
+
       const updatedItems = subsection.items
         .filter((item: any) => item.id)
         .map((item: any, index: number) => ({
           id: item.id,
           ordinalPosition: index
         }));
-  
+
       if (updatedItems.length > 0) {
         this.formTemplateService.updateSubsectionItemsOrder(
           +this.templateId,
@@ -1224,11 +1330,11 @@ removeItem(item: any) {
         input.type === 'SELECT_BOX' ||
         input.type === 'RADIO_BUTTON'
     );
-  
+
     if (multiChoiceInputs.length === 0) {
       return;
     }
-  
+
     const requests = multiChoiceInputs.map((input) =>
       this.multipleValueService.getMultipleValuesByFormInputId(input.id).pipe(
         map((values) => ({ input, values })),
@@ -1241,7 +1347,7 @@ removeItem(item: any) {
         })
       )
     );
-  
+
     // Execute all requests in parallel
     forkJoin(requests)
       .pipe(takeUntil(this.destroy$))
@@ -1251,7 +1357,7 @@ removeItem(item: any) {
             input.multipleValues = values as MultipleValue[];
             this.updateEditorItemWithMultipleValues(input);
           });
-  
+
           this.cdr.detectChanges();
         },
         error: (error) => {
@@ -1259,7 +1365,7 @@ removeItem(item: any) {
         },
       });
   }
-  
+
 
   private updateEditorItemWithMultipleValues(input: FormInput) {
     const updateItemConfig = (item: any) => {
@@ -1302,12 +1408,12 @@ removeItem(item: any) {
         item.multipleValues = multipleValues;
       }
     };
-  
+
     this.editorItems.forEach((section) => {
       if (section.items) {
         section.items.forEach(updateItemConfig);
       }
-      
+
       if (section.children) {
         section.children.forEach((subsection: any) => {
           if (subsection.items) {
@@ -1367,7 +1473,7 @@ removeItem(item: any) {
           mode: 'edit' as const
         }
       });
-  
+
       dialogRef.closed.subscribe((updatedSection) => {
         if (updatedSection) {
           this.handleUpdateSection(item, updatedSection);
@@ -1380,7 +1486,7 @@ removeItem(item: any) {
           mode: 'edit' as const
         }
       });
-  
+
       dialogRef.closed.subscribe((updatedSubsection) => {
         if (updatedSubsection) {
           this.handleUpdateSubsection(item, updatedSubsection);
@@ -1406,24 +1512,24 @@ removeItem(item: any) {
   }
   handleUpdateSection(oldSection: any, updatedSection: any): void {
     const topLevelIndex = this.editorItems.indexOf(oldSection);
-  
-    let sectionToUpdate = { 
-      ...oldSection, 
+
+    let sectionToUpdate = {
+      ...oldSection,
       title: updatedSection.title,
       config: {
         ...oldSection.config,
         title: updatedSection.title
       }
     };
-    
+
     if (!sectionToUpdate.children && oldSection.children) {
       sectionToUpdate.children = [...oldSection.children];
     }
-    
+
     if (!sectionToUpdate.items && oldSection.items) {
       sectionToUpdate.items = [...oldSection.items];
     }
-  
+
     if (topLevelIndex !== -1) {
       this.editorItems[topLevelIndex] = sectionToUpdate;
     } else {
@@ -1437,12 +1543,12 @@ removeItem(item: any) {
         }
       }
     }
-  
+
     if (sectionToUpdate.id) {
       const updatePayload = {
         title: sectionToUpdate.title
       };
-  
+
       this.formLayoutService.updateFormLayout(sectionToUpdate.id, updatePayload).subscribe({
         next: (response) => {
           console.log('Section mise à jour sur le serveur:', response);
@@ -1457,7 +1563,7 @@ removeItem(item: any) {
     }
   }
   handleUpdateSubsection(oldSubsection: any, updatedSubsection: any): void {
-    let subsectionToUpdate = { 
+    let subsectionToUpdate = {
       ...oldSubsection,
       title: updatedSubsection.title,
       config: {
@@ -1466,21 +1572,21 @@ removeItem(item: any) {
         children: updatedSubsection.config?.children || oldSubsection.config?.children || []
       }
     };
-    
+
     if (oldSubsection.items && !updatedSubsection.items) {
       subsectionToUpdate.items = oldSubsection.items;
     }
-  
+
     for (const section of this.editorItems) {
       if (section.children) {
         const subIndex = section.children.indexOf(oldSubsection);
         if (subIndex !== -1) {
           section.children[subIndex] = subsectionToUpdate;
-  
+
           if (subsectionToUpdate.id) {
             this.formLayoutService.updateFormLayout(subsectionToUpdate.id, {
               title: subsectionToUpdate.title,
-              children: subsectionToUpdate.config?.children || [] 
+              children: subsectionToUpdate.config?.children || []
 
             })
               .subscribe({
@@ -1493,7 +1599,7 @@ removeItem(item: any) {
                 }
               });
           }
-  
+
           break;
         }
       }

@@ -9,6 +9,7 @@ import { AdminSubmissionComponent } from './pages/admin-submission/admin-submiss
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
+import { adminGuard, userGuard, formAccessGuard } from './core/auth/guards/roleGuard';
 import { RegisterComponent } from './user/pages/register/register.component';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
@@ -20,104 +21,96 @@ import { ProfilComponent } from './user/pages/profil/profil.component';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', loadComponent: () => import('./pages/login-page/login-page.component').then(m => m.LoginPageComponent) },
-  
+
   {
     path: 'admin',
     component: AdminLayoutsComponent,
-    canActivate: [authGuard],
-    children: [ 
-      { 
-        path: '', 
-        component: DashboardComponent, 
+    canActivate: [adminGuard],
+    children: [
+      {
+        path: '',
+        component: DashboardComponent,
         pathMatch: 'full',
-        data: { title: 'Dashboard' } 
+        data: { title: 'Dashboard' }
       },
-      { 
-        path: 'form-template', 
-        component: FormTemplateComponent, 
-        canActivate: [authGuard],
-        data: { title: 'Form Templates' } 
+      {
+        path: 'form-template',
+        component: FormTemplateComponent,
+        data: { title: 'Form Templates' }
       },
-      { 
-        path: 'editor-tree/:id', 
-        component: EditorTreeComponent, 
-        canActivate: [authGuard],
-        data: { title: 'Form Editor' } 
+      {
+        path: 'editor-tree/:id',
+        component: EditorTreeComponent,
+        data: { title: 'Form Editor' }
       },
-      { 
-        path: 'list_submissions', 
-        component: AdminSubmissionComponent, 
-        canActivate: [authGuard],
-        data: { title: 'Submissions' } 
+      {
+        path: 'list_submissions',
+        component: AdminSubmissionComponent,
+        data: { title: 'Submissions' }
       },
       { path: 'diagram',
-         component: BpmnModelerComponent, 
-         canActivate: [authGuard],
-         data: { title: 'Camunda Modeler' } 
+         component: BpmnModelerComponent,
+         data: { title: 'Camunda Modeler' }
         },
       { path: 'processes',
          component: ProcessesPageComponent,
-         canActivate: [authGuard],
-         data: { title: 'Processes' } 
+         data: { title: 'Processes' }
         },
       { path: 'register',
          component: RegisterComponent,
-         canActivate: [authGuard],
-         data: { title: 'Register' } 
+         data: { title: 'Register' }
         },
         { path: 'users',
          component: ListUsersComponent,
-         canActivate: [authGuard],
-         data: { title: 'List users' } 
+         data: { title: 'List users' }
         },
 
-    ] 
-  }, 
+    ]
+  },
 
   {
     path: 'user',
     component: UserLayoutsComponent,
-    canActivate: [authGuard],
-    children: [ 
-      { 
-        path: '', 
+    canActivate: [userGuard],
+    children: [
+      {
+        path: '',
         redirectTo: 'profile',
         pathMatch: 'full'
       },
-      { 
-        path: 'profile', 
+      {
+        path: 'profile',
         component: ProfilComponent,
-        canActivate: [authGuard],
-        data: { title: 'Profile' } 
+        data: { title: 'Profile' }
       },
-      { 
-        path: 'forms', 
-        component: FormsComponent, 
-        canActivate: [authGuard],
+      {
+        path: 'forms',
+        component: FormsComponent,
+        canActivate: [formAccessGuard],
         data: { title: 'Forms' }
       },
-      { 
-        path: 'list', 
-        component: FormListComponent, 
-        canActivate: [authGuard],
+      {
+        path: 'list',
+        component: FormListComponent,
+        canActivate: [formAccessGuard],
         data: { title: 'Responses' }
       }
-    ] 
-  }, 
-  
-   
+    ]
+  },
 
-  { path: 'editor-tree/:id', component: EditorTreeComponent, canActivate: [authGuard] },
-  { path: 'forms', component: FormsComponent, canActivate: [authGuard] },
-  { path: 'formvalue/:id', component: FormvalueComponent, canActivate: [authGuard] },
-  { path: 'responses/:userId/:formId', component: FormResponsesComponent, canActivate: [authGuard] },
-  { path: 'list', component: FormListComponent, canActivate: [authGuard] },
-  { path: 'edit/:userId/:submissionId', component: EditFormComponent, canActivate: [authGuard] },
+
+
+  { path: 'editor-tree/:id', component: EditorTreeComponent, canActivate: [adminGuard] },
+  { path: 'forms', component: FormsComponent, canActivate: [formAccessGuard] },
+  { path: 'formvalue/:id', component: FormvalueComponent, canActivate: [formAccessGuard] },
+  { path: 'responses/:userId/:formId', component: FormResponsesComponent, canActivate: [formAccessGuard] },
+  { path: 'list', component: FormListComponent, canActivate: [formAccessGuard] },
+  { path: 'edit/:userId/:submissionId', component: EditFormComponent, canActivate: [formAccessGuard] },
   // { path: 'list_submissions', component: AdminSubmissionComponent, canActivate: [authGuard] },
   // { path: 'diagram', component: BpmnModelerComponent, canActivate: [authGuard] },
   // { path: 'processes', component: ProcessesPageComponent, canActivate: [authGuard] },
   // { path: 'register', component: RegisterComponent, canActivate: [authGuard] },
-  
+
 
   { path: '**', redirectTo: 'login' }
 ];

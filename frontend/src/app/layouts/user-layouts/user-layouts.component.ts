@@ -1,7 +1,8 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
+import { TokenService } from '../../services/token.service';
 import { CommonModule } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { IonicModule } from '@ionic/angular';
@@ -19,29 +20,31 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   isAuthenticated = false;
   currentUser: UserProfile | null = null;
   pageTitle: string = 'Profile';
-  userPhotoUrl: string | null = null; 
-  @ViewChild('fileInput') fileInput!: ElementRef; 
+  userPhotoUrl: string | null = null;
+  isDropdownOpen = false;
+  @ViewChild('fileInput') fileInput!: ElementRef;
   
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private tokenService: TokenService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
-  
+
   ngOnInit() {
     this.authService.isAuthenticated$.subscribe(
       isAuth => {
         console.log('Authentication status:', isAuth);
         this.isAuthenticated = isAuth;
-        
+
         if (isAuth) {
           this.loadUserAndPhoto();
         }
       }
     );
-    
+
     this.userService.currentUser$.subscribe(
       user => {
         console.log('Current user data:', user);
@@ -50,7 +53,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       }
     );
-    
+
     this.router.events.pipe(
       filter((event: Event) => event instanceof NavigationEnd),
       map(() => this.activatedRoute),
@@ -73,12 +76,14 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     this.updateTitleFromUrl();
   }
-  
+
   ngAfterViewInit() {
   }
+
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
+
   private updateTitleFromUrl(): void {
     const urlPath = this.router.url;
 
@@ -94,28 +99,32 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     document.title = `USER - ${this.pageTitle}`;
   }
-  
 
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 
   onFileSelected(event: any): void {
     const input = event.target as HTMLInputElement;
-  
+
     if (!input || !input.files || input.files.length === 0) {
       console.error('Aucun fichier sélectionné');
       return;
     }
-  
+
     const file = input.files[0];
-  
+
     if (!file.type.startsWith('image/')) {
       console.error('Le fichier sélectionné n\'est pas une image.');
       return;
     }
-  
+
     this.uploadPhoto(file);
-  
+
     input.value = '';
   }
+
   private loadUserAndPhoto(): void {
     this.userService.loadCurrentUserWithPhoto();
   }
@@ -185,7 +194,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   
   uploadPhoto(file: File) {
     const userId = this.currentUser?.id;
-  
+
     if (!userId) {
       console.error("Aucun utilisateur connecté ou ID non trouvé");
       return;
@@ -196,7 +205,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
     
     let body = new FormData();
     body.append('file', file);
-  
+
     this.userService.ModifierPhoto(userId, body).subscribe({
       next: (response) => {
         console.log('Réponse du serveur après téléchargement:', response);
@@ -208,7 +217,10 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
           this.cdr.detectChanges();
         }
         
-        this.userService.loadCurrentUserWithPhoto();
+        // Recharger les données utilisateur pour s'assurer de la synchronisation
+        setTimeout(() => {
+          this.userService.loadCurrentUserWithPhoto();
+        }, 500);
         
         console.log('Photo mise à jour avec succès');
         alert('Photo mise à jour avec succès !');
@@ -227,8 +239,9 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
   getDefaultAvatarUrl(): string {
-    return 'assets/default-avatar.png'; 
+    return 'assets/default-avatar.png';
   }
 
   onImageError(event: ErrorEvent): void {
@@ -238,8 +251,27 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       imgElement.src = this.getDefaultAvatarUrl();
     }
   }
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+
+  canAccessForms(): boolean {
+    return this.tokenService.isUser();
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target) {
+      const dropdown = target.closest('.dropdown');
+      if (!dropdown && this.isDropdownOpen) {
+        this.isDropdownOpen = false;
+      }
+    }
   }
 }

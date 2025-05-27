@@ -9,118 +9,130 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <div class="container bootstrap snippet">
-    <div class="row mb-4">
-        <div class="col-sm-6 text-left">
-            <img src="assets/st2i.png" alt="ST2I Logo" class="img-responsive logo-image" style="max-height: 80px; margin-bottom: 10px;">
-        </div>
-        <div class="col-sm-6 text-right" style="padding-top: 15px;">
-            <!-- User Profile Dropdown -->
-            <div class="dropdown" style="display: inline-block;">
-              <button type="button" class="btn logout-btn" (click)="logout()">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
+  <div class="row mb-4">
+      <div class="col-sm-6 text-left">
+          <img src="assets/st2i.png" alt="ST2I Logo" class="img-responsive logo-image" style="max-height: 80px; margin-bottom: 10px;">
+      </div>
+      <div class="col-sm-6 text-right" style="padding-top: 15px;">
+          <!-- User Profile Dropdown -->
+          <div class="dropdown" style="display: inline-block;">
+              <button class="btn btn-default dropdown-toggle" type="button" id="userProfileDropdown"
+                      (click)="toggleDropdown()"
+                      aria-haspopup="true"
+                      [attr.aria-expanded]="isDropdownOpen"
+                      style="background-color: #f8f9fa; border-color: #3498db; position: relative;">
+                  <span style="margin-right: 5px;">{{ currentUser?.firstname || 'User' }} {{ currentUser?.lastname || '' }}</span>
+                  <span class="caret"></span>
               </button>
-                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="userProfileDropdown">
-                    <li class="dropdown-header" style="padding: 10px;">
-                        <div style="font-weight: bold;">{{ currentUser?.firstname }} {{ currentUser?.lastname }}</div>
-                        <div style="font-size: 12px; color: #777;">{{ currentUser?.email }}</div>
-                    </li>
-                    <li role="separator" class="divider"></li>
-                    <li><a routerLink="/profile"><i class="fas fa-user-circle"></i> Profile</a></li>
-                    <li><a href="#" (click)="logout()"><i class="fas fa-sign-out-alt"></i> Sign out</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <hr style="border-top: 1px solid #3498db; margin-top: 10px;">
+              <ul class="dropdown-menu dropdown-menu-right"
+                  [class.show]="isDropdownOpen"
+                  [style.display]="isDropdownOpen ? 'block' : 'none'"
+                  aria-labelledby="userProfileDropdown"
+                  style="position: absolute; top: 100%; right: 0; z-index: 1000; min-width: 200px; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <li class="dropdown-header" style="padding: 10px; border-bottom: 1px solid #eee;">
+                      <div style="font-weight: bold; color: #333;">{{ currentUser?.firstname }} {{ currentUser?.lastname }}</div>
+                      <div style="font-size: 12px; color: #777;">{{ currentUser?.email }}</div>
+                  </li>
+                  <li><a routerLink="/user/profile" class="dropdown-link"
+                         (click)="closeDropdown()">
+                      <i class="fas fa-user-circle" style="margin-right: 8px;"></i> Profile</a></li>
+                  <li><a href="#" class="dropdown-link logout-link"
+                         (click)="logout(); $event.preventDefault()">
+                      <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Sign out</a></li>
+              </ul>
+          </div>
+      </div>
+  </div>
+  <hr style="border-top: 1px solid #3498db; margin-top: 10px;">
 
-    <div class="row">
-  		<div class="col-sm-3">
-              
-        <div class="text-center" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <img [src]="userPhotoUrl || getDefaultAvatarUrl()" 
-               class="avatar img-circle img-thumbnail" 
-               alt="avatar" 
-               style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #3498db;"
-               (error)="onImageError($event)">
-          
-          <h4 style="margin-top: 15px; font-weight: 600; color: #2c3e50;">
-            {{ currentUser?.firstname }} {{ currentUser?.lastname }}
-          </h4>
-          
-          <p class="text-muted">
-            <i class="fas fa-map-marker-alt"></i> New York, USA
-          </p>
-          
-          <input type="file" 
-                 #fileInput 
-                 style="display: none;" 
-                 accept="image/*" 
-                 (change)="onFileSelected($event)">
-          
-          <button type="button" 
-                  class="btn btn-primary btn-sm" 
-                  style="margin-top: 10px; background-color: #3498db; border-color: #3498db;" 
-                  (click)="triggerFileInput()">
-            <i class="fas fa-camera"></i> Change Photo
-          </button>
-        </div><br>
+  <div class="row">
+    <div class="col-sm-3">
 
-          <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <div class="panel-heading" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
-              <i class="fas fa-globe"></i> Website
-            </div>
-            <div class="panel-body">
-              <a href="http://example.com" style="color: #3498db;">example.com</a>
-            </div>
+      <div class="text-center" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <img [src]="userPhotoUrl || getDefaultAvatarUrl()"
+             class="avatar img-circle img-thumbnail"
+             alt="avatar"
+             style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #3498db;"
+             (error)="onImageError($event)">
+        
+        <h4 style="margin-top: 15px; font-weight: 600; color: #2c3e50;">
+          {{ currentUser?.firstname }} {{ currentUser?.lastname }}
+        </h4>
+
+        <p class="text-muted">
+          <i class="fas fa-map-marker-alt"></i> New York, USA
+        </p>
+
+        <input type="file"
+               #fileInput
+               style="display: none;"
+               accept="image/*"
+               (change)="onFileSelected($event)">
+
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                style="margin-top: 10px; background-color: #3498db; border-color: #3498db;"
+                (click)="triggerFileInput()">
+          <i class="fas fa-camera"></i> Change Photo
+        </button>
+      </div><br>
+
+        <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+          <div class="panel-heading" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
+            <i class="fas fa-globe"></i> Website
           </div>
-          
-          
-          <ul class="list-group" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <li class="list-group-item text-muted" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
-              <i class="fas fa-chart-line"></i> Activity Dashboard
-            </li>
-            <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
-              <span class="pull-left"><i class="fas fa-share-alt"></i> <strong>Shares</strong></span> 
-              <span class="badge" style="background-color: #3498db;">125</span>
-            </li>
-            <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
-              <span class="pull-left"><i class="fas fa-heart"></i> <strong>Likes</strong></span> 
-              <span class="badge" style="background-color: #e74c3c;">13</span>
-            </li>
-            <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
-              <span class="pull-left"><i class="fas fa-file-alt"></i> <strong>Posts</strong></span> 
-              <span class="badge" style="background-color: #2ecc71;">37</span>
-            </li>
-            <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
-              <span class="pull-left"><i class="fas fa-users"></i> <strong>Followers</strong></span> 
-              <span class="badge" style="background-color: #9b59b6;">78</span>
-            </li>
-          </ul> 
-               
-          <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <div class="panel-heading" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
-              <i class="fas fa-share-alt"></i> Social Media
-            </div>
-            <div class="panel-body text-center">
-              <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #3b5998;"><i class="fab fa-facebook-f fa-2x"></i></a>
-              <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #00acee;"><i class="fab fa-twitter fa-2x"></i></a>
-              <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #171515;"><i class="fab fa-github fa-2x"></i></a>
-              <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #0e76a8;"><i class="fab fa-linkedin-in fa-2x"></i></a>
-              <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #db4a39;"><i class="fab fa-google-plus-g fa-2x"></i></a>
-            </div>
-          </div>
-          
-        </div>
-    	<div class="col-sm-9">
-            <ul class="nav nav-tabs" style="border-bottom: 2px solid #3498db;">
-                <li><a routerLink="profile" routerLinkActive="active" style="color: #555; font-weight: 600;"><i class="fas fa-user-edit"></i> Profile</a></li>
-                <li><a routerLink="forms" routerLinkActive="active" style="color: #555;"><i class="fas fa-file-alt"></i> Forms</a></li>
-                <li><a routerLink="list" routerLinkActive="active" style="color: #555;"><i class="fas fa-shield-alt"></i> Responses</a></li>
-            </ul>
-            
-            <div class="tab-content" style="margin-top: 20px;">
-              <router-outlet></router-outlet>
-            </div>
+          <div class="panel-body">
+            <a href="http://example.com" style="color: #3498db;">example.com</a>
           </div>
         </div>
-</div>>
+
+
+        <ul class="list-group" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+          <li class="list-group-item text-muted" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
+            <i class="fas fa-chart-line"></i> Activity Dashboard
+          </li>
+          <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
+            <span class="pull-left"><i class="fas fa-share-alt"></i> <strong>Shares</strong></span>
+            <span class="badge" style="background-color: #3498db;">125</span>
+          </li>
+          <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
+            <span class="pull-left"><i class="fas fa-heart"></i> <strong>Likes</strong></span>
+            <span class="badge" style="background-color: #e74c3c;">13</span>
+          </li>
+          <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
+            <span class="pull-left"><i class="fas fa-file-alt"></i> <strong>Posts</strong></span>
+            <span class="badge" style="background-color: #2ecc71;">37</span>
+          </li>
+          <li class="list-group-item text-right" style="border-left: 3px solid #3498db;">
+            <span class="pull-left"><i class="fas fa-users"></i> <strong>Followers</strong></span>
+            <span class="badge" style="background-color: #9b59b6;">78</span>
+          </li>
+        </ul>
+
+        <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+          <div class="panel-heading" style="background-color: #3498db; color: white; border-radius: 8px 8px 0 0;">
+            <i class="fas fa-share-alt"></i> Social Media
+          </div>
+          <div class="panel-body text-center">
+            <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #3b5998;"><i class="fab fa-facebook-f fa-2x"></i></a>
+            <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #00acee;"><i class="fab fa-twitter fa-2x"></i></a>
+            <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #171515;"><i class="fab fa-github fa-2x"></i></a>
+            <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #0e76a8;"><i class="fab fa-linkedin-in fa-2x"></i></a>
+            <a href="#" class="btn btn-social-icon" style="margin: 5px; color: #db4a39;"><i class="fab fa-google-plus-g fa-2x"></i></a>
+          </div>
+        </div>
+
+      </div>
+    <div class="col-sm-9">
+          <ul class="nav nav-tabs" style="border-bottom: 2px solid #3498db;">
+              <li><a routerLink="profile" routerLinkActive="active" style="color: #555; font-weight: 600;"><i class="fas fa-user-edit"></i> Profile</a></li>
+              <li *ngIf="canAccessForms()"><a routerLink="forms" routerLinkActive="active" style="color: #555;"><i class="fas fa-file-alt"></i> Forms</a></li>
+              <li *ngIf="canAccessForms()"><a routerLink="list" routerLinkActive="active" style="color: #555;"><i class="fas fa-shield-alt"></i> Responses</a></li>
+          </ul>
+
+          <div class="tab-content" style="margin-top: 20px;">
+            <router-outlet></router-outlet>
+          </div>
+        </div>
+      </div>
+</div>
