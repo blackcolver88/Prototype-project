@@ -129,60 +129,37 @@ public class AuthenticationController {
         return ResponseEntity.ok(new MessageResponse("Utilisateur modifié avec succès !"));
     }
 
-//    @PutMapping(value = "/ModifierPhoto/{iduser}")
-//    public ResponseEntity<?> modifierUserPhoto(@PathVariable("iduser") Long id,
-//                                               @RequestParam("file") MultipartFile file) {
-//
-//        Optional<User> optionalUser = userRepository.findById(id);
-//
-//        if (optionalUser.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body("Utilisateur introuvable avec l'ID : " + id);
-//        }
-//
-//        User user = optionalUser.get();
-//
-//        String fileName = file.getOriginalFilename();
-//
-//
-//        if (fileName.contains("..")) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body("Nom de fichier invalide");
-//        }
-//
-//        try {
-//            // Encoder en Base64
-//            String base64Image = Base64.getEncoder().encodeToString(file.getBytes());
-//            user.setPhoto(base64Image);
-//            userRepository.save(user);
-//
-//            String message = "Photo mise à jour avec succès pour l'utilisateur : " + user.getEmail();
-//            return ResponseEntity.ok(new MessageResponse(message));
-//
-//        } catch (IOException e) {
-//            String message = "Échec de la mise à jour de la photo : " + e.getMessage();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new MessageResponse(message));
-//        }
-//    }
-//
-//    @GetMapping("/photo/{id}")
-//    public ResponseEntity<byte[]> getUserPhoto(@PathVariable Long id) {
-//        Optional<User> userOpt = userRepository.findById(id);
-//
-//        if (userOpt.isEmpty() || userOpt.get().getPhoto() == null) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        String base64Image = userOpt.get().getPhoto().split(",")[1]; 
-//        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-//
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
-//                .body(imageBytes);
-//    }
+    @PutMapping("/ModifierPhoto/{iduser}")
+    public ResponseEntity<?> ModifierUserPhoto(@PathVariable("iduser") Long id,
+                                               @RequestParam("file") MultipartFile file) {
 
+        String message = "";
 
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Le fichier est vide !"));
+        }
 
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        if (fileName.contains("..")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Nom de fichier invalide : " + fileName));
+        }
+
+        try {
+            User user = userRepository.findById(id).orElseThrow(
+                    () -> new RuntimeException("Utilisateur non trouvé avec l'id : " + id)
+            );
+
+            user.setPhoto(file.getBytes());
+            userRepository.save(user);
+
+            message = "Photo utilisateur mise à jour avec succès : " + fileName;
+            return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
+
+        } catch (Exception e) {
+            message = "Impossible d'uploader la photo : " + fileName + " !";
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
+        }
+    }
 
 }

@@ -43,6 +43,9 @@ public class User implements UserDetails, Principal {
     private boolean accountLocked;
     private boolean enabled;
 
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "photo", columnDefinition = "bytea")
+    private byte[] photo;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -90,5 +93,21 @@ public class User implements UserDetails, Principal {
     @Override
     public String getName() {
         return null ;
+    }
+
+    public User(Long id, String firstname, String lastname, String password, String email,
+                Role role, boolean accountLocked, boolean enabled,
+                LocalDateTime createdDate, LocalDateTime lastModifiedDate) {
+        this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+        this.accountLocked = accountLocked;
+        this.enabled = enabled;
+        this.createdDate = createdDate;
+        this.lastModifiedDate = lastModifiedDate;
+        this.photo = null; // Initialisation explicite
     }
 }

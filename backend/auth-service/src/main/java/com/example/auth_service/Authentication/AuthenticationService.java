@@ -55,6 +55,7 @@ public class AuthenticationService {
                 .enabled(request.isEnabled())
                 .createdDate(now)
                 .lastModifiedDate(now)
+                .photo(null)
                 .build();
         repository.save(user);
 

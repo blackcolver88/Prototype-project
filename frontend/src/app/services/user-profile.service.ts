@@ -13,7 +13,7 @@ export interface UserProfile {
   lastname: string;
   role: string;
   password?: string; 
-  // photo?: string;
+  photo?: string;
 
 }
 
@@ -82,10 +82,20 @@ export class UserService {
   
     return this.http.put<UserProfile>(`${this.API}/modifier/${id}`, user, { headers });
   }
-  uploadUserPhoto(userId: number, file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return this.http.put(`${this.API}/ModifierPhoto/${userId}`, formData);
+  ModifierPhoto(id: any, file: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${this.tokenService.getToken()}`
+    });
+    
+    return this.http.put(`${this.API}/ModifierPhoto/${id}`, file, { headers }).pipe(
+      tap(response => {
+        console.log('Photo modification response:', response);
+        this.loadCurrentUser();
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la modification de la photo:', error);
+        throw error;
+      })
+    );
   }
 }

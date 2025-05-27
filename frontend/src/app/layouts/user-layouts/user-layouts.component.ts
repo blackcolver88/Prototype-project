@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
@@ -18,14 +18,15 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   isAuthenticated = false;
   currentUser: UserProfile | null = null;
   pageTitle: string = 'Profile';
+  userPhotoUrl: string | null = null; 
   @ViewChild('fileInput') fileInput!: ElementRef; 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
-  
   }
   
   ngOnInit() {
@@ -44,6 +45,11 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       user => {
         console.log('Current user data:', user);
         this.currentUser = user;
+        if (user?.photo) {
+          this.userPhotoUrl = `data:image/png;base64,${user.photo}?t=${Date.now()}`;
+        } else {
+          this.userPhotoUrl = null;
+        }
       }
     );
     
@@ -96,8 +102,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/login']);
   }
 
-
-  onFileSelected(event: Event & { target: HTMLInputElement }): void {
+  onFileSelected(event: any): void {
     const input = event.target as HTMLInputElement;
   
     if (!input || !input.files || input.files.length === 0) {
@@ -123,10 +128,16 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       console.error("Aucun utilisateur connecté ou ID non trouvé");
       return;
     }
+
+    let body = new FormData();
+    body.append('file', file);
   
-    this.userService.uploadUserPhoto(userId, file).subscribe({
+    this.userService.ModifierPhoto(userId, body).subscribe({
       next: (response) => {
         console.log('Photo téléchargée avec succès', response);
+        setTimeout(() => {
+          this.userService.loadCurrentUser();
+        }, 500); 
         alert('Photo mise à jour avec succès !');
       },
       error: (err) => {
@@ -134,5 +145,9 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
         alert("Échec de la mise à jour de la photo.");
       }
     });
+  }
+
+  getDefaultAvatarUrl(): string {
+    return 'assets/images/default-avatar.png'; 
   }
 }
