@@ -32,6 +32,7 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         extraClaims.put("id", ((User)userDetails).getId());
+        extraClaims.put("role", ((User)userDetails).getRole().name());
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -42,7 +43,7 @@ public class JwtService {
                 .compact();
 
     }
-    
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));

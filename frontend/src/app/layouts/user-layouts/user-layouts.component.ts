@@ -1,7 +1,8 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
+import { TokenService } from '../../services/token.service';
 import { CommonModule } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { IonicModule } from '@ionic/angular';
@@ -18,29 +19,31 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   isAuthenticated = false;
   currentUser: UserProfile | null = null;
   pageTitle: string = 'Profile';
-  userPhotoUrl: string | null = null; 
-  @ViewChild('fileInput') fileInput!: ElementRef; 
+  userPhotoUrl: string | null = null;
+  isDropdownOpen = false;
+  @ViewChild('fileInput') fileInput!: ElementRef;
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private tokenService: TokenService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
   }
-  
+
   ngOnInit() {
     this.authService.isAuthenticated$.subscribe(
       isAuth => {
         console.log('Authentication status:', isAuth);
         this.isAuthenticated = isAuth;
-        
+
         if (isAuth) {
           this.userService.loadCurrentUser();
         }
       }
     );
-    
+
     this.userService.currentUser$.subscribe(
       user => {
         console.log('Current user data:', user);
@@ -52,7 +55,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
         }
       }
     );
-    
+
     this.router.events.pipe(
       filter((event: Event) => event instanceof NavigationEnd),
       map(() => this.activatedRoute),
@@ -75,7 +78,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     this.updateTitleFromUrl();
   }
-  
+
   ngAfterViewInit() {
   }
   triggerFileInput() {
@@ -96,7 +99,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     document.title = `USER - ${this.pageTitle}`;
   }
-  
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -104,26 +107,26 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
   onFileSelected(event: any): void {
     const input = event.target as HTMLInputElement;
-  
+
     if (!input || !input.files || input.files.length === 0) {
       console.error('Aucun fichier sélectionné');
       return;
     }
-  
+
     const file = input.files[0];
-  
+
     if (!file.type.startsWith('image/')) {
       console.error('Le fichier sélectionné n\'est pas une image.');
       return;
     }
-  
+
     this.uploadPhoto(file);
-  
+
     input.value = '';
   }
   uploadPhoto(file: File) {
     const userId = this.currentUser?.id;
-  
+
     if (!userId) {
       console.error("Aucun utilisateur connecté ou ID non trouvé");
       return;
@@ -131,13 +134,13 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     let body = new FormData();
     body.append('file', file);
-  
+
     this.userService.ModifierPhoto(userId, body).subscribe({
       next: (response) => {
         console.log('Photo téléchargée avec succès', response);
         setTimeout(() => {
           this.userService.loadCurrentUser();
-        }, 500); 
+        }, 500);
         alert('Photo mise à jour avec succès !');
       },
       error: (err) => {
@@ -148,6 +151,29 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   }
 
   getDefaultAvatarUrl(): string {
-    return 'assets/images/default-avatar.png'; 
+    return 'assets/images/default-avatar.png';
+  }
+
+  canAccessForms(): boolean {
+    return this.tokenService.isUser();
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown(): void {
+    this.isDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target) {
+      const dropdown = target.closest('.dropdown');
+      if (!dropdown && this.isDropdownOpen) {
+        this.isDropdownOpen = false;
+      }
+    }
   }
 }

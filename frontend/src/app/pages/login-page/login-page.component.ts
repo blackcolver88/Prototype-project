@@ -33,8 +33,8 @@ export class LoginPageComponent implements OnInit {
       remember: [false]
     });
 
-    // Get return URL from route parameters or default to '/form-template'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin';
+    // Get return URL from route parameters - we'll determine the default after login based on role
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
   }
 
   onSubmit(): void {
@@ -46,13 +46,13 @@ export class LoginPageComponent implements OnInit {
     this.error = '';
 
     const { email, password } = this.loginForm.value;
-    
+
     this.authService.login({ email, password })
       .subscribe({
         next: (response) => {
           // Debug the token
           console.log("LOGIN RESPONSE:", response);
-          
+
           const token = this.tokenService.getToken();
           if (token) {
             try {
@@ -62,10 +62,24 @@ export class LoginPageComponent implements OnInit {
               console.error("Could not parse token", e);
             }
           }
-          
+
           // After successful login, load the user profile
           this.userService.loadCurrentUser();
-          this.router.navigate([this.returnUrl]);
+
+          // Determine redirect URL based on role
+          let redirectUrl = this.returnUrl;
+          if (!redirectUrl) {
+            // Default redirect based on user role
+            if (this.tokenService.isUser()) {
+              redirectUrl = '/user/profile';
+            } else if (this.tokenService.canAccessAdminRoutes()) {
+              redirectUrl = '/admin';
+            } else {
+              redirectUrl = '/user/profile'; // fallback
+            }
+          }
+
+          this.router.navigate([redirectUrl]);
         },
         error: err => {
           this.isLoading = false;
