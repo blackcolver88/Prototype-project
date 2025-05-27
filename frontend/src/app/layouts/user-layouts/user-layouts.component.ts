@@ -14,20 +14,21 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './user-layouts.component.html',
   styleUrl: './user-layouts.component.css'
 })
+
 export class UserLayoutsComponent implements OnInit, AfterViewInit {
   isAuthenticated = false;
   currentUser: UserProfile | null = null;
   pageTitle: string = 'Profile';
   userPhotoUrl: string | null = null; 
   @ViewChild('fileInput') fileInput!: ElementRef; 
+  
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {
-  }
+  ) {}
   
   ngOnInit() {
     this.authService.isAuthenticated$.subscribe(
@@ -36,7 +37,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
         this.isAuthenticated = isAuth;
         
         if (isAuth) {
-          this.userService.loadCurrentUser();
+          this.loadUserAndPhoto();
         }
       }
     );
@@ -45,11 +46,8 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       user => {
         console.log('Current user data:', user);
         this.currentUser = user;
-        if (user?.photo) {
-          this.userPhotoUrl = `data:image/png;base64,${user.photo}?t=${Date.now()}`;
-        } else {
-          this.userPhotoUrl = null;
-        }
+        this.updatePhotoUrl();
+        this.cdr.detectChanges();
       }
     );
     
@@ -97,10 +95,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
     document.title = `USER - ${this.pageTitle}`;
   }
   
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+
 
   onFileSelected(event: any): void {
     const input = event.target as HTMLInputElement;
@@ -121,6 +116,73 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
   
     input.value = '';
   }
+  private loadUserAndPhoto(): void {
+    this.userService.loadCurrentUserWithPhoto();
+  }
+  
+  private updatePhotoUrl(): void {
+    console.log('Mise à jour de la photo URL, données utilisateur:', this.currentUser);
+    
+    if (!this.currentUser?.photo) {
+      console.log('Aucune photo disponible pour l\'utilisateur');
+      this.userPhotoUrl = this.getDefaultAvatarUrl();
+      return;
+    }
+
+    const photoData = this.currentUser.photo;
+    
+    if (photoData.startsWith('http') || photoData.startsWith('data:image/')) {
+      console.log('Utilisation de l\'URL de l\'image existante');
+      this.userPhotoUrl = photoData;
+      return;
+    }
+    
+    try {
+      const cleanBase64 = photoData.replace(/\s/g, '');
+      
+      if (this.isValidBase64(cleanBase64)) {
+        if (cleanBase64.startsWith('data:image/')) {
+          this.userPhotoUrl = cleanBase64;
+        } else {
+          this.userPhotoUrl = `data:image/png;base64,${cleanBase64}`;
+        }
+        console.log('URL de l\'image mise à jour avec succès');
+      } else {
+        console.error('Chaîne Base64 invalide');
+        this.userPhotoUrl = this.getDefaultAvatarUrl();
+      }
+    } catch (error) {
+      console.error('Erreur lors du traitement de l\'image:', error);
+      this.userPhotoUrl = this.getDefaultAvatarUrl();
+    }
+  }
+  
+  private isValidBase64(str: string): boolean {
+    if (!str || str.trim() === '') {
+      return false;
+    }
+    
+    if (str.startsWith('data:image/')) {
+      return true;
+    }
+    
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    if (!base64Regex.test(str)) {
+      return false;
+    }
+    
+    if (str.length % 4 !== 0) {
+      return false;
+    }
+    
+    try {
+      const decoded = atob(str);
+      return decoded.length > 0;
+    } catch (err) {
+      return false;
+    }
+  }
+  
   uploadPhoto(file: File) {
     const userId = this.currentUser?.id;
   
@@ -128,26 +190,56 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
       console.error("Aucun utilisateur connecté ou ID non trouvé");
       return;
     }
-
+    
+    const loadingMessage = 'Téléchargement de la photo en cours...';
+    console.log(loadingMessage);
+    
     let body = new FormData();
     body.append('file', file);
   
     this.userService.ModifierPhoto(userId, body).subscribe({
       next: (response) => {
-        console.log('Photo téléchargée avec succès', response);
-        setTimeout(() => {
-          this.userService.loadCurrentUser();
-        }, 500); 
+        console.log('Réponse du serveur après téléchargement:', response);
+        
+        if (response && response.photo) {
+          if (!this.currentUser) this.currentUser = {} as UserProfile;
+          this.currentUser.photo = response.photo;
+          this.updatePhotoUrl();
+          this.cdr.detectChanges();
+        }
+        
+        this.userService.loadCurrentUserWithPhoto();
+        
+        console.log('Photo mise à jour avec succès');
         alert('Photo mise à jour avec succès !');
       },
       error: (err) => {
         console.error("Erreur lors de l'upload", err);
-        alert("Échec de la mise à jour de la photo.");
+        let errorMessage = "Échec de la mise à jour de la photo.";
+        
+        if (err.status === 413) {
+          errorMessage = "Le fichier est trop volumineux. Taille maximale autorisée : 5MB";
+        } else if (err.error?.message) {
+          errorMessage += `\n${err.error.message}`;
+        }
+        
+        alert(errorMessage);
       }
     });
   }
-
   getDefaultAvatarUrl(): string {
-    return 'assets/images/default-avatar.png'; 
+    return 'assets/default-avatar.png'; 
+  }
+
+  onImageError(event: ErrorEvent): void {
+    console.error('Erreur de chargement de l\'image');
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.src = this.getDefaultAvatarUrl();
+    }
+  }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

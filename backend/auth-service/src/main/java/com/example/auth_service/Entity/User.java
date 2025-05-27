@@ -16,6 +16,7 @@ import com.example.auth_service.Enum.Role;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -93,6 +94,21 @@ public class User implements UserDetails, Principal {
     @Override
     public String getName() {
         return null ;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    public String getPhotoAsBase64() {
+        if (photo == null || photo.length == 0) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(photo);
     }
 
     public User(Long id, String firstname, String lastname, String password, String email,

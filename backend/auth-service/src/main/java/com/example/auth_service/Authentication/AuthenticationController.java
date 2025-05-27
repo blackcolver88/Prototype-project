@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -159,6 +157,30 @@ public class AuthenticationController {
         } catch (Exception e) {
             message = "Impossible d'uploader la photo : " + fileName + " !";
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
+        }
+    }
+    @GetMapping("/GetPhoto/{iduser}")
+    public ResponseEntity<?> getUserPhoto(@PathVariable("iduser") Long id) {
+        try {
+            User user = userRepository.findById(id).orElseThrow(
+                    () -> new RuntimeException("Utilisateur non trouvé avec l'id : " + id)
+            );
+
+            if (user.getPhoto() == null || user.getPhoto().length == 0) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new MessageResponse("Aucune photo trouvée pour cet utilisateur"));
+            }
+
+            String photoBase64 = Base64.getEncoder().encodeToString(user.getPhoto());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("photo", photoBase64);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Erreur lors de la récupération de la photo : " + e.getMessage()));
         }
     }
 

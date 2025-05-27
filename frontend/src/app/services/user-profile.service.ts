@@ -21,11 +21,6 @@ export interface UserProfile {
 @Injectable({
   providedIn: 'root'
 })
-
-
-@Injectable({
-  providedIn: 'root'
-})
 export class UserService {
   private readonly API_URL = `${environment.apiUrl}/auth-service/api/v1/auth/users`;
   private readonly API = `${environment.apiUrl}/auth-service/api/v1/auth`;
@@ -98,4 +93,44 @@ export class UserService {
       })
     );
   }
+getPhoto(userId: number): Observable<string | null> {
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${this.tokenService.getToken()}`
+  });
+
+  return this.http.get<{photo: string}>(`${this.API}/GetPhoto/${userId}`, { headers }).pipe(
+    map(response => response.photo),
+    catchError(error => {
+      console.error('Erreur lors de la récupération de la photo:', error);
+      return of(null);
+    })
+  );
+}
+
+loadCurrentUserWithPhoto(): void {
+  const userId = this.tokenService.getUserId();
+  if (!userId) return;
+
+  this.getUserById(userId).subscribe({
+    next: (user) => {
+      if (user) {
+        // Récupérer la photo séparément
+        this.getPhoto(userId).subscribe({
+          next: (photoBase64) => {
+            if (photoBase64) {
+              user.photo = photoBase64;
+            }
+            this.currentUserSubject.next(user);
+          },
+          error: () => {
+            this.currentUserSubject.next(user);
+          }
+        });
+      }
+    },
+    error: () => this.currentUserSubject.next(null)
+  });
+}
+
+
 }
