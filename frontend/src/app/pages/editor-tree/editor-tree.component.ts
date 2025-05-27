@@ -592,9 +592,13 @@ handleSubmit() {
   });
 
   // Only save sections that are actually new (don't have IDs)
-  const layoutsToSave = this.editorItems.filter(
-    (item) => !item.id && item.type === 'Section'
-  );
+  // Remove children from sections before sending to backend since they need to be saved separately
+  const layoutsToSave = this.editorItems
+    .filter((item) => !item.id && item.type === 'Section')
+    .map(section => ({
+      ...section,
+      children: undefined // Remove children - they will be saved separately
+    }));
 
   console.log(`Found ${layoutsToSave.length} new sections to save`);
 
@@ -712,7 +716,9 @@ handleSubmit() {
 
         if (section.children?.length > 0) {
           section.children.forEach((subsection: any) => {
+            // Only process subsections that don't have an ID (new subsections)
             if (!subsection.id && subsection.type === 'Subsection') {
+              console.log(`Processing subsection for section ${sectionId}:`, subsection);
               const subsectionData = {
                 title: subsection.title || 'Subsection',
                 type: 'Subsection',
