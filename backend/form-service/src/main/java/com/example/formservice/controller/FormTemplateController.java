@@ -165,5 +165,26 @@ public class FormTemplateController {
         FormLayout updatedSection = formTemplateService.updateSubsectionOrder(templateId, sectionId, subsectionOrders);
         return ResponseEntity.ok(updatedSection);
     }
+
+    // Process association endpoints
+    @PostMapping("/{templateId}/processes")
+    public ResponseEntity<ProcessAssociationResponse> associateProcesses(
+            @PathVariable Long templateId,
+            @RequestBody ProcessAssociationRequest request) {
+        ProcessAssociationResponse response = formTemplateService.associateProcesses(templateId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{templateId}/processes")
+    public ResponseEntity<ProcessAssociationResponse> getAssociatedProcesses(@PathVariable Long templateId) {
+        ProcessAssociationResponse response = formTemplateService.getAssociatedProcesses(templateId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{templateId}/available-processes")
+    public ResponseEntity<List<String>> getAvailableProcesses(@PathVariable Long templateId) {
+        List<String> processKeys = formTemplateService.getAvailableProcessKeys(templateId);
+        return ResponseEntity.ok(processKeys);
+    }
 }
 

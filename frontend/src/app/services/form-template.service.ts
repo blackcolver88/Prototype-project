@@ -86,7 +86,7 @@ export class FormTemplateService {
         })
       );
   }
-  
+
   getFullFormTemplate(formTemplateId: number): Observable<FormTemplate> {
     const url = `${this.baseUrl}/${formTemplateId}/full`;
     return this.http.get<FormTemplate>(url).pipe(
@@ -99,17 +99,17 @@ export class FormTemplateService {
   addFormInputToSubsection(layoutId: number, formInput: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/form-layouts/${layoutId}/form-inputs`, formInput);
   }
-  
+
   addFormInputToLayout(layoutId: number, formInput: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/form-layouts/${layoutId}/form-inputs`, formInput);
   }
 
    updateSubsectionItemsOrder(
-    templateId: number, 
-    subsectionId: number, 
+    templateId: number,
+    subsectionId: number,
     inputOrders: { id: number; ordinalPosition: number }[]): Observable<void> {
     return this.http.put<void>(
-      `${this.baseUrl}/${templateId}/subsections/${subsectionId}/items/order`, 
+      `${this.baseUrl}/${templateId}/subsections/${subsectionId}/items/order`,
       inputOrders
     );
   }
@@ -120,12 +120,43 @@ export class FormTemplateService {
       subsectionOrders
     );
   }
-  
+
   addSubsectionToSection(sectionId: number, subsection: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/form-layouts/${sectionId}/subsections`, subsection)
       .pipe(
         catchError(error => {
           console.error('Error adding subsection to section:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Process association methods
+  associateProcesses(templateId: number, request: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${templateId}/processes`, request)
+      .pipe(
+        catchError(error => {
+          console.error('Error associating processes:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  getAssociatedProcesses(templateId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${templateId}/processes`)
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching associated processes:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  getAvailableProcesses(templateId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/${templateId}/available-processes`)
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching available processes:', error);
           return throwError(() => error);
         })
       );

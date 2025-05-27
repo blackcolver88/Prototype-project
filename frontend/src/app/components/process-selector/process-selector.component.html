@@ -1,4 +1,34 @@
-<div class="process-selector">  <label for="processSelector" class="block text-sm font-medium text-gray-700 mb-1">    Select Workflow Process  </label>    <div *ngIf="loading" class="text-sm text-gray-500">Loading available processes...</div>    <div *ngIf="error" class="text-sm text-red-500">{{ error }}</div>    <select     *ngIf="!loading && !error && availableProcesses.length > 0"    id="processSelector"    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"    [ngModel]="selectedProcessKey"    (change)="onProcessChange($event)">    <option value="" disabled>Select a workflow process</option>    <option *ngFor="let process of availableProcesses" [value]="process.key">      {{ process.name || process.key }} (v{{ process.version }})    </option>  </select>    <div *ngIf="!loading && !error && availableProcesses.length === 0" class="text-sm text-amber-600">
-    No active workflow processes found. Please deploy a process first.
+<div class="process-selector">
+  <label for="processSelector" class="block text-sm font-medium text-gray-700 mb-1">
+    Select Workflow Process
+  </label>
+
+  <div *ngIf="loading" class="text-sm text-gray-500">Loading available processes...</div>
+  <div *ngIf="error" class="text-sm text-red-500">{{ error }}</div>
+
+  <select
+    *ngIf="!loading && !error && availableProcesses.length > 0"
+    id="processSelector"
+    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+    [ngModel]="selectedProcessKey"
+    (change)="onProcessChange($event)">
+    <option value="" disabled>Select a workflow process</option>
+
+    <!-- For associated processes (when formTemplateId is provided) -->
+    <option
+      *ngFor="let process of availableProcesses"
+      [value]="process.processDefinitionKey || process.key">
+      {{ process.processName || process.name || process.processDefinitionKey || process.key }}
+      <span *ngIf="process.version">(v{{ process.version }})</span>
+    </option>
+  </select>
+
+  <div *ngIf="!loading && !error && availableProcesses.length === 0" class="text-sm text-amber-600">
+    <span *ngIf="formTemplateId; else noProcesses">
+      No processes are associated with this form. Please configure process associations first.
+    </span>
+    <ng-template #noProcesses>
+      No active workflow processes found. Please deploy a process first.
+    </ng-template>
   </div>
 </div>
