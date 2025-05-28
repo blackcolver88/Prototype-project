@@ -5,7 +5,10 @@ import com.example.formservice.entities.FormInput;
 import com.example.formservice.entities.FormLayout;
 import com.example.formservice.entities.FormTemplate;
 import com.example.formservice.exception.ResourceNotFoundException;
+import com.example.formservice.repository.FormTemplateProcessRepository;
+import com.example.formservice.repository.FormTemplateRepository;
 import com.example.formservice.service.FormTemplateService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -21,6 +24,11 @@ import java.util.Optional;
 public class FormTemplateController {
 
     private final FormTemplateService formTemplateService;
+    @Autowired
+    private FormTemplateRepository formTemplateRepository;
+
+    @Autowired
+    private FormTemplateProcessRepository formTemplateProcessRepository;
 
 
     public FormTemplateController(FormTemplateService formTemplateService) {
@@ -185,6 +193,18 @@ public class FormTemplateController {
     public ResponseEntity<List<String>> getAvailableProcesses(@PathVariable Long templateId) {
         List<String> processKeys = formTemplateService.getAvailableProcessKeys(templateId);
         return ResponseEntity.ok(processKeys);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countFormTemplates() {
+        Long count = formTemplateRepository.count();
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/countProcess")
+    public ResponseEntity<Long> countAllProcesses() {
+        Long count = formTemplateProcessRepository.count();
+        return ResponseEntity.ok(count);
     }
 }
 

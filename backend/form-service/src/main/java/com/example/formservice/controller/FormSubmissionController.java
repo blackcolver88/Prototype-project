@@ -4,6 +4,7 @@ import com.example.formservice.DTO.*;
 import com.example.formservice.client.WorkflowServiceClient;
 import com.example.formservice.entities.*;
 import com.example.formservice.repository.FormInputRepository;
+import com.example.formservice.repository.FormSubmissionRepository;
 import com.example.formservice.repository.FormTemplateRepository;
 import com.example.formservice.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,9 @@ public class FormSubmissionController {
 
     @Autowired
     private WorkflowServiceClient workflowServiceClient;
+
+    @Autowired
+    private FormSubmissionRepository formSubmissionRepository;
 
     @Autowired
     private DiscoveryClient discoveryClient;
@@ -378,5 +382,11 @@ public class FormSubmissionController {
         response.put("totalPages", submissionPage.getTotalPages());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countFormSubmissions() {
+        Long count = formSubmissionRepository.count();
+        return ResponseEntity.ok(count);
     }
 }

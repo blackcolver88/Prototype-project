@@ -21,4 +21,6 @@ public interface FormTemplateProcessRepository extends JpaRepository<FormTemplat
     void deleteByFormTemplateId(Long formTemplateId);
 
     boolean existsByFormTemplateIdAndProcessDefinitionKey(Long formTemplateId, String processDefinitionKey);
+
+
 }

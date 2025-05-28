@@ -183,5 +183,10 @@ public class AuthenticationController {
                     .body(new MessageResponse("Erreur lors de la récupération de la photo : " + e.getMessage()));
         }
     }
+    @GetMapping("/users/count")
+    public ResponseEntity<Long> countUsers() {
+        Long userCount = userRepository.countByRoleNot(Role.ROLE_ADMIN);
+        return ResponseEntity.ok(userCount);
+    }
 
 }

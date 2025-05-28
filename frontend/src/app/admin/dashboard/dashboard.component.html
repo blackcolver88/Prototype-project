@@ -1,99 +1,77 @@
-<p>dashboard</p>
-<div class="flex flex-wrap  min-h-screen">
+<div class="dashboard-container">
+  <h1 class="dashboard-title">Dashboard</h1>
   
-  <!-- card1 -->
-  <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-    <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-      <div class="flex-auto p-4">
-        <div class="flex flex-row -mx-3">
-          <div class="flex-none w-2/3 max-w-full px-3">
-            <div>
-              <p class="mb-0 font-sans text-sm font-semibold leading-normal">Today's Money</p>
-              <h5 class="mb-0 font-bold">
-                $53,000
-                <span class="text-sm leading-normal font-weight-bolder text-lime-500">+55%</span>
-              </h5>
-            </div>
-          </div>
-          <div class="px-3 text-right basis-1/3">
-            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-to-tl from-purple-700 to-pink-500">
-              <i class="ni leading-none ni-money-coins text-lg relative top-3.5 text-white"></i>
-            </div>
-          </div>
+  <div class="cards-container">
+
+    <div class="stat-card bg-white p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="stat-title">Users</p>
+          <h3 class="stat-value">
+            {{ usersCount !== null ? usersCount : '...' }}
+          </h3>
+        </div>
+        <div class="stat-icon bg-blue-100 text-blue-600">
+          <i class="ni ni-single-02"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="stat-title">Templates</p>
+          <h3 class="stat-value">
+            {{ templatesCount !== null ? templatesCount : '...' }}
+          </h3>
+        </div>
+        <div class="stat-icon bg-purple-100 text-purple-600">
+          <i class="ni ni-paper-diploma"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="stat-title">Submissions</p>
+          <h3 class="stat-value">
+            {{ submissionsCount !== null ? submissionsCount : '...' }}
+          </h3>
+        </div>
+        <div class="stat-icon bg-green-100 text-green-600">
+          <i class="ni ni-check-bold"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="stat-title">Processes</p>
+          <h3 class="stat-value">
+            {{ processesCount !== null ? processesCount : '...' }}
+          </h3>
+        </div>
+        <div class="stat-icon bg-orange-100 text-orange-600">
+          <i class="ni ni-briefcase-24"></i>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- card2 -->
-  <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-    <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-      <div class="flex-auto p-4">
-        <div class="flex flex-row -mx-3">
-          <div class="flex-none w-2/3 max-w-full px-3">
-            <div>
-              <p class="mb-0 font-sans text-sm font-semibold leading-normal">Today's Users</p>
-              <h5 class="mb-0 font-bold">
-                2,300
-                <span class="text-sm leading-normal font-weight-bolder text-lime-500">+3%</span>
-              </h5>
-            </div>
-          </div>
-          <div class="px-3 text-right basis-1/3">
-            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-to-tl from-purple-700 to-pink-500">
-              <i class="ni leading-none ni-world text-lg relative top-3.5 text-white"></i>
-            </div>
-          </div>
-        </div>
+  <div class="mt-8">
+    <div class="chart-container">
+      <h3 class="text-lg font-semibold mb-4">Statistics Overview</h3>
+      <div style="height: 320px;">
+        <canvas
+          baseChart
+          [datasets]="barChartData"
+          [labels]="barChartLabels"
+          [options]="barChartOptions"
+          [legend]="barChartLegend"
+          type="bar">
+        </canvas>
       </div>
     </div>
   </div>
-
-  <!-- card3 -->
-  <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-    <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-      <div class="flex-auto p-4">
-        <div class="flex flex-row -mx-3">
-          <div class="flex-none w-2/3 max-w-full px-3">
-            <div>
-              <p class="mb-0 font-sans text-sm font-semibold leading-normal">New Clients</p>
-              <h5 class="mb-0 font-bold">
-                +3,462
-                <span class="text-sm leading-normal text-red-600 font-weight-bolder">-2%</span>
-              </h5>
-            </div>
-          </div>
-          <div class="px-3 text-right basis-1/3">
-            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-to-tl from-purple-700 to-pink-500">
-              <i class="ni leading-none ni-paper-diploma text-lg relative top-3.5 text-white"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- card4 -->
-  <div class="w-full max-w-full px-3 sm:w-1/2 sm:flex-none xl:w-1/4">
-    <div class="relative flex flex-col min-w-0 break-words bg-white shadow-soft-xl rounded-2xl bg-clip-border">
-      <div class="flex-auto p-4">
-        <div class="flex flex-row -mx-3">
-          <div class="flex-none w-2/3 max-w-full px-3">
-            <div>
-              <p class="mb-0 font-sans text-sm font-semibold leading-normal">Sales</p>
-              <h5 class="mb-0 font-bold">
-                $103,430
-                <span class="text-sm leading-normal font-weight-bolder text-lime-500">+5%</span>
-              </h5>
-            </div>
-          </div>
-          <div class="px-3 text-right basis-1/3">
-            <div class="inline-block w-12 h-12 text-center rounded-lg bg-gradient-to-tl from-purple-700 to-pink-500">
-              <i class="ni leading-none ni-cart text-lg relative top-3.5 text-white"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
