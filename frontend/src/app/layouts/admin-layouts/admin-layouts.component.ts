@@ -1,4 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { AdminProfileDialogComponent } from './admin-profile-dialog.component';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
@@ -27,15 +29,26 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
   pageTitle: string = 'Dashboard';
   sidebarCollapsed = false;
   dropdowns: { [key: string]: boolean } = {};
+  adminPhotoUrl: string = 'assets/default-user.png';
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private dialog: MatDialog
   ) {
     addIcons({ logoIonic });
   }
+
+  openProfileDialog() {
+    this.dialog.open(AdminProfileDialogComponent, {
+      width: '700px',
+      panelClass: 'profile-dialog-container',
+      autoFocus: false
+    });
+  }
+
   ngOnInit() {
     const savedState = localStorage.getItem('sidebarCollapsed');
     this.sidebarCollapsed = savedState === 'true';
@@ -43,9 +56,16 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
-
+    
+    this.userService.loadCurrentUserWithPhoto();
+    
     this.userService.currentUser$.subscribe(
-      user => this.currentUser = user
+      user => {
+        this.currentUser = user;
+        if (user && user.photo) {
+          this.updatePhotoUrl(user.photo);
+        }
+      }
     );
 
     this.router.events.pipe(
@@ -69,6 +89,26 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.updateTitleFromUrl();
+  }
+
+  private updatePhotoUrl(photoData: string): void {
+    if (!photoData) {
+      this.adminPhotoUrl = 'assets/default-user.png';
+      return;
+    }
+    
+    if (photoData.startsWith('http') || photoData.startsWith('data:image/')) {
+      this.adminPhotoUrl = photoData;
+      return;
+    }
+    
+    try {
+      const cleanBase64 = photoData.replace(/\s/g, '');
+      this.adminPhotoUrl = `data:image/png;base64,${cleanBase64}`;
+    } catch (error) {
+      console.error('Erreur lors du traitement de l\'image:', error);
+      this.adminPhotoUrl = 'assets/default-user.png';
+    }
   }
 
   private updateTitleFromUrl(): void {
@@ -106,7 +146,6 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sidebarCollapsed = !this.sidebarCollapsed;
     localStorage.setItem('sidebarCollapsed', String(this.sidebarCollapsed));
 
-    // For mobile: toggle the sidebar visibility
     if (window.innerWidth < 768) {
       if (this.sidebar.nativeElement.classList.contains('-translate-x-full')) {
         this.sidebar.nativeElement.classList.remove('-translate-x-full');
