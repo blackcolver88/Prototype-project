@@ -22,7 +22,7 @@ Chart.register(
     BaseChartDirective
   ],
   providers: [
-    provideCharts() 
+    provideCharts()
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -35,28 +35,28 @@ export class DashboardComponent implements OnInit {
   processesCount: number = 0;
 
   public barChartData = [
-    { 
-      data: [0, 0, 0, 0], 
+    {
+      data: [0, 0, 0, 0],
       label: 'Statistics',
       backgroundColor: [
-        'rgba(0, 86, 179, 0.8)',    
-        'rgba(230, 57, 70, 0.8)',   
-        'rgba(0, 86, 179, 0.6)',    
-        'rgba(230, 57, 70, 0.6)'    
+        'rgba(0, 86, 179, 0.8)',
+        'rgba(230, 57, 70, 0.8)',
+        'rgba(0, 86, 179, 0.6)',
+        'rgba(230, 57, 70, 0.6)'
       ],
       borderColor: [
-        'rgba(0, 86, 179, 1)',      
-        'rgba(230, 57, 70, 1)',     
-        'rgba(0, 86, 179, 1)',      
-        'rgba(230, 57, 70, 1)'      
+        'rgba(0, 86, 179, 1)',
+        'rgba(230, 57, 70, 1)',
+        'rgba(0, 86, 179, 1)',
+        'rgba(230, 57, 70, 1)'
       ],
       borderWidth: 1,
       borderRadius: 4,
       hoverBackgroundColor: [
-        'rgba(0, 86, 179, 1)',      
-        'rgba(230, 57, 70, 1)',     
-        'rgba(0, 86, 179, 1)',      
-        'rgba(230, 57, 70, 1)'        
+        'rgba(0, 86, 179, 1)',
+        'rgba(230, 57, 70, 1)',
+        'rgba(0, 86, 179, 1)',
+        'rgba(230, 57, 70, 1)'
       ]
     }
   ];
@@ -85,7 +85,7 @@ export class DashboardComponent implements OnInit {
           size: 13,
           weight: 'bold',
           family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
-        } as any,  
+        } as any,
         bodyFont: {
           size: 12,
           family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
@@ -152,9 +152,17 @@ export class DashboardComponent implements OnInit {
       this.updateChart();
     });
 
-    this.dashboardService.countFormProcesses().subscribe(count => {
-      this.processesCount = count;
-      this.updateChart();
+    this.dashboardService.countDeployedProcesses().subscribe({
+      next: (count) => {
+        this.processesCount = count;
+        this.updateChart();
+      },
+      error: (error) => {
+        console.error('Error counting deployed processes:', error);
+        // Fallback to 0 if there's an error
+        this.processesCount = 0;
+        this.updateChart();
+      }
     });
   }
 
