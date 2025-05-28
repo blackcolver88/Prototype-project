@@ -104,10 +104,7 @@ body {
   transition: background-color 0.2s ease;
 }
 
-.dropdown-link:hover {
-  background-color: #f5f5f5;
-  text-decoration: none;
-}
+
 
 .logout-link {
   color: #d9534f !important;
@@ -497,4 +494,23 @@ hr {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white !important;
   border-color: #3498db;
+}
+
+
+.dropdown-link:hover {
+  background-color: #f8f9fa;
+  color: #3498db !important;
+}
+
+.btn-default:hover {
+  background-color: #e9ecef;
+  border-color: #2980b9;
+}
+
+.user-avatar, .dropdown-avatar {
+  transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.1);
 }

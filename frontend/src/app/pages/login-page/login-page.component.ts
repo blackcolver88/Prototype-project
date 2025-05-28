@@ -25,6 +25,7 @@ export class LoginPageComponent implements OnInit {
   error = '';
   isLoading = false;
   returnUrl: string = '/';
+  showPassword = false; 
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
@@ -35,6 +36,10 @@ export class LoginPageComponent implements OnInit {
 
     // Get return URL from route parameters - we'll determine the default after login based on role
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {

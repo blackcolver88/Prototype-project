@@ -17,6 +17,7 @@ import { SuccessDialogComponent } from '../success-dialog/success-dialog.compone
 export class ProfilComponent implements OnInit {
 
   userProfileForm: FormGroup;
+  showPassword = false; 
 
   constructor(
     private userService: UserService,
@@ -32,6 +33,10 @@ export class ProfilComponent implements OnInit {
       ]),
       confirmPassword: new FormControl('')
     }, { validators: this.passwordMatchValidator });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {

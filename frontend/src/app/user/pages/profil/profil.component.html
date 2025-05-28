@@ -36,11 +36,26 @@
           </div>
         </div>
 
+    
+
         <div class="form-group">
           <label for="password">
             <i class="fas fa-lock"></i> New Password
           </label>
-          <input type="password" class="form-control" formControlName="password" placeholder="Leave blank to keep current password" id="password">
+          <div class="input-group">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              class="form-control" 
+              formControlName="password" 
+              placeholder="Leave blank to keep current password" 
+              id="password">
+            <div class="input-group-addon password-toggle">
+              <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'" 
+                 style="color: #3498db; cursor: pointer;"
+                 (click)="togglePasswordVisibility()"
+                 title="Toggle password visibility"></i>
+            </div>
+          </div>
           <div *ngIf="userProfileForm.get('password')?.touched && userProfileForm.get('password')?.errors?.['minlength']" class="validation-error">
             Password must be at least 6 characters long
           </div>
@@ -50,7 +65,20 @@
           <label for="confirmPassword">
             <i class="fas fa-lock"></i> Confirm New Password
           </label>
-          <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm your new password" id="confirmPassword">
+          <div class="input-group">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              class="form-control" 
+              formControlName="confirmPassword" 
+              placeholder="Confirm your new password" 
+              id="confirmPassword">
+            <div class="input-group-addon password-toggle">
+              <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'" 
+                 style="color: #3498db; cursor: pointer;"
+                 (click)="togglePasswordVisibility()"
+                 title="Toggle password visibility"></i>
+            </div>
+          </div>
           <div *ngIf="userProfileForm.get('confirmPassword')?.touched && userProfileForm.get('confirmPassword')?.errors?.['passwordMismatch']" class="validation-error">
             Passwords do not match
           </div>

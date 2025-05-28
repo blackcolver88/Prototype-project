@@ -16,31 +16,48 @@
       <div class="col-sm-6 text-right" style="padding-top: 15px;">
           <!-- User Profile Dropdown -->
           <div class="dropdown" style="display: inline-block;">
-              <button class="btn btn-default dropdown-toggle" type="button" id="userProfileDropdown"
-                      (click)="toggleDropdown()"
-                      aria-haspopup="true"
-                      [attr.aria-expanded]="isDropdownOpen"
-                      style="background-color: #f8f9fa; border-color: #3498db; position: relative;">
-                  <span style="margin-right: 5px;">{{ currentUser?.firstname || 'User' }} {{ currentUser?.lastname || '' }}</span>
-                  <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-right"
-                  [class.show]="isDropdownOpen"
-                  [style.display]="isDropdownOpen ? 'block' : 'none'"
-                  aria-labelledby="userProfileDropdown"
-                  style="position: absolute; top: 100%; right: 0; z-index: 1000; min-width: 200px; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                  <li class="dropdown-header" style="padding: 10px; border-bottom: 1px solid #eee;">
-                      <div style="font-weight: bold; color: #333;">{{ currentUser?.firstname }} {{ currentUser?.lastname }}</div>
-                      <div style="font-size: 12px; color: #777;">{{ currentUser?.email }}</div>
-                  </li>
-                  <li><a routerLink="/user/profile" class="dropdown-link"
-                         (click)="closeDropdown()">
-                      <i class="fas fa-user-circle" style="margin-right: 8px;"></i> Profile</a></li>
-                  <li><a href="#" class="dropdown-link logout-link"
-                         (click)="logout(); $event.preventDefault()">
-                      <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Sign out</a></li>
-              </ul>
-          </div>
+            <button class="btn btn-default dropdown-toggle" type="button" id="userProfileDropdown"
+                    (click)="toggleDropdown()"
+                    aria-haspopup="true"
+                    [attr.aria-expanded]="isDropdownOpen"
+                    style="background-color: #f8f9fa; border-color: #3498db; position: relative; display: flex; align-items: center; padding: 8px 12px;">
+                
+                <img [src]="userPhotoUrl || getDefaultAvatarUrl()"
+                     class="user-avatar"
+                     alt="User Avatar"
+                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin-right: 8px;"
+                     (error)="onImageError($event)">
+                
+                <span style="margin-right: 8px;">{{ currentUser?.firstname || 'User' }} {{ currentUser?.lastname || '' }}</span>
+                <span class="caret"></span>
+            </button>
+            
+            <ul class="dropdown-menu dropdown-menu-right"
+                [class.show]="isDropdownOpen"
+                [style.display]="isDropdownOpen ? 'block' : 'none'"
+                aria-labelledby="userProfileDropdown"
+                style="position: absolute; top: 100%; right: 0; z-index: 1000; min-width: 200px; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                
+                <li class="dropdown-header" style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
+                    <img [src]="userPhotoUrl || getDefaultAvatarUrl()"
+                         class="dropdown-avatar"
+                         alt="User Avatar"
+                         style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid #3498db; margin-bottom: 8px;"
+                         (error)="onImageError($event)">
+                    <div style="font-weight: bold; color: #333;">{{ currentUser?.firstname }} {{ currentUser?.lastname }}</div>
+                    <div style="font-size: 12px; color: #777;">{{ currentUser?.email }}</div>
+                </li>
+                
+                <li><a routerLink="/user/profile" class="dropdown-link"
+                       (click)="closeDropdown()"
+                       style="display: flex; align-items: center; padding: 10px 15px; text-decoration: none; color: #333;">
+                    <i class="fas fa-user-circle" style="margin-right: 10px; width: 16px;"></i> Profile</a></li>
+                <li><a href="#" class="dropdown-link logout-link"
+                       (click)="logout(); $event.preventDefault()"
+                       style="display: flex; align-items: center; padding: 10px 15px; text-decoration: none; color: #333;">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px; width: 16px;"></i> Sign out</a></li>
+            </ul>
+        </div>
       </div>
   </div>
   <hr style="border-top: 1px solid #3498db; margin-top: 10px;">
