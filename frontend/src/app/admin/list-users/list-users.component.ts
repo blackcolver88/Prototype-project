@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserModalComponent } from '../user-modal/user-modal.component';
 import { ConfirmModalComponent } from './confirm-modal.component';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-users',
@@ -34,8 +36,95 @@ export class ListUsersComponent implements OnInit {
   loadUsers(): void {
     this.userService.getAllUsers().subscribe((users) => {
       this.allUsers = users;
-      this.updateTableData();
+      
+      const photoRequests = users.map(user => {
+        return this.userService.getPhoto(user.id).pipe(
+          map((photo: string | null) => {
+            if (photo) {
+              user.photo = this.processPhotoData(photo);
+            }
+            return user;
+          })
+        );
+      });
+      
+      forkJoin(photoRequests).subscribe({
+        next: (usersWithPhotos: UserProfile[]) => {
+          this.allUsers = usersWithPhotos;
+          this.updateTableData();
+        },
+        error: (err: Error) => {
+          console.error('Erreur lors du chargement des photos:', err);
+          this.updateTableData();
+        }
+      });
     });
+  }
+  
+  private processPhotoData(photoData: string): string {
+    if (!photoData) {
+      return this.getDefaultAvatarUrl();
+    }
+    
+    if (photoData.startsWith('http') || photoData.startsWith('data:image/')) {
+      return photoData;
+    }
+    
+    try {
+      const cleanBase64 = photoData.replace(/\s/g, '');
+      
+      if (this.isValidBase64(cleanBase64)) {
+        if (cleanBase64.startsWith('data:image/')) {
+          return cleanBase64;
+        } else {
+          return `data:image/png;base64,${cleanBase64}`;
+        }
+      } else {
+        console.error('Chaîne Base64 invalide');
+        return this.getDefaultAvatarUrl();
+      }
+    } catch (error) {
+      console.error('Erreur lors du traitement de l\'image:', error);
+      return this.getDefaultAvatarUrl();
+    }
+  }
+  
+  private isValidBase64(str: string): boolean {
+    if (!str || str.trim() === '') {
+      return false;
+    }
+    
+    if (str.startsWith('data:image/')) {
+      return true;
+    }
+    
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    if (!base64Regex.test(str)) {
+      return false;
+    }
+    
+    if (str.length % 4 !== 0) {
+      return false;
+    }
+    
+    try {
+      const decoded = atob(str);
+      return decoded.length > 0;
+    } catch (err) {
+      return false;
+    }
+  }
+  
+  getDefaultAvatarUrl(): string {
+    return 'assets/default-avatar.png';
+  }
+  
+  onImageError(event: Event): void {
+    console.error('Erreur de chargement de l\'image');
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.src = this.getDefaultAvatarUrl();
+    }
   }
 
 

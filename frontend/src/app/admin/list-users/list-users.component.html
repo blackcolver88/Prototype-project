@@ -25,6 +25,7 @@
       <table class="form-table" *ngIf="isBrowser">
         <thead>
           <tr>
+            <th class="table-header">Picture</th>
             <th class="table-header">First Name</th>
             <th class="table-header">Last Name</th>
             <th class="table-header">Email</th>
@@ -34,6 +35,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let user of rowData" class="form-row">
+            <td class="table-cell photo-cell">
+              <img *ngIf="user.photo" [src]="user.photo" alt="Photo de profil" class="user-photo" (error)="onImageError($event)">
+              <div *ngIf="!user.photo" class="user-photo-placeholder">
+                {{ user.firstname?.charAt(0) }}{{ user.lastname?.charAt(0) }}
+              </div>
+            </td>
             <td class="table-cell">{{ user.firstname }}</td>
             <td class="table-cell">{{ user.lastname }}</td>
             <td class="table-cell">{{ user.email }}</td>

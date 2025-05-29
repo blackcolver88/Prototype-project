@@ -148,6 +148,33 @@
     text-overflow: ellipsis;
     max-width: 200px;
   }
+  
+  .photo-cell {
+    width: 60px;
+    text-align: center;
+  }
+  
+  .user-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+  }
+  
+  .user-photo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0 auto;
+  }
 
   /* Button Styles */
   .table-cell button {
