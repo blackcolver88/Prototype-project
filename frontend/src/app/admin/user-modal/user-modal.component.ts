@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { RegisterRequest } from '../../model/RegisterRequest';
 import { AuthService } from '../../services/Auth.service';
-import { Role } from '../../model/Role';
 
 @Component({
   selector: 'app-user-modal',
@@ -20,6 +19,8 @@ export class UserModalComponent {
   errorMessage: string = '';
   successMessage: string = '';
   isSubmitting: boolean = false;
+  availableRoles: string[] = [];
+  isLoadingRoles: boolean = true;
 
   constructor(
     private fb: FormBuilder,
@@ -33,6 +34,25 @@ export class UserModalComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  ngOnInit(): void {
+    this.loadRoles();
+  }
+
+  loadRoles(): void {
+    this.isLoadingRoles = true;
+    this.authService.getAvailableRoles().subscribe({
+      next: (roles) => {
+        this.availableRoles = roles;
+        this.isLoadingRoles = false;
+      },
+      error: (err) => {
+        console.error('Failed to load roles', err);
+        this.errorMessage = 'Unable to load roles. Please try again later.';
+        this.isLoadingRoles = false;
+      }
+    });
   }
 
   passwordMatchValidator(formGroup: FormGroup) {
@@ -66,7 +86,7 @@ export class UserModalComponent {
       next: (response) => {
         console.log('User registration successful', response);
         this.successMessage = `User ${registerData.firstname} ${registerData.lastname} has been successfully registered with role: ${registerData.role}`;
-        this.errorMessage = ''; // Clear any error message
+        this.errorMessage = '';
         this.registerForm.reset();
         this.registerForm.patchValue({ role: '' });
         this.userCreated.emit(registerData);
@@ -78,7 +98,7 @@ export class UserModalComponent {
       error: (error) => {
         console.error('Registration failed', error);
         this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
-        this.successMessage = ''; // Clear any success message
+        this.successMessage = '';
         this.isSubmitting = false;
       },
       complete: () => {

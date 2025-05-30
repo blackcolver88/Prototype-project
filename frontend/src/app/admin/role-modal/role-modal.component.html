@@ -1,0 +1,66 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <button type="button" class="close-button" (click)="closeModal()">&times;</button>
+      <h2 class="modal-title">{{ editMode ? 'Edit Role' : 'Create New Role' }}</h2>
+    </div>
+    
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+    </div>
+
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-group">
+        <label for="name">Role Name</label>
+        <input type="text" formControlName="name" id="name" placeholder="Example: USER">
+        <div *ngIf="f['name'].touched && f['name'].errors" class="error-text">
+          <div *ngIf="f['name'].errors['required']">Role name is required</div>
+          <div *ngIf="f['name'].errors['minlength']">Role name must be at least 2 characters</div>
+        </div>
+        <small class="form-text text-muted">The "ROLE_" prefix will be automatically added if necessary.</small>
+      </div>
+
+      <button type="submit" [disabled]="roleForm.invalid || isSubmitting" class="submit-button">
+        {{ isSubmitting ? 'Processing...' : (editMode ? 'Update Role' : 'Create Role') }}
+      </button>
+    </form>
+
+    <!-- Existing roles list -->
+    <div class="roles-list" *ngIf="!isLoading && roles.length > 0">
+      <h3>Existing Roles</h3>
+      <table class="roles-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of roles">
+            <td>{{ role.name }}</td>
+            <td class="actions">
+              <button class="edit-button" (click)="editRole(role)" title="Edit">
+                <span class="material-icons">edit</span>
+              </button>
+              <button class="delete-button" (click)="deleteRole(role.id)" title="Delete">
+                <span class="material-icons">delete</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-message">
+      Loading roles...
+    </div>
+
+    <div *ngIf="!isLoading && roles.length === 0" class="no-roles-message">
+      No roles available.
+    </div>
+  </div>
+</div>

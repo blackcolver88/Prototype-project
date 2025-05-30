@@ -74,13 +74,21 @@ export class LoginPageComponent implements OnInit {
           // Determine redirect URL based on role
           let redirectUrl = this.returnUrl;
           if (!redirectUrl) {
-            // Default redirect based on user role
-            if (this.tokenService.isUser()) {
-              redirectUrl = '/user/profile';
-            } else if (this.tokenService.canAccessAdminRoutes()) {
+            const userRole = this.tokenService.getUserRole();
+            console.log('Redirection based on role:', userRole);
+            
+            if (this.tokenService.isAdmin()) {
+              console.log('Redirecting to admin dashboard (ADMIN)');
               redirectUrl = '/admin';
+            } else if (this.tokenService.isManager()) {
+              console.log('Redirecting to admin dashboard (MANAGER)');
+              redirectUrl = '/admin';
+            } else if (this.tokenService.isUser()) {
+              console.log('Redirecting to user profile (USER)');
+              redirectUrl = '/user/profile';
             } else {
-              redirectUrl = '/user/profile'; // fallback
+              console.log('Redirecting to admin dashboard (other role)');
+              redirectUrl = '/admin';
             }
           }
 

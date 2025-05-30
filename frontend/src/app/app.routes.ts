@@ -10,13 +10,13 @@ import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.compon
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
 import { adminGuard, userGuard, formAccessGuard } from './core/auth/guards/roleGuard';
-import { RegisterComponent } from './user/pages/register/register.component';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
 import { ListUsersComponent } from './admin/list-users/list-users.component';
 import { UserLayoutsComponent } from './layouts/user-layouts/user-layouts.component';
 import { ProfilComponent } from './user/pages/profil/profil.component';
+import { RoleModalComponent } from './admin/role-modal/role-modal.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -56,13 +56,14 @@ export const routes: Routes = [
          component: ProcessesPageComponent,
          data: { title: 'Processes' }
         },
-      { path: 'register',
-         component: RegisterComponent,
-         data: { title: 'Register' }
-        },
+
         { path: 'users',
          component: ListUsersComponent,
          data: { title: 'List users' }
+        },
+        { path: 'role',
+         component: RoleModalComponent,
+         data: { title: 'Roles' }
         },
 
     ]

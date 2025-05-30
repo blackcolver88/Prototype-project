@@ -1,7 +1,8 @@
 package com.example.auth_service.Authentication;
 
+import com.example.auth_service.Entity.Role;
 import com.example.auth_service.Entity.User;
-import com.example.auth_service.Enum.Role;
+import com.example.auth_service.Repository.RoleRepository;
 import com.example.auth_service.Repository.UserRepository;
 import com.example.auth_service.Service.EmailService;
 import com.example.auth_service.Service.JwtService;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 public class AuthenticationService {
 
     private final UserRepository repository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -28,21 +30,24 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) {
         LocalDateTime now = LocalDateTime.now();
 
-        // Parse the role from the request
         Role userRole;
         try {
-            // Log the received role value
             System.out.println("Received role from request: " + request.getRole());
 
-            // Convert string to enum
-            userRole = Role.valueOf(request.getRole());
+            String roleName = request.getRole();
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+            
+            userRole = roleRepository.findByName(roleName)
+                    .orElseGet(() -> roleRepository.findByName("ROLE_USER")
+                            .orElseThrow(() -> new RuntimeException("Rôle par défaut non trouvé")));
         } catch (Exception e) {
-            // Fallback to default role if parsing fails
             System.err.println("Error parsing role: " + e.getMessage());
-            userRole = Role.ROLE_USER;
+            userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Rôle par défaut non trouvé"));
         }
 
-        // Store the original password to send in the email
         String originalPassword = request.getPassword();
 
         var user = User.builder()
@@ -65,7 +70,7 @@ public class AuthenticationService {
             user.getFirstname(),
             user.getLastname(),
             originalPassword,
-            userRole.name()
+            userRole.getName()
         );
 
         var jwtToken = jwtService.generateToken(user);

@@ -1,6 +1,6 @@
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthResponse } from '../model/AuthResponse';
 import { LoginRequest } from '../model/LoginRequest';
@@ -88,5 +88,24 @@ export class AuthService {
         this.tokenService.removeToken();
       }
     }
+  }
+
+ 
+
+  getAvailableRoles(): Observable<string[]> {
+    return this.http.get<{ name: string }[]>(`${this.API_URL}/roles`)
+      .pipe(
+        map((roles: { name: string }[]) => roles.map(r => r.name))
+      );
+  }
+
+
+  getUserById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/users/${id}`);
+  }
+
+ 
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/users`);
   }
 }

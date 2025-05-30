@@ -43,10 +43,12 @@
 
         <div class="form-group">
           <label for="role">Role</label>
-          <select formControlName="role" id="role">
+          <div *ngIf="isLoadingRoles" class="text-gray-500 text-sm">Loading roles...</div>
+          <select *ngIf="!isLoadingRoles" formControlName="role" id="role">
             <option value="">Select a role</option>
-            <option value="ROLE_HR">HR</option>
-            <option value="ROLE_USER">User</option>
+            <option *ngFor="let role of availableRoles" [value]="role">
+              {{ role.replace('ROLE_', '') }}
+            </option>
           </select>
           <div *ngIf="f['role'].touched && f['role'].errors" class="error-text">
             <div *ngIf="f['role'].errors['required']">Please select a role</div>

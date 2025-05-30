@@ -4,15 +4,16 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { TokenService } from './token.service';
-import { Role } from '../model/Role';
 
 export interface UserProfile {
   id: number;
   email: string;
   firstname: string;
   lastname: string;
-  role: string;
-  password?: string; 
+  role: {
+    id: number;
+    name: string;
+  };  password?: string; 
   photo?: string;
 
 }
@@ -58,10 +59,12 @@ export class UserService {
     this.currentUserSubject.next(null);
   }
   getAllUsers(): Observable<UserProfile[]> {
-    return this.http.get<UserProfile[]>(`${this.API_URL}`).pipe(
-      map((users) => users.filter(user => user.role !== Role.ROLE_ADMIN)), 
-      catchError(() => {
-        console.error('Erreur lors de la récupération des utilisateurs.');
+    return this.http.get<UserProfile[]>(this.API_URL).pipe(
+      map(users => 
+        users.filter(user => user.role?.name !== 'ROLE_ADMIN') 
+      ),
+      catchError(err => {
+        console.error('Erreur lors de la récupération des utilisateurs.', err);
         return of([]); 
       })
     );

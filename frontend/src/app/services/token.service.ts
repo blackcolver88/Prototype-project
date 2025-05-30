@@ -8,11 +8,20 @@ export class TokenService {
   private readonly TOKEN_KEY = 'auth_token';
   private platformId = inject(PLATFORM_ID);
 
+  // Cache pour éviter les appels répétés aux méthodes d'extraction
+  private cachedUserRole: string | null = null;
+  private cachedUserId: number | null = null;
+  private lastToken: string | null = null;
+
   constructor() {}
 
   saveToken(token: string): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.TOKEN_KEY, token);
+      // Réinitialiser le cache lorsqu'un nouveau token est enregistré
+      this.cachedUserRole = null;
+      this.cachedUserId = null;
+      this.lastToken = null;
     }
   }
 
@@ -26,6 +35,10 @@ export class TokenService {
   removeToken(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
+      // Réinitialiser le cache lorsque le token est supprimé
+      this.cachedUserRole = null;
+      this.cachedUserId = null;
+      this.lastToken = null;
     }
   }
 
@@ -39,6 +52,7 @@ export class TokenService {
       // Check if token has expired
       return payload.exp > Date.now() / 1000;
     } catch (e) {
+      console.error('Error decoding token:', e);
       return false;
     }
   }
@@ -56,13 +70,15 @@ export class TokenService {
   getUserId(): number | null {
     const token = this.getToken();
     if (!token) {
-      console.warn('No token available');
       return null;
+    }
+
+    if (token === this.lastToken && this.cachedUserId !== null) {
+      return this.cachedUserId;
     }
 
     try {
       const payload = this.decodeToken(token);
-      console.log('Token payload:', payload); // For debugging
 
       // Spring Security typically places the user details in different ways
       // Try all possible paths where the ID might be stored
@@ -89,17 +105,15 @@ export class TokenService {
 
         null;
 
-      if (!userId) {
-        console.warn('User ID not found in token payload. Full payload:', payload);
-        // If JWT contains email but no ID, we could use email as identifier
-        if (payload?.email) {
-          console.log("Using email as fallback identifier", payload.email);
-          // Return a placeholder ID if using email as identifier
-          return 999; // Temporary solution
-        }
+      if (!userId && payload?.email) {
+        // Return a placeholder ID if using email as identifier
+        this.cachedUserId = 999; // Temporary solution
+      } else {
+        this.cachedUserId = userId ? Number(userId) : null;
       }
 
-      return userId ? Number(userId) : null;
+      this.lastToken = token;
+      return this.cachedUserId;
     } catch (e) {
       console.error('Error getting user ID from token:', e);
       return null;
@@ -109,22 +123,28 @@ export class TokenService {
   getUserRole(): string | null {
     const token = this.getToken();
     if (!token) {
-      console.warn('No token available');
       return null;
+    }
+
+    if (token === this.lastToken && this.cachedUserRole !== null) {
+      return this.cachedUserRole;
     }
 
     try {
       const payload = this.decodeToken(token);
+      console.log('Token payload for role extraction:', payload);
 
       // Try to extract role from different possible locations in the token
-      const role =
+      this.cachedUserRole =
         payload?.role ||
         payload?.authorities?.[0] ||
         payload?.scope ||
         null;
-
-      console.log('Extracted role from token:', role);
-      return role;
+      
+      console.log('Extracted role from token (normalized):', this.cachedUserRole);
+      
+      this.lastToken = token;
+      return this.cachedUserRole;
     } catch (e) {
       console.error('Error getting user role from token:', e);
       return null;
@@ -133,7 +153,9 @@ export class TokenService {
 
   hasRole(role: string): boolean {
     const userRole = this.getUserRole();
-    return userRole === role;
+    if (!userRole) return false;
+    
+    return userRole.toUpperCase() === role.toUpperCase();
   }
 
   isAdmin(): boolean {
@@ -148,7 +170,11 @@ export class TokenService {
     return this.hasRole('ROLE_USER');
   }
 
+  isManager(): boolean {
+    return this.hasRole('ROLE_MANAGER');
+  }
+
   canAccessAdminRoutes(): boolean {
-    return this.isAdmin() || this.isHR();
+    return this.isAdmin() || this.isHR() || this.isManager();
   }
 }

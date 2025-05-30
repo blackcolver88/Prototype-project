@@ -69,6 +69,17 @@
             </a>
           </li>
 
+          <li class="mt-0.5 w-full">
+            <a class="py-2.7 text-sm ease-nav-brand my-0 mx-4 flex items-center whitespace-nowrap px-4 transition-colors"
+             routerLink="/admin/role"
+             routerLinkActive="bg-gradient-to-r from-blue-500 to-blue-700 shadow-soft-xl font-semibold text-white"
+             [routerLinkActiveOptions]="{ exact: true }">
+              <div class="shadow-soft-2xl mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tl from-purple-400 to-indigo-600 bg-center text-white text-2xl xl:p-2.5">
+                <span class="material-icons">admin_panel_settings</span>
+              </div>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease-soft sidebar-text" [class.hidden]="sidebarCollapsed">Manage Roles</span>
+            </a>
+          </li>
 
           <li class="w-full mt-4">
             <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase opacity-60">Account pages</h6>

@@ -3,7 +3,8 @@ package com.example.auth_service.Authentication;
 
 import com.example.auth_service.DTO.UserDTO;
 import com.example.auth_service.Entity.User;
-import com.example.auth_service.Enum.Role;
+import com.example.auth_service.Entity.Role;
+import com.example.auth_service.Repository.RoleRepository;
 import com.example.auth_service.Repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,61 @@ public class AuthenticationController {
     private final AuthenticationService service;
     private final UserService userService; // Add this field
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+
+    @GetMapping("/roles")
+    public ResponseEntity<List<Map<String, Object>>> getAvailableRoles() {
+        List<Map<String, Object>> roles = roleRepository.findAll().stream()
+                .map(role -> {
+                    Map<String, Object> roleMap = new HashMap<>();
+                    roleMap.put("id", role.getId());
+                    roleMap.put("name", role.getName());
+                    return roleMap;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(roles);
+    }
+    
+
     @PostMapping("/register")
-    public ResponseEntity <AuthenticationResponse> register(
-            @RequestBody RegisterRequest request
-    ){
-      return ResponseEntity.ok(service.register(request));
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            String roleName = request.getRole();
+
+            if (roleName == null || roleName.isBlank()) {
+                roleName = "ROLE_USER";
+            }
+
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+
+            if (!roleRepository.existsByName(roleName)) {
+                List<String> availableRoles = roleRepository.findAll()
+                        .stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of(
+                                "message", "Le rôle spécifié n'existe pas : " + roleName,
+                                "availableRoles", availableRoles
+                        ));
+            }
+
+            AuthenticationResponse response = service.register(request);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Erreur lors de l'enregistrement : " + e.getMessage()));
+        }
     }
 
     @PostMapping("/authenticate")
@@ -80,14 +126,18 @@ public class AuthenticationController {
         dto.setEmail(user.getEmail());
         dto.setFirstname(user.getFirstname());
         dto.setLastname(user.getLastname());
-        dto.setRole(user.getRole().name());
+        if (user.getRole() != null) {
+            dto.setRole(user.getRole().getName());
+        } else {
+            dto.setRole("ROLE_USER");
+        }
         return dto;
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().stream()
-                .filter(user -> !Role.ROLE_ADMIN.equals(user.getRole())) 
+                .filter(user -> user.getRole() != null && !"ROLE_ADMIN".equals(user.getRole().getName())) 
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
@@ -185,7 +235,10 @@ public class AuthenticationController {
     }
     @GetMapping("/users/count")
     public ResponseEntity<Long> countUsers() {
-        Long userCount = userRepository.countByRoleNot(Role.ROLE_ADMIN);
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                .orElseThrow(() -> new RuntimeException("Rôle ADMIN non trouvé"));
+        
+        Long userCount = userRepository.countByRoleNot(adminRole);
         return ResponseEntity.ok(userCount);
     }
 
