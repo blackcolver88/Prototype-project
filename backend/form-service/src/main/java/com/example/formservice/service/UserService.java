@@ -22,7 +22,9 @@ public class UserService {
         try {
             String authHeader = getAuthorizationHeader();
             if (authHeader == null) {
-                return Optional.empty();
+                // For internal service calls, use the method without auth header
+                UserDTO user = authServiceClient.getUserByIdInternal(id);
+                return Optional.ofNullable(user);
             }
             UserDTO user = authServiceClient.getUserById(id, authHeader);
             return Optional.ofNullable(user);

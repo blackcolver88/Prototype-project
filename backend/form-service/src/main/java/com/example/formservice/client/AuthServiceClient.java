@@ -12,6 +12,9 @@ public interface AuthServiceClient {
     @GetMapping("/{id}")
     UserDTO getUserById(@PathVariable("id") Long id, @RequestHeader("Authorization") String authHeader);
 
+    @GetMapping("/{id}")
+    UserDTO getUserByIdInternal(@PathVariable("id") Long id);
+
     @GetMapping("/validate")
     boolean validateUser(@PathVariable("id") Long id, @RequestHeader("Authorization") String authHeader);
 }
