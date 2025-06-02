@@ -3,9 +3,21 @@
   background-color: var(--section-bg);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
+  width: 100%;
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 0 auto;
   animation: fadeIn 0.3s ease-out;
+  overflow-x: hidden;
+}
+
+.form-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  overflow-x: auto;
 }
 
 @keyframes fadeIn {
@@ -44,11 +56,31 @@ ul {
   margin: 1rem 0;
 }
 
-li {
-  padding: 1rem;
-  background-color: var(--subsection-bg);
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+.form-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .form-values-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-values-grid > div {
+  background-color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
   border-left: 3px solid var(--primary-color);
   transition: var(--transition);
 }

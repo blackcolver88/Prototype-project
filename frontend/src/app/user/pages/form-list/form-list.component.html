@@ -1,11 +1,11 @@
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-6 mx-auto" style="max-width: 100%; width: 100%;">
   <h1 class="text-2xl font-semibold text-blue-600 mb-6">Mes Reponses</h1>
   
   <div class="bg-white rounded-lg shadow overflow-hidden">
     <ng-container *ngIf="isBrowser">
       <ag-grid-angular
         class="ag-theme-quartz w-full"
-        style="height: calc(100vh - 200px); min-height: 400px;"
+        style="height: calc(100vh - 200px); min-height: 400px; width: 100%; overflow-x: auto;"
         [rowData]="forms"
         [columnDefs]="colDefs"
         [rowSelection]="'single'"

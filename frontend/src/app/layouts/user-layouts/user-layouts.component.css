@@ -9,14 +9,14 @@ body {
   margin-top: 30px;
   margin-bottom: 30px;
   padding: 0 25px;
-  max-width: 1140px;
-  width: 90%;
+  max-width: 1440px;
+  width: 95%;
   margin-left: auto;
   margin-right: auto;
 }
 
 .bootstrap.snippet {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 15px;
   box-sizing: border-box;
@@ -513,4 +513,53 @@ hr {
 
 .user-avatar:hover {
   transform: scale(1.1);
+}
+
+/* Enhanced responsive styles */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 15px;
+  }
+  
+  .bootstrap.snippet {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+  
+  .row {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .col-sm-2, .col-sm-10 {
+    width: 100%;
+    padding: 0;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .text-center {
+    margin-bottom: 20px;
+  }
+  
+  .nav-tabs {
+    justify-content: space-between;
+  }
+  
+  .nav-tabs > li {
+    flex: 1;
+    text-align: center;
+    margin-right: 5px;
+  }
+  
+  .nav-tabs > li > a {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .nav-tabs > li > a i {
+    margin-right: 4px;
+  }
 }

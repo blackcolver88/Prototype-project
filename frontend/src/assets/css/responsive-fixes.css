@@ -1,0 +1,61 @@
+/* Additional responsive styles for the UI */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .bootstrap.snippet {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .nav-tabs > li {
+    flex: 1 1 auto;
+  }
+  
+  .nav-tabs > li > a {
+    padding: 8px;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .tab-content {
+    padding: 10px;
+  }
+  
+  .table-wrapper {
+    min-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .requests-table {
+    min-width: 800px;
+  }
+}
+
+/* Fix for the dialog width */
+.mat-dialog-container {
+  max-width: 90vw !important;
+  width: auto !important;
+  max-height: 90vh !important;
+  overflow: auto !important;
+}
+
+/* Ensure the grid doesn't overflow */
+ag-grid-angular {
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Add scrolling for table containers */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}

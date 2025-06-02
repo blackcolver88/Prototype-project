@@ -61,7 +61,7 @@
   <hr style="border-top: 1px solid #3498db; margin-top: 10px;">
 
   <div class="row">
-    <div class="col-sm-3">
+    <div class="col-sm-2">
 
       <div class="text-center" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <img [src]="userPhotoUrl || getDefaultAvatarUrl()"
@@ -91,7 +91,7 @@
       
 
       </div>
-    <div class="col-sm-9">
+    <div class="col-sm-10">
           <ul class="nav nav-tabs" style="border-bottom: 2px solid #3498db;">
               <li><a routerLink="profile" routerLinkActive="active" style="color: #555; font-weight: 600;"><i class="fas fa-user-edit"></i> Profile</a></li>
               <li *ngIf="canAccessForms()"><a routerLink="requests" routerLinkActive="active" style="color: #555;"><i class="fas fa-file-alt"></i> Requests</a></li>

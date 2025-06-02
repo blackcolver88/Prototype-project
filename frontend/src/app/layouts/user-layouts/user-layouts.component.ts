@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [RouterModule, RouterOutlet, CommonModule, IonicModule, FormsModule],
   templateUrl: './user-layouts.component.html',
-  styleUrl: './user-layouts.component.css'
+  styleUrls: ['./user-layouts.component.css', './responsive-nav.css']
 })
 
 export class UserLayoutsComponent implements OnInit, AfterViewInit {

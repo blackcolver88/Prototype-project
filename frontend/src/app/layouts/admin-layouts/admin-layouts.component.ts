@@ -4,6 +4,7 @@ import { AdminProfileDialogComponent } from './admin-profile-dialog.component';
 import { RouterModule, RouterOutlet, Router, NavigationEnd, ActivatedRoute, Event } from '@angular/router';
 import { UserProfile, UserService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/Auth.service';
+import { TokenService } from '../../services/token.service';
 import { addIcons } from 'ionicons';
 import { logoIonic } from 'ionicons/icons';
 import { IonicModule } from '@ionic/angular';
@@ -31,9 +32,15 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
   dropdowns: { [key: string]: boolean } = {};
   adminPhotoUrl: string = 'assets/default-user.png';
 
+  // Check if user can access admin-only features
+  canAccessAdminOnlyFeatures(): boolean {
+    return this.tokenService.canAccessAdminOnlyFeatures();
+  }
+
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private tokenService: TokenService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private dialog: MatDialog

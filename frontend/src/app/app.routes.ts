@@ -9,7 +9,7 @@ import { AdminSubmissionComponent } from './pages/admin-submission/admin-submiss
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
-import { adminGuard, userGuard, formAccessGuard } from './core/auth/guards/roleGuard';
+import { adminGuard, adminOnlyGuard, userGuard, formAccessGuard } from './core/auth/guards/roleGuard';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
@@ -31,7 +31,8 @@ export const routes: Routes = [
         path: '',
         component: DashboardComponent,
         pathMatch: 'full',
-        data: { title: 'Dashboard' }
+        canActivate: [adminOnlyGuard],
+        data: { title: 'Dashboard', adminOnly: true }
       },
       {
         path: 'form-template',
@@ -46,7 +47,8 @@ export const routes: Routes = [
       {
         path: 'list_submissions',
         component: AdminSubmissionComponent,
-        data: { title: 'Submissions' }
+        canActivate: [adminOnlyGuard],
+        data: { title: 'Submissions', adminOnly: true }
       },
       { path: 'diagram',
          component: BpmnModelerComponent,
@@ -59,11 +61,13 @@ export const routes: Routes = [
 
         { path: 'users',
          component: ListUsersComponent,
-         data: { title: 'List users' }
+         canActivate: [adminOnlyGuard],
+         data: { title: 'List users', adminOnly: true }
         },
         { path: 'role',
          component: RoleModalComponent,
-         data: { title: 'Roles' }
+         canActivate: [adminOnlyGuard],
+         data: { title: 'Roles', adminOnly: true }
         },
 
     ]

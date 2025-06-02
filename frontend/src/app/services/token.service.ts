@@ -175,6 +175,15 @@ export class TokenService {
   }
 
   canAccessAdminRoutes(): boolean {
-    return this.isAdmin() || this.isHR() || this.isManager();
+    // Allow any role other than ROLE_USER to access admin routes
+    const userRole = this.getUserRole();
+    if (!userRole) return false;
+    
+    return userRole.toUpperCase() !== 'ROLE_USER';
+  }
+  
+  // Check if user can access admin-only features (Dashboard, Roles, Submissions)
+  canAccessAdminOnlyFeatures(): boolean {
+    return this.isAdmin();
   }
 }

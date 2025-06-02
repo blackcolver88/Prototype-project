@@ -22,7 +22,7 @@ interface RequestData {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './requests.component.html',
-  styleUrls: ['./requests.component.css']
+  styleUrls: ['./requests.component.css', './button-styles.css']
 })
 export class RequestsComponent implements OnInit {
   requests: RequestData[] = [];

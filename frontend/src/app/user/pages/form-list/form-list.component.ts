@@ -75,11 +75,15 @@ export class FormListComponent implements OnInit {
       resizable: true,
       sortable: true,
       flex: 1,
-      minWidth: 100
+      minWidth: 150,
+      autoHeight: true
     },
     pagination: false,
     suppressPaginationPanel: true,
-    domLayout: 'autoHeight'
+    domLayout: 'autoHeight',
+    suppressCellFocus: true,
+    suppressColumnVirtualisation: false,
+    enableCellTextSelection: true
   };
 
   constructor(
@@ -136,7 +140,8 @@ export class FormListComponent implements OnInit {
             };
             
             const dialogRef = this.dialog.open(FormResponsesComponent, {
-              width: '400px',
+              width: '800px',
+              maxWidth: '90vw',
               data: dialogData,
             });
           },
