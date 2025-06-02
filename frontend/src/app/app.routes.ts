@@ -85,10 +85,10 @@ export const routes: Routes = [
         data: { title: 'Profile' }
       },
       {
-        path: 'forms',
-        component: FormsComponent,
+        path: 'requests',
+        loadComponent: () => import('./user/pages/requests/requests.component').then(m => m.RequestsComponent),
         canActivate: [formAccessGuard],
-        data: { title: 'Forms' }
+        data: { title: 'Requests' }
       },
       {
         path: 'list',

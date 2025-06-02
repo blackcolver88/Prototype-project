@@ -25,6 +25,8 @@ public class FormSubmissionDTO {
     private Long formId;
     @Setter
     private String processDefinitionKey;
+    @Setter
+    private String targetRole;
 
     
     public FormSubmissionDTO(Long id, LocalDateTime date, String task, String formTitle, List<String> formValues) {

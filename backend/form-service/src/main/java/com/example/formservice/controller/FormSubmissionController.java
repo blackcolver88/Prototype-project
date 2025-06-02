@@ -99,23 +99,17 @@ public class FormSubmissionController {
             Optional<FormTemplate> form = formRepository.findById(formId);
             log.info("Form found: {}", form.isPresent());
 
-            // More logging
-            boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
-            log.info("Submission exists: {}", submissionExists);
-
             if (user.isEmpty() || form.isEmpty()) {
                 return ResponseEntity.notFound().build();
-            }
-
-            if (submissionExists) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "Vous avez déjà soumis ce formulaire."));
             }
 
             FormSubmission submission = new FormSubmission();
             submission.setUserId(userId);
             submission.setDate(LocalDateTime.now());
             submission.setIdForm(formId);
+            if (formValuesWrapper.getTargetRole() != null) {
+                submission.setTargetRole(formValuesWrapper.getTargetRole());
+            }
             try {
                 submission.setUserTask(user.get().getFirstname(), user.get().getLastname());
                 log.info("User task set successfully: {}", submission.getUserTask());
@@ -175,6 +169,10 @@ public class FormSubmissionController {
 
             if (formValuesWrapper.getProcessDefinitionKey() != null) {
                 formSubmissionDTO.setProcessDefinitionKey(formValuesWrapper.getProcessDefinitionKey());
+            }
+
+            if (formValuesWrapper.getTargetRole() != null) {
+                formSubmissionDTO.setTargetRole(formValuesWrapper.getTargetRole());
             }
 
             formSubmissionDTO.setFormValues(values.stream()
@@ -254,7 +252,8 @@ public class FormSubmissionController {
                         submission.getFormValues().stream()
                                 .map(FormValue::getValue)
                                 .collect(Collectors.toList()));
-
+                
+                dto.setTargetRole(submission.getTargetRole());
                 submissionDTOs.add(dto);
             }
 
@@ -280,15 +279,6 @@ public class FormSubmissionController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(submissionDTOs);
-    }
-
-    @GetMapping("/check-submission/{userId}/{formId}")
-    public ResponseEntity<Boolean> checkIfSubmissionExists(
-            @PathVariable Long userId,
-            @PathVariable Long formId) {
-
-        boolean submissionExists = formSubmissionService.existsByUserIdAndFormId(userId, formId);
-        return ResponseEntity.ok(submissionExists);
     }
 
     @PatchMapping("/{userId}/{submissionId}")

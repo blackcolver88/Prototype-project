@@ -89,8 +89,8 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
     if (urlPath.includes('/profile')) {
       this.pageTitle = 'Profile';
-    } else if (urlPath.includes('/forms')) {
-      this.pageTitle = 'Forms';
+    } else if (urlPath.includes('/requests')) {
+      this.pageTitle = 'Requests';
     } else if (urlPath.includes('/list')) {
       this.pageTitle = 'Responses';
     } else {

@@ -86,19 +86,7 @@ export class FormvalueComponent {
       
       this.userId = userId;
       this.loadFormTemplateWithLayouts(this.templateId);
-      this.checkFormSubmissionStatus();
     });
-  }
-
-  checkFormSubmissionStatus() {
-    this.formSubmissionService
-      .checkIfSubmissionExists(this.userId, +this.templateId)
-      .subscribe((exists) => {
-        if (exists) {
-          this.isFormSubmitted = true;
-          this.submissionMessage = 'You have already submitted this form.';
-        }
-      });
   }
 
   ngOnDestroy() {
@@ -430,12 +418,6 @@ export class FormvalueComponent {
       return;
     }
     
-    if (this.isFormSubmitted) {
-      alert('You have already submitted this form.');
-      console.warn('You have already submitted this form.');
-      return;
-    }
-    
     if (!this.validateForm()) {
       return; 
     }
@@ -457,8 +439,7 @@ export class FormvalueComponent {
       )
       .subscribe({
         next: (result) => {
-          this.isFormSubmitted = true; 
-          this.router.navigate(['/forms']); 
+          this.router.navigate(['/user/requests']); 
         },
         error: (error) => {
           console.error('Error submitting form:', error);

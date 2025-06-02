@@ -63,10 +63,6 @@ export class FormSubmissionService {
     return this.http.get<any[]>(`${this.baseUrl}/user/${userId}/form/${formId}`);
   }
 
-  checkIfSubmissionExists(userId: number, formId: number): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/check-submission/${userId}/${formId}`);
-  }
-
   getFormTemplateBySubmissionId(submissionId: number): Observable<any> {
     const url = `${this.baseUrl}/submission/${submissionId}/template`;
     return this.http.get<any>(url).pipe(
@@ -104,9 +100,11 @@ export class FormSubmissionService {
   ): Observable<any> {
     try {
       const userId = this.getUserId();
+      const pendingRequestData = JSON.parse(localStorage.getItem('pendingRequestData') || '{}');
       const payload = { 
         formValues: formValues,
-        processDefinitionKey: processDefinitionKey
+        processDefinitionKey: processDefinitionKey,
+        targetRole: pendingRequestData.targetRole
       };
       return this.http.post<FormSubmission>(`${this.baseUrl}/${userId}/${formId}`, payload);
     } catch (error) {

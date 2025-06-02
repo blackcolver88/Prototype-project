@@ -24,6 +24,9 @@ public class FormSubmission {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "target_role")
+    private String targetRole;
+
     @Transient
     private String userTask;
 
