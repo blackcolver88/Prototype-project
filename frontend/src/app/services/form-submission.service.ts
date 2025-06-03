@@ -89,6 +89,11 @@ export class FormSubmissionService {
     return this.http.get<PaginatedSubmissionsResponse>(url);
   }
 
+  getFormSubmissionsByTargetRole(targetRole: string, page: number, limit: number): Observable<any> {
+    const url = `${this.baseUrl}/paginated/by-target-role?targetRole=${targetRole}&page=${page}&limit=${limit}`;
+    return this.http.get<PaginatedSubmissionsResponse>(url);
+  }
+
   getFormSubmissionById(submissionId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${submissionId}`);
   }

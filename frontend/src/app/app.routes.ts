@@ -9,7 +9,7 @@ import { AdminSubmissionComponent } from './pages/admin-submission/admin-submiss
 import { BpmnModelerComponent } from './camunda/bpmn-modeler/bpmn-modeler.component';
 import { ProcessesPageComponent } from './pages/processes/processes-page/processes-page.component';
 import { authGuard } from './core/auth/guards/authGuard';
-import { adminGuard, adminOnlyGuard, userGuard, formAccessGuard } from './core/auth/guards/roleGuard';
+import { adminGuard, adminOnlyGuard, userGuard, formAccessGuard, requestManagementGuard } from './core/auth/guards/roleGuard';
 import { DashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminLayoutsComponent } from './layouts/admin-layouts/admin-layouts.component';
 import { FormTemplateComponent } from './pages/form-template/form-template.component';
@@ -40,6 +40,12 @@ export const routes: Routes = [
         data: { title: 'Form Templates' }
       },
       {
+        path: 'request-management',
+        loadComponent: () => import('./pages/request-management/request-management.component').then(m => m.RequestManagementComponent),
+        canActivate: [requestManagementGuard],
+        data: { title: 'Request Management' }
+      },
+      {
         path: 'editor-tree/:id',
         component: EditorTreeComponent,
         data: { title: 'Form Editor' }
@@ -58,18 +64,16 @@ export const routes: Routes = [
          component: ProcessesPageComponent,
          data: { title: 'Processes' }
         },
-
-        { path: 'users',
+      { path: 'users',
          component: ListUsersComponent,
          canActivate: [adminOnlyGuard],
          data: { title: 'List users', adminOnly: true }
         },
-        { path: 'role',
+      { path: 'role',
          component: RoleModalComponent,
          canActivate: [adminOnlyGuard],
          data: { title: 'Roles', adminOnly: true }
         },
-
     ]
   },
 
@@ -103,14 +107,13 @@ export const routes: Routes = [
     ]
   },
 
-
-
   { path: 'editor-tree/:id', component: EditorTreeComponent, canActivate: [adminGuard] },
   { path: 'forms', component: FormsComponent, canActivate: [formAccessGuard] },
   { path: 'formvalue/:id', component: FormvalueComponent, canActivate: [formAccessGuard] },
   { path: 'responses/:userId/:formId', component: FormResponsesComponent, canActivate: [formAccessGuard] },
   { path: 'list', component: FormListComponent, canActivate: [formAccessGuard] },
   { path: 'edit/:userId/:submissionId', component: EditFormComponent, canActivate: [formAccessGuard] },
+
   // { path: 'list_submissions', component: AdminSubmissionComponent, canActivate: [authGuard] },
   // { path: 'diagram', component: BpmnModelerComponent, canActivate: [authGuard] },
   // { path: 'processes', component: ProcessesPageComponent, canActivate: [authGuard] },

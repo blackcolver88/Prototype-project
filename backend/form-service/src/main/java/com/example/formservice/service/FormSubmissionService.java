@@ -148,7 +148,7 @@ public class FormSubmissionService {
         if (userInfo.isPresent()) {
             UserDTO user = userInfo.get();
             for (FormSubmission submission : submissions) {
-                submission.setUserTask(user.getFirstname() + " " + user.getLastname());
+                submission.setUserTask(user.getFirstname(), user.getLastname());
             }
         }
 
@@ -185,6 +185,23 @@ public class FormSubmissionService {
     public Page<FormSubmission> getAllFormSubmissions(int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("date").descending());
         Page<FormSubmission> submissionPage = formSubmissionRepository.findAll(pageable);
+
+        for (FormSubmission submission : submissionPage.getContent()) {
+            if (submission.getUserId() != null) {
+                Optional<UserDTO> userInfo = userService.getUserById(submission.getUserId());
+                if (userInfo.isPresent()) {
+                    UserDTO user = userInfo.get();
+                    submission.setUserTask(user.getFirstname(), user.getLastname());
+                }
+            }
+        }
+
+        return submissionPage;
+    }
+
+    public Page<FormSubmission> getFormSubmissionsByTargetRole(String targetRole, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("date").descending());
+        Page<FormSubmission> submissionPage = formSubmissionRepository.findByTargetRole(targetRole, pageable);
 
         for (FormSubmission submission : submissionPage.getContent()) {
             if (submission.getUserId() != null) {

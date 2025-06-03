@@ -26,13 +26,42 @@ export class FormResponsesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Extract data from dialog data
     this.userId = this.data.userId;
     this.formId = this.data.formId;
     
     if (this.data.specificSubmission) {
-      // If we have a specific submission, use it directly
-      this.submissions = [this.data.specificSubmission];
+      console.log('Using specific submission:', this.data.specificSubmission);
+      // Process and ensure form values have proper titles
+      const processedSubmission = {
+        ...this.data.specificSubmission,
+        formValues: (this.data.specificSubmission.formValues || []).map((value: any) => ({
+          title: value.title || value.input?.label || value.formInput?.title || 'Field',
+          value: value.value || ''
+        }))
+      };
+      console.log('Processed form values:', processedSubmission.formValues);
+      this.submissions = [processedSubmission];
       this.loading = false;
+    } else if (this.data.submissionId) {
+      // If we have only a submission ID, fetch the details
+      console.log('Fetching submission by ID:', this.data.submissionId);
+      this.loading = true;
+      this.formSubmissionService.getFormSubmissionById(this.data.submissionId).subscribe({
+        next: (submission) => {
+          if (submission) {
+            this.submissions = [submission];
+          } else {
+            this.submissions = [];
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching submission by ID:', error);
+          this.submissions = [];
+          this.loading = false;
+        }
+      });
     } else {
       // Fallback to loading all submissions (preserving existing behavior)
       if (!this.userId || !this.formId) {

@@ -1,0 +1,55 @@
+<div class="request-management-container">
+  <div class="header-section">
+    <h2>Request Management</h2>
+    <div class="filter-info" *ngIf="userRole">
+      <span class="filter-label">Showing requests for role:</span>
+      <span class="filter-value">{{ userRole }}</span>
+    </div>
+    <div class="filter-info" *ngIf="!userRole">
+      <span class="filter-warning">⚠️ Role not detected - showing all requests</span>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <div class="action-bar">
+      <div class="button-container">
+        <!-- You can add action buttons here if needed -->
+      </div>
+      <div class="pagination-controls">
+        <div class="items-per-page">
+          <label for="itemsPerPage">Items per page:</label>
+          <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onPageSizeChange()">
+            <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <table class="submission-table">
+      <thead>
+        <tr>
+          <th class="table-header">Form Title</th>
+          <th class="table-header">User</th>
+          <th class="table-header">Date</th>
+          <th class="table-header">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let submission of submissions" class="submission-row">
+          <td class="table-cell">{{ submission.formTitle || 'Formulaire inconnu' }}</td>
+          <td class="table-cell">{{ submission.task || 'Tâche inconnue' }}</td>
+          <td class="table-cell">{{ submission.date | date:'medium' }}</td>
+          <td class="table-cell actions-cell">
+            <button (click)="showFormResponses(submission.id)" class="btn-view" title="View Details">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button (click)="validateRequest(submission.id)" class="btn-validate" title="Validate Request">
+              <i class="fas fa-check"></i>
+            </button>
+            <button (click)="rejectRequest(submission.id)" class="btn-reject" title="Reject Request">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> 
