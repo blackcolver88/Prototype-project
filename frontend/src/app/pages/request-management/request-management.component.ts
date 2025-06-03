@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class RequestManagementComponent implements OnInit {
   submissions: any[] = [];
+  tasks: any[] = [];
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalItems: number = 0;
@@ -37,6 +38,7 @@ export class RequestManagementComponent implements OnInit {
     // Get the user's role from the token
     this.userRole = this.tokenService.getUserRole();
     this.loadSubmissions();
+    this.loadTasksForRole();
   }
 
   loadSubmissions() {
@@ -83,6 +85,7 @@ export class RequestManagementComponent implements OnInit {
   onPageChange(page: number) {
     this.currentPage = page;
     this.loadSubmissions();
+    this.loadTasksForRole();
   }
 
   showFormResponses(submissionId: number) {
@@ -219,8 +222,56 @@ export class RequestManagementComponent implements OnInit {
   }
 
   validateRequest(submissionId: number) {
-    // TODO: Implement validation logic
-    console.log('Validating request:', submissionId);
+    // Find the corresponding task for this submission
+    const relatedTask = this.tasks.find(task => 
+      task.formSubmissionId === submissionId
+    );
+
+    if (!relatedTask) {
+      console.error('No task found for submission:', submissionId);
+      alert('No active task found for this submission.');
+      return;
+    }
+
+    const userId = this.tokenService.getUserId();
+    if (!userId) {
+      console.error('User ID not found');
+      alert('User authentication error. Please log in again.');
+      return;
+    }
+
+    // Complete the task using the workflow service
+    this.formSubmissionService.completeTask(relatedTask.id, userId).subscribe(
+      (response) => {
+        console.log('Task completed successfully:', response);
+        alert('Request validated successfully!');
+        // Reload the data to reflect changes
+        this.loadSubmissions();
+        this.loadTasksForRole();
+      },
+      (error) => {
+        console.error('Error completing task:', error);
+        alert('Failed to validate request. Please try again.');
+      }
+    );
+  }
+
+  loadTasksForRole() {
+    if (!this.userRole) {
+      console.log('No user role available, skipping task loading');
+      return;
+    }
+
+    this.formSubmissionService.getTasksByRole(this.userRole).subscribe(
+      (tasks) => {
+        this.tasks = tasks;
+        console.log('Loaded tasks for role:', this.userRole, tasks);
+      },
+      (error) => {
+        console.error('Error loading tasks for role:', this.userRole, error);
+        this.tasks = [];
+      }
+    );
   }
 
   rejectRequest(submissionId: number) {
@@ -234,5 +285,6 @@ export class RequestManagementComponent implements OnInit {
       this.currentPage = this.totalPages || 1;
     }
     this.loadSubmissions();
+    this.loadTasksForRole();
   }
 } 
