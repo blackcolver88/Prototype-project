@@ -374,6 +374,40 @@ public class FormSubmissionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/paginated/by-target-role")
+    public ResponseEntity<Map<String, Object>> getFormSubmissionsByTargetRole(
+            @RequestParam String targetRole,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int limit) {
+
+        // Get paginated submissions filtered by target role from service
+        Page<FormSubmission> submissionPage = formSubmissionService.getFormSubmissionsByTargetRole(targetRole, page, limit);
+
+        // Map submissions to DTOs
+        List<FormSubmissionDTO> submissionDTOs = submissionPage.getContent().stream()
+                .map(submission -> {
+                    String formTitle = formTemplateService.getFormTemplateTitleById(submission.getIdForm());
+
+                    return new FormSubmissionDTO(
+                            submission.getId(),
+                            submission.getDate(),
+                            submission.getUserTask(),
+                            formTitle,
+                            submission.getFormValues().stream()
+                                    .map(FormValue::getValue)
+                                    .collect(Collectors.toList()));
+                })
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", submissionDTOs);
+        response.put("currentPage", submissionPage.getNumber());
+        response.put("totalItems", submissionPage.getTotalElements());
+        response.put("totalPages", submissionPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/count")
     public ResponseEntity<Long> countFormSubmissions() {
         Long count = formSubmissionRepository.count();

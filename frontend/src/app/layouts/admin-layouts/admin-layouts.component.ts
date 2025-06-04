@@ -129,6 +129,8 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageTitle = 'Submissions';
     } else if (urlPath.includes('/editor-tree')) {
       this.pageTitle = 'Form Editor';
+    } else if (urlPath.includes('/request-management')) {
+      this.pageTitle = 'Request Management';
     } else {
       this.pageTitle = 'Dashboard';
     }
@@ -207,5 +209,13 @@ export class AdminLayoutsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     // Clean up any subscriptions or event listeners if needed
+  }
+
+  isAdmin(): boolean {
+    return this.tokenService.isAdmin();
+  }
+
+  isUser(): boolean {
+    return this.tokenService.isUser();
   }
 }

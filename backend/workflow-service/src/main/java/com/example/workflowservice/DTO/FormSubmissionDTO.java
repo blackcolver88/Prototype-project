@@ -20,12 +20,13 @@ public class FormSubmissionDTO {
     private Long userId;
     private String task;
     private String processDefinitionKey;
+    private String targetRole;
 
     @Override
     public String toString() {
         return "FormSubmissionDTO{id=" + id + ", date=" + date + ", formId=" + formId +
                 ", userId=" + userId + ", task='" + task + "', processDefinitionKey='" + processDefinitionKey +
-                "', formValues=" + formValues + "}";
+                "', targetRole='" + targetRole + "', formValues=" + formValues + "}";
     }
 
     public FormSubmissionDTO(Long id, LocalDateTime date, Long formId, List<FormValueDTO> formValues) {

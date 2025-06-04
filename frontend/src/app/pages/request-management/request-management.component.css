@@ -1,0 +1,242 @@
+.request-management-container {
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.filter-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.filter-label {
+  color: #6b7280;
+}
+
+.filter-value {
+  padding: 0.25rem 0.75rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.filter-warning {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.button-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.items-per-page label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.items-per-page select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  color: #1f2937;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.items-per-page select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.submission-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 2rem;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.submission-table th,
+.submission-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.submission-table th {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 2px solid #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.submission-table td {
+  color: #1f2937;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.submission-table tr {
+  transition: all 0.3s ease;
+}
+
+.submission-table tr:nth-child(even) {
+  background-color: rgba(243, 244, 246, 0.5);
+}
+
+.submission-table tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f3f4f6;
+  backdrop-filter: blur(8px);
+}
+
+.table-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.actions-cell button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actions-cell button i {
+  font-size: 0.875rem;
+}
+
+.btn-view {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.btn-validate {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-validate:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.btn-reject {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-reject:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 768px) {
+  .request-management-container {
+    padding: 1rem;
+  }
+
+  .submission-table {
+    overflow-x: auto;
+  }
+
+  .submission-table th,
+  .submission-table td {
+    padding: 0.75rem 1rem;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .actions-cell {
+    gap: 0.25rem;
+  }
+
+  .actions-cell button {
+    width: 28px;
+    height: 28px;
+  }
+} 

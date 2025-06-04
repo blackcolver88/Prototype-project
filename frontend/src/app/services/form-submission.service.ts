@@ -12,6 +12,7 @@ import { TokenService } from "./token.service";
 })
 export class FormSubmissionService {
   private baseUrl = `${environment.apiUrl}/form-service/api/form-submissions`;
+  private workflowUrl = `${environment.apiUrl}/workflow-service/api/workflow`;
   
   constructor(
     private http: HttpClient,
@@ -89,6 +90,11 @@ export class FormSubmissionService {
     return this.http.get<PaginatedSubmissionsResponse>(url);
   }
 
+  getFormSubmissionsByTargetRole(targetRole: string, page: number, limit: number): Observable<any> {
+    const url = `${this.baseUrl}/paginated/by-target-role?targetRole=${targetRole}&page=${page}&limit=${limit}`;
+    return this.http.get<PaginatedSubmissionsResponse>(url);
+  }
+
   getFormSubmissionById(submissionId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/${submissionId}`);
   }
@@ -111,5 +117,16 @@ export class FormSubmissionService {
       // Return an observable that immediately throws
       return throwError(() => error);
     }
+  }
+
+  // Workflow Service Methods
+  completeTask(taskId: string, userId: number): Observable<string> {
+    const url = `${this.workflowUrl}/complete-task?taskId=${taskId}&userId=${userId}`;
+    return this.http.post<string>(url, {}, { responseType: 'text' as 'json' });
+  }
+
+  getTasksByRole(role: string): Observable<any[]> {
+    const url = `${this.workflowUrl}/tasks-by-role?role=${role}`;
+    return this.http.get<any[]>(url);
   }
 }

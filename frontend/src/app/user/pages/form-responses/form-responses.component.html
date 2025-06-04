@@ -1,26 +1,35 @@
 <div class="popup-content">
   <h2>Form Submission Details</h2>
-  <div *ngIf="loading">
-    Loading submissions...
+  <div *ngIf="loading" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Loading submission details...</p>
   </div>
-  <div *ngIf="!loading && submissions.length === 0">
-    No answers found for this user and form.
+  <div *ngIf="!loading && submissions.length === 0" class="empty-state">
+    <p>No submission data found.</p>
   </div>
-  <div *ngIf="!loading && submissions.length > 0">
-    <h3>Responses for this user and form:</h3>
-    <ul>
-      <li *ngFor="let submission of submissions">
-        <p><strong>Form Title:</strong> {{ submission.formTitle || 'No title available' }}</p>
-        <div *ngIf="submission.formValues && submission.formValues.length > 0" class="form-values-grid">
-          <div *ngFor="let value of submission.formValues">
-            <strong>{{ value.title }}:</strong> {{ value.value }}
+  <div *ngIf="!loading && submissions.length > 0" class="submission-details">
+    <div *ngFor="let submission of submissions" class="submission-item">
+      <h3>{{ submission.formTitle || 'Form Submission' }}</h3>
+      
+      <div class="submission-meta">
+        <p><strong>Submission Date:</strong> {{ submission.date | date:'medium' }}</p>
+      </div>
+      
+      <div *ngIf="submission.formValues && submission.formValues.length > 0" class="form-values">
+        <h4>Form Responses:</h4>
+        <div class="form-values-grid">
+          <div *ngFor="let value of submission.formValues" class="form-value-item">
+            <div class="value-label">{{ value.title }}:</div>
+            <div class="value-content">{{ value.value }}</div>
           </div>
         </div>
-        <div *ngIf="!submission.formValues || submission.formValues.length === 0">
-          <strong>No values submitted.</strong>
-        </div>
-      </li>
-    </ul>
+      </div>
+      <div *ngIf="!submission.formValues || submission.formValues.length === 0" class="no-values">
+        <p>No form values available for this submission.</p>
+      </div>
+    </div>
   </div>
-  <button (click)="closeDialog()" class="btn-close">Close</button>
+  <div class="dialog-actions">
+    <button (click)="closeDialog()" class="btn-close">Close</button>
+  </div>
 </div>

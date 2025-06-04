@@ -74,3 +74,27 @@ export const formAccessGuard = (next: any, state: any) => {
   // Redirect non-ROLE_USER users away from form submission pages
   return router.parseUrl('/admin');
 };
+
+export const requestManagementGuard = (next: any, state: any) => {
+  const router = inject(Router);
+  const tokenService = inject(TokenService);
+
+  if (!tokenService.isTokenValid()) {
+    return router.parseUrl('/login?returnUrl=' + encodeURIComponent(router.url));
+  }
+
+  const userRole = tokenService.getUserRole();
+  if (!userRole) return router.parseUrl('/login');
+
+  // Only allow roles that are not ADMIN and not USER
+  if (userRole.toUpperCase() !== 'ROLE_ADMIN' && userRole.toUpperCase() !== 'ROLE_USER') {
+    return true;
+  }
+
+  // Redirect ADMIN and USER roles to their respective dashboards
+  if (userRole.toUpperCase() === 'ROLE_ADMIN') {
+    return router.parseUrl('/admin');
+  } else {
+    return router.parseUrl('/user/profile');
+  }
+};

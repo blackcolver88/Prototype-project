@@ -17,7 +17,7 @@
     
     <!-- New User Task -->
     <bpmn:sequenceFlow id="Flow_2" sourceRef="ServiceTask_1" targetRef="UserTask_1" />
-    <bpmn:userTask id="UserTask_1" name="Review Submission">
+    <bpmn:userTask id="UserTask_1" name="Review Submission" camunda:candidateGroups="${targetRole}">
       <bpmn:incoming>Flow_2</bpmn:incoming>
       <bpmn:outgoing>Flow_3</bpmn:outgoing>
     </bpmn:userTask>
