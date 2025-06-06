@@ -2,7 +2,7 @@ import { Component, ViewChild,inject,Output,EventEmitter,OnInit,Input,OnDestroy}
 import { CdkTreeModule, NestedTreeControl } from '@angular/cdk/tree';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Dialog, DialogModule } from '@angular/cdk/dialog';
+import { Dialog, DialogModule, DialogRef } from '@angular/cdk/dialog';
 import { TextformConfigComponent } from '../../configurations/textform-config/textform-config.component';
 import { CheckboxConfigComponent } from '../../configurations/checkbox-config/checkbox-config.component';
 import { SelectBoxConfigComponent } from '../../configurations/select-box-config/select-box-config.component';
@@ -42,6 +42,7 @@ import { SubsectionConfigComponent } from '../../configurations/subsection-confi
 import { faBars} from '@fortawesome/free-solid-svg-icons';
 import { GenericFormInputEditorComponent } from '../../configurations/generic-form-input-editor/generic-form-input-editor.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
 
 export interface FoodNode {
   name: string;
@@ -92,7 +93,7 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     !!node.children && node.children.length > 0;
   editorItems: any[] = [];
   @Input() tabs: any[] = [];
-  private dialog = inject(Dialog);
+  // private dialog = inject(Dialog);
 
   formTitle: string = '';
   constructor(
@@ -104,7 +105,8 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     private formTemplateService: FormTemplateService,
     private formLayoutService: FormLayoutService,
     private formInputService: FormInputService,
-    private multipleValueService: MultipleValueService
+    private multipleValueService: MultipleValueService,
+    private dialog: Dialog
   ) {
     library.addIcons(faTrashAlt, faPlus,faBars,faEdit
     );
@@ -1038,7 +1040,32 @@ private prepareFormInputRequest(
       }
     });
   }
-removeItem(item: any) {
+  removeItem(item: any) {
+    const name = item.title ||
+                 item.name ||
+                 item.sectionTitle ||
+                 item.label ||
+                 item.config?.label ||
+                 item.config?.textName ||
+                 item.config?.placeholder ||
+                 'cet élément';
+  
+    const message = `Are you sure you want to delete the item <strong>"${name}"</strong>?`;
+  
+    const dialogRef = this.dialog.open<string>(DeleteConfirmationDialog, {
+      width: '350px',
+      data: { 
+        message: message
+      }
+    });
+  
+    dialogRef.closed.subscribe((result: string | undefined) => {
+      if (result === 'confirm') {
+        this.executeRemoveItem(item);
+      }
+    });
+  }
+private executeRemoveItem(item: any) {
   const topLevelIndex = this.editorItems.indexOf(item);
   if (topLevelIndex !== -1) {
     if (item.id) {
