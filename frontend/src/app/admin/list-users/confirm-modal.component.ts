@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
         </div>
         
         <div class="modal-body">
-          <p>{{ message }}</p>
+          <p [innerHTML]="message"></p>
         </div>
         
         <div class="modal-footer">

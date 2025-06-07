@@ -187,7 +187,7 @@ export class ListUsersComponent implements OnInit {
     
     const userToDelete = this.allUsers.find(user => user.id === userId);
     if (userToDelete) {
-      this.confirmMessage = `Are you sure you want to delete user ${userToDelete.firstname} ${userToDelete.lastname}?`;
+      this.confirmMessage = `Are you sure you want to delete user <strong>${userToDelete.firstname} ${userToDelete.lastname}</strong>?`;
     } else {
       this.confirmMessage = `Are you sure you want to delete this user?`;
     }

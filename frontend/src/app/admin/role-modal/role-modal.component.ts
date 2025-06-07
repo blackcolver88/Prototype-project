@@ -6,12 +6,13 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { RoleService } from '../../services/role.service';
 import { RoleDTO } from '../../model/RoleDTO';
+import { ConfirmModalComponent } from '../list-users/confirm-modal.component';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-role-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, ConfirmModalComponent],
   templateUrl: './role-modal.component.html',
   styleUrl: './role-modal.component.css'
 })
@@ -27,6 +28,10 @@ export class RoleModalComponent implements OnInit {
   isLoading: boolean = true;
   editMode: boolean = false;
   currentRoleId: number | null = null;
+
+  showDeleteConfirmation: boolean = false;
+  roleToDeleteId: number | null = null;
+  deleteConfirmMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -128,15 +133,33 @@ export class RoleModalComponent implements OnInit {
   }
 
   deleteRole(id: number) {
-    if (confirm('Are you sure you want to delete this role?')) {
-      this.roleService.deleteRole(id).subscribe({
+    this.roleToDeleteId = id;
+    const role = this.roles.find(r => r.id === id);
+    this.deleteConfirmMessage = `Are you sure you want to delete the role <strong>"${role ? role.name : 'this role'}"</strong>?`;
+    this.showDeleteConfirmation = true;
+  }
+
+  confirmRoleDeletion(): void {
+    if (this.roleToDeleteId !== null) {
+      this.roleService.deleteRole(this.roleToDeleteId).subscribe({
         next: () => {
           this.successMessage = 'The role has been deleted successfully.';
           this.loadRoles();
+          this.showDeleteConfirmation = false;
+          this.roleToDeleteId = null;
         },
-        error: this.handleError.bind(this)
+        error: (err) => {
+          this.handleError(err);
+          this.showDeleteConfirmation = false;
+          this.roleToDeleteId = null;
+        }
       });
     }
+  }
+
+  cancelRoleDeletion(): void {
+    this.showDeleteConfirmation = false;
+    this.roleToDeleteId = null;
   }
 
   closeModal() {

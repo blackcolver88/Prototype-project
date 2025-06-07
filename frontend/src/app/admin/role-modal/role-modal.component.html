@@ -62,5 +62,12 @@
     <div *ngIf="!isLoading && roles.length === 0" class="no-roles-message">
       No roles available.
     </div>
+
+    <app-confirm-modal 
+      *ngIf="showDeleteConfirmation"
+      [message]="deleteConfirmMessage"
+      (confirm)="confirmRoleDeletion()"
+      (cancel)="cancelRoleDeletion()">
+    </app-confirm-modal>
   </div>
 </div>
