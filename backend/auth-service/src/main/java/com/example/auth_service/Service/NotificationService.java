@@ -185,7 +185,8 @@ public class NotificationService {
      * Get all notifications for a user
      */
     public List<Notification> getNotificationsByUserId(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        Pageable pageable = null;
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 
     /**
@@ -193,7 +194,7 @@ public class NotificationService {
      */
     public Page<Notification> getNotificationsByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        return (Page<Notification>) notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 
     /**
