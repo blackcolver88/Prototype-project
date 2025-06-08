@@ -16,7 +16,7 @@ public class ProcessAssociationResponse {
     public ProcessAssociationResponse(Long formTemplateId, List<FormTemplateProcess> formTemplateProcesses) {
         this.formTemplateId = formTemplateId;
         this.associatedProcesses = formTemplateProcesses.stream()
-                .map(ftp -> new ProcessInfo(ftp.getProcessDefinitionKey(), ftp.getProcessName()))
+                .map(ftp -> new ProcessInfo(ftp.getProcessDefinitionKey(), ftp.getProcessName(), ftp.getTargetRole()))
                 .collect(Collectors.toList());
     }
 
@@ -25,10 +25,17 @@ public class ProcessAssociationResponse {
     public static class ProcessInfo {
         private String processDefinitionKey;
         private String processName;
+        private String targetRole;
         
         public ProcessInfo(String processDefinitionKey, String processName) {
             this.processDefinitionKey = processDefinitionKey;
             this.processName = processName;
+        }
+
+        public ProcessInfo(String processDefinitionKey, String processName, String targetRole) {
+            this.processDefinitionKey = processDefinitionKey;
+            this.processName = processName;
+            this.targetRole = targetRole;
         }
     }
 }

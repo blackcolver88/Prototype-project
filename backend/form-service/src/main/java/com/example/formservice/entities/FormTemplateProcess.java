@@ -22,6 +22,9 @@ public class FormTemplateProcess {
     @Column(name = "process_name")
     private String processName;
 
+    @Column(name = "target_role")
+    private String targetRole;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "form_template_id", nullable = false)
     @JsonIgnore
@@ -32,6 +35,13 @@ public class FormTemplateProcess {
     public FormTemplateProcess(String processDefinitionKey, String processName, FormTemplate formTemplate) {
         this.processDefinitionKey = processDefinitionKey;
         this.processName = processName;
+        this.formTemplate = formTemplate;
+    }
+
+    public FormTemplateProcess(String processDefinitionKey, String processName, String targetRole, FormTemplate formTemplate) {
+        this.processDefinitionKey = processDefinitionKey;
+        this.processName = processName;
+        this.targetRole = targetRole;
         this.formTemplate = formTemplate;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.workflowservice.controller;
 
 import com.example.workflowservice.DTO.FormSubmissionDTO;
+import com.example.workflowservice.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,9 @@ public class WorkflowController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping("/start-process")
     public String startProcess(@RequestBody FormSubmissionDTO formSubmission) {
@@ -104,8 +110,25 @@ public class WorkflowController {
                         .body("Task not found with ID: " + taskId);
             }
 
+            // Get process variables before completing the task
+            String processInstanceId = task.getProcessInstanceId();
+            Long formSubmissionId = (Long) runtimeService.getVariable(processInstanceId, "formSubmissionId");
+            Long submitterUserId = (Long) runtimeService.getVariable(processInstanceId, "userId");
+            String taskName = (String) runtimeService.getVariable(processInstanceId, "task");
+
             // Complete the task
             taskService.complete(taskId);
+            
+            // Send notification to the form submitter about task completion
+            if (submitterUserId != null) {
+                String formTitle = taskName != null ? taskName : "Form Submission";
+                String reviewerName = "User ID: " + userId; // TODO: Get actual reviewer name
+                String completionDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                String status = "Completed"; // TODO: Determine actual status based on task outcome
+                
+                System.out.println("Sending task completion notification to submitter: " + submitterUserId);
+                notificationService.notifyTaskCompletion(submitterUserId, formTitle, reviewerName, completionDate, status);
+            }
             
             return ResponseEntity.ok("Task completed successfully for user: " + userId);
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.example.workflowservice.delegates;
 
 import com.example.workflowservice.DTO.FormSubmissionDTO;
+import com.example.workflowservice.service.NotificationService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -22,6 +24,9 @@ public class ProcessFormSubmissionDelegate implements JavaDelegate {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
@@ -49,6 +54,21 @@ public class ProcessFormSubmissionDelegate implements JavaDelegate {
         try {
             // Perform any internal workflow logic here if needed
             execution.setVariable("submissionStatus", "SUCCESS");
+            
+            // Send notification to users with target role about the new form submission
+            String targetRole = (String) execution.getVariable("targetRole");
+            String task = (String) execution.getVariable("task");
+            
+            if (targetRole != null && !targetRole.trim().isEmpty()) {
+                String formTitle = task != null ? task : "Form Submission";
+                String submitterName = "User ID: " + userId; // TODO: Get actual user name
+                String submissionDateStr = submissionDate != null ? 
+                    submissionDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : 
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                
+                log.info("Sending notification for form submission to role: {}", targetRole);
+                notificationService.notifyFormSubmission(targetRole, formTitle, submitterName, submissionDateStr);
+            }
         } catch (Exception e) {
             log.error("Failed to process submission: {}", e.getMessage(), e);
             execution.setVariable("submissionStatus", "FAILED");

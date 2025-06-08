@@ -10,11 +10,12 @@ import { logoIonic } from 'ionicons/icons';
 import { IonicModule } from '@ionic/angular';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
+import { NotificationIconComponent } from '../../components/notification-icon/notification-icon.component';
 
 @Component({
   selector: 'app-admin-layouts',
   standalone: true,
-  imports: [RouterModule, RouterOutlet, IonicModule, CommonModule],
+  imports: [RouterModule, RouterOutlet, IonicModule, CommonModule, NotificationIconComponent],
   templateUrl: './admin-layouts.component.html',
   styleUrl: './admin-layouts.component.css'
 })

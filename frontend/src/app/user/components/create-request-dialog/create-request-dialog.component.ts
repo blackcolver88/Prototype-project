@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormTemplateService } from '../../../services/form-template.service';
-import { RoleService } from '../../../services/role.service';
 import { FormTemplate } from '../../../model/FormTemplate';
 
 @Component({
@@ -16,25 +15,21 @@ import { FormTemplate } from '../../../model/FormTemplate';
 export class CreateRequestDialogComponent implements OnInit {
   requestForm: FormGroup;
   availableForms: FormTemplate[] = [];
-  availableRoles: string[] = [];
   isLoading = false;
   errorMessage = '';
 
   constructor(
     private dialogRef: MatDialogRef<CreateRequestDialogComponent>,
     private formBuilder: FormBuilder,
-    private formTemplateService: FormTemplateService,
-    private roleService: RoleService
+    private formTemplateService: FormTemplateService
   ) {
     this.requestForm = this.formBuilder.group({
-      formId: ['', Validators.required],
-      targetRole: ['', Validators.required]
+      formId: ['', Validators.required]
     });
   }
 
   ngOnInit() {
     this.loadAvailableForms();
-    this.loadAvailableRoles();
   }
 
   loadAvailableForms() {
@@ -52,29 +47,15 @@ export class CreateRequestDialogComponent implements OnInit {
     });
   }
 
-  loadAvailableRoles() {
-    this.roleService.getAvailableRoles().subscribe({
-      next: (roles) => {
-        // Filter out ROLE_USER as it's not typically an approval role
-        this.availableRoles = roles.filter(role => role !== 'ROLE_USER');
-      },
-      error: (error) => {
-        console.error('Error loading roles:', error);
-        this.errorMessage = 'Failed to load available roles';
-      }
-    });
-  }
-
   onSubmit() {
     if (this.requestForm.valid) {
       const formData = this.requestForm.value;
       const selectedForm = this.availableForms.find(form => form.id === parseInt(formData.formId));
       
-      // Store complete data with formId and targetRole
+      // Store complete data with formId only (target role will be determined by form template configuration)
       const result = {
         formId: parseInt(formData.formId),
-        formTitle: selectedForm?.title || 'Unknown Form',
-        targetRole: formData.targetRole
+        formTitle: selectedForm?.title || 'Unknown Form'
       };
       
       // Store in localStorage for use in form submission
@@ -101,7 +82,7 @@ export class CreateRequestDialogComponent implements OnInit {
     const control = this.requestForm.get(fieldName);
     if (control?.errors && control.touched) {
       if (control.errors['required']) {
-        return `${fieldName === 'formId' ? 'Form' : 'Target Role'} is required`;
+        return 'Form is required';
       }
     }
     return '';

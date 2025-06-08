@@ -60,4 +60,68 @@ public class EmailService {
             System.err.println("Failed to send welcome email: " + e.getMessage());
         }
     }
+
+    /**
+     * Sends a notification email when a form is submitted and assigned to a role
+     *
+     * @param email          recipient's email address
+     * @param firstName      recipient's first name
+     * @param lastName       recipient's last name
+     * @param formTitle      title of the submitted form
+     * @param submitterName  name of the person who submitted the form
+     * @param submissionDate date when the form was submitted
+     * @param role           role assigned to review the form
+     */
+    public void sendFormSubmissionNotification(String email, String firstName, String lastName, 
+                                             String formTitle, String submitterName, 
+                                             String submissionDate, String role) {
+        try {
+            Context context = new Context();
+            context.setVariable("firstName", firstName);
+            context.setVariable("lastName", lastName);
+            context.setVariable("formTitle", formTitle);
+            context.setVariable("submitterName", submitterName);
+            context.setVariable("submissionDate", submissionDate);
+            context.setVariable("role", role);
+            
+            String emailContent = templateEngine.process("form-submission-notification", context);
+            
+            sendEmail(email, "New Form Submission Requires Your Review - " + formTitle, emailContent);
+        } catch (MessagingException e) {
+            // Log the error but don't throw it to prevent disrupting the workflow
+            System.err.println("Failed to send form submission notification: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sends a notification email when a task is completed
+     *
+     * @param email         recipient's email address
+     * @param firstName     recipient's first name
+     * @param lastName      recipient's last name
+     * @param formTitle     title of the form
+     * @param reviewerName  name of the person who completed the review
+     * @param completionDate date when the task was completed
+     * @param status        completion status (approved/rejected/etc.)
+     */
+    public void sendTaskCompletionNotification(String email, String firstName, String lastName,
+                                             String formTitle, String reviewerName,
+                                             String completionDate, String status) {
+        try {
+            Context context = new Context();
+            context.setVariable("firstName", firstName);
+            context.setVariable("lastName", lastName);
+            context.setVariable("formTitle", formTitle);
+            context.setVariable("reviewerName", reviewerName);
+            context.setVariable("completionDate", completionDate);
+            context.setVariable("status", status);
+            
+            String emailContent = templateEngine.process("task-completion-notification", context);
+            
+            sendEmail(email, "Form Review Completed - " + formTitle, emailContent);
+        } catch (MessagingException e) {
+            // Log the error but don't throw it to prevent disrupting the workflow
+            System.err.println("Failed to send task completion notification: " + e.getMessage());
+        }
+    }
 }

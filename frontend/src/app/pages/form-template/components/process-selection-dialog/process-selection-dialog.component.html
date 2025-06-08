@@ -41,6 +41,18 @@
             <span class="process-key">{{ process.processDefinitionKey }}</span>
           </div>
         </label>
+        
+        <div *ngIf="process.selected" class="target-role-selection">
+          <label class="role-label">Target Role:</label>
+          <select 
+            class="role-select"
+            [value]="process.targetRole"
+            (change)="onTargetRoleChange(process, $any($event.target).value)"
+          >
+            <option value="">Select a role...</option>
+            <option *ngFor="let role of availableRoles" [value]="role">{{ role }}</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>

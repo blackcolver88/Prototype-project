@@ -425,6 +425,7 @@ public class FormTemplateService {
             FormTemplateProcess association = new FormTemplateProcess(
                     processInfo.getProcessDefinitionKey(),
                     processInfo.getProcessName(),
+                    processInfo.getTargetRole(),
                     formTemplate
             );
             newAssociations.add(formTemplateProcessRepository.save(association));
@@ -450,5 +451,17 @@ public class FormTemplateService {
         }
 
         return formTemplateProcessRepository.findProcessDefinitionKeysByFormTemplateId(templateId);
+    }
+
+    /**
+     * Lookup target role for a specific form template and process definition key
+     * @param formTemplateId The form template ID
+     * @param processDefinitionKey The process definition key
+     * @return The target role if found, null otherwise
+     */
+    @Transactional(readOnly = true)
+    public String getTargetRoleByFormTemplateAndProcess(Long formTemplateId, String processDefinitionKey) {
+        Optional<String> targetRole = formTemplateProcessRepository.findTargetRoleByFormTemplateIdAndProcessDefinitionKey(formTemplateId, processDefinitionKey);
+        return targetRole.orElse(null);
     }
 }

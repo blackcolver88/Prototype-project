@@ -131,7 +131,8 @@
     <!-- end sidenav -->
 
     <main #mainContent class="ease-soft-in-out relative h-full max-h-screen rounded-xl transition-all duration-300 px-2 md:px-4" [ngClass]="{'xl:ml-68.5': !sidebarCollapsed, 'xl:ml-20': sidebarCollapsed}">
-  <div class="absolute top-4 right-8 flex items-center gap-2 z-50">
+  <div class="absolute top-4 right-8 flex items-center gap-4 z-50">
+    <app-notification-icon></app-notification-icon>
     <div class="relative">
       <button (click)="toggleDropdown('profileMenu')" class="flex items-center gap-2 rounded-full px-2 py-1 bg-white shadow hover:bg-gray-100 transition">
         <img [src]="adminPhotoUrl" alt="Profil" class="w-10 h-10 rounded-full object-cover border border-gray-200">
