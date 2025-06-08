@@ -12,6 +12,7 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f4f4f4;
         }
         .header {
             background-color: #28a745;
@@ -51,18 +52,34 @@
         .btn {
             display: inline-block;
             background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
+            color: white !important;
             text-decoration: none;
+            padding: 10px 20px;
             border-radius: 5px;
             margin: 10px 0;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            color: inherit;
+        }
+        .details-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>✅ Form Review Completed</h1>
-        <p>Your submission has been processed</p>
+        <h1><span class="emoji">✅</span> Task Completed</h1>
+        <p>Your form has been reviewed</p>
     </div>
     
     <div class="content">
@@ -71,20 +88,21 @@
         <p>Your form submission has been reviewed and processed.</p>
         
         <div class="details-box">
-            <h3>📋 Review Details</h3>
-            <p><strong>Form Title:</strong> <span th:text="${formTitle}">Form Title</span></p>
-            <p><strong>Reviewed by:</strong> <span th:text="${reviewerName}">Reviewer Name</span></p>
-            <p><strong>Completion Date:</strong> <span th:text="${completionDate}">Completion Date</span></p>
-            <p><strong>Status:</strong> <span class="status-badge" th:text="${status}">Status</span></p>
+            <h3><span class="emoji">📄</span> Form Details</h3>
+            <p><span class="details-label">Form Title:</span> <span th:text="${formTitle}">Form Title</span></p>
+            <p><span class="details-label">Reviewed by:</span> <span th:text="${reviewerName}">Reviewer Name</span></p>
+            <p><span class="details-label">Completion Date:</span> <span th:text="${completionDate}">Completion Date</span></p>
+            <p>
+                <span class="details-label">Status:</span> 
+                <span class="status-badge" th:text="${status}">Approved</span>
+            </p>
         </div>
-        
-        <p>Please log in to the system to view the complete review details and any additional comments.</p>
         
         <div style="text-align: center;">
-            <a href="#" class="btn">🔗 View Details</a>
+            <a href="http://localhost:4200/my-requests" class="btn"><span class="emoji">🔗</span> View Details</a>
         </div>
         
-        <p><em>This is an automated notification. Please do not reply to this email.</em></p>
+        <p style="font-style: italic; color: #666; margin-top: 20px;">This is an automated notification. Please do not reply to this email.</p>
     </div>
     
     <div class="footer">

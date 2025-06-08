@@ -97,11 +97,8 @@ public class NotificationService {
     private void sendFormSubmissionNotification(User user, String formTitle, String submitterName,
                                               String submissionDate, String role) {
         try {
-            String subject = "New Form Submission Requires Your Review - " + formTitle;
-            String message = buildFormSubmissionMessage(user.getFirstname(), formTitle,
-                                                      submitterName, submissionDate, role);
-            
-            emailService.sendEmail(user.getEmail(), subject, message);
+            emailService.sendFormSubmissionNotification(user.getEmail(), user.getFirstname(), user.getLastname(),
+                                                      formTitle, submitterName, submissionDate, role);
             System.out.println("Sent form submission notification to: " + user.getEmail());
         } catch (Exception e) {
             System.err.println("Failed to send form submission email to: " + user.getEmail() + " - " + e.getMessage());
@@ -112,11 +109,9 @@ public class NotificationService {
     private void sendTaskCompletionNotification(User user, String formTitle, String reviewerName,
                                               String completionDate, String status) {
         try {
-            String subject = "Form Review Completed - " + formTitle;
-            String message = buildTaskCompletionMessage(user.getFirstname(), formTitle,
-                                                       reviewerName, completionDate, status);
-            
-            emailService.sendEmail(user.getEmail(), subject, message);
+            // Use EmailService to process the template and send HTML email
+            emailService.sendTaskCompletionNotification(user.getEmail(), user.getFirstname(), user.getLastname(),
+                                                      formTitle, reviewerName, completionDate, status);
             System.out.println("Sent task completion notification to: " + user.getEmail());
         } catch (Exception e) {
             System.err.println("Failed to send task completion email to: " + user.getEmail() + " - " + e.getMessage());

@@ -7,11 +7,12 @@ import { CommonModule } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { NotificationIconComponent } from '../../components/notification-icon/notification-icon.component';
 
 @Component({
   selector: 'app-user-layouts',
   standalone: true,
-  imports: [RouterModule, RouterOutlet, CommonModule, IonicModule, FormsModule],
+  imports: [RouterModule, RouterOutlet, CommonModule, IonicModule, FormsModule, NotificationIconComponent],
   templateUrl: './user-layouts.component.html',
   styleUrls: ['./user-layouts.component.css', './responsive-nav.css']
 })
