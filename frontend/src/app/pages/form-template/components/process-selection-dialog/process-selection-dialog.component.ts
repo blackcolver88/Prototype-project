@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { ProcessService } from '../../../../services/process.service';
 import { FormTemplateService } from '../../../../services/form-template.service';
+import { RoleService } from '../../../../services/role.service';
 
 export interface ProcessSelectionData {
   formTemplateId: number;
@@ -14,6 +15,7 @@ export interface ProcessInfo {
   processDefinitionKey: string;
   processName: string;
   selected: boolean;
+  targetRole?: string;
 }
 
 @Component({
@@ -25,6 +27,7 @@ export interface ProcessInfo {
 })
 export class ProcessSelectionDialogComponent implements OnInit {
   availableProcesses: ProcessInfo[] = [];
+  availableRoles: string[] = [];
   loading = true;
   error: string | null = null;
 
@@ -32,7 +35,8 @@ export class ProcessSelectionDialogComponent implements OnInit {
     private dialogRef: DialogRef<ProcessSelectionDialogComponent>,
     @Inject(DIALOG_DATA) public data: ProcessSelectionData,
     private processService: ProcessService,
-    private formTemplateService: FormTemplateService
+    private formTemplateService: FormTemplateService,
+    private roleService: RoleService
   ) {}
 
   ngOnInit() {
@@ -43,22 +47,33 @@ export class ProcessSelectionDialogComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Load all available processes and currently associated processes
+    // Load all available processes, currently associated processes, and available roles
     Promise.all([
       this.processService.getLatestProcessDefinitions().toPromise(),
-      this.formTemplateService.getAssociatedProcesses(this.data.formTemplateId).toPromise()
-    ]).then(([allProcesses, associatedProcesses]) => {
-      const associatedKeys = new Set(
-        associatedProcesses?.associatedProcesses?.map((p: any) => p.processDefinitionKey) || []
-      );
+      this.formTemplateService.getAssociatedProcesses(this.data.formTemplateId).toPromise(),
+      this.roleService.getAvailableRoles().toPromise()
+    ]).then(([allProcesses, associatedProcesses, roles]) => {
+      this.availableRoles = roles || [];
+      
+      const associatedProcessMap = new Map<string, {selected: boolean, targetRole: string}>();
+      (associatedProcesses?.associatedProcesses || []).forEach((p: any) => {
+        associatedProcessMap.set(p.processDefinitionKey, {
+          selected: true,
+          targetRole: p.targetRole || ''
+        });
+      });
 
       this.availableProcesses = (allProcesses || [])
         .filter((p: any) => p.suspended === false)
-        .map((process: any) => ({
-          processDefinitionKey: process.key,
-          processName: process.name || process.key,
-          selected: associatedKeys.has(process.key)
-        }));
+        .map((process: any) => {
+          const association = associatedProcessMap.get(process.key);
+          return {
+            processDefinitionKey: process.key,
+            processName: process.name || process.key,
+            selected: association ? association.selected : false,
+            targetRole: association ? association.targetRole : ''
+          };
+        });
 
       this.loading = false;
     }).catch(error => {
@@ -72,12 +87,17 @@ export class ProcessSelectionDialogComponent implements OnInit {
     process.selected = !process.selected;
   }
 
+  onTargetRoleChange(process: ProcessInfo, targetRole: string) {
+    process.targetRole = targetRole;
+  }
+
   save() {
     const selectedProcesses = this.availableProcesses
       .filter(p => p.selected)
       .map(p => ({
         processDefinitionKey: p.processDefinitionKey,
-        processName: p.processName
+        processName: p.processName,
+        targetRole: p.targetRole
       }));
 
     const request = {

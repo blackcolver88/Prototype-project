@@ -5,7 +5,7 @@ import java.util.List;
 public class FormValuesWrapper {
     private List<FormValueRequest> formValues;
     private String processDefinitionKey;
-    private String targetRole;
+    // Note: targetRole is no longer needed from frontend as it's automatically looked up
 
     public List<FormValueRequest> getFormValues() {
         return formValues;
@@ -21,13 +21,5 @@ public class FormValuesWrapper {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
-    }
-
-    public String getTargetRole() {
-        return targetRole;
-    }
-
-    public void setTargetRole(String targetRole) {
-        this.targetRole = targetRole;
     }
 }

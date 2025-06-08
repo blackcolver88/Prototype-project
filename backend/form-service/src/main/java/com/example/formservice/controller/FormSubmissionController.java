@@ -107,8 +107,23 @@ public class FormSubmissionController {
             submission.setUserId(userId);
             submission.setDate(LocalDateTime.now());
             submission.setIdForm(formId);
-            if (formValuesWrapper.getTargetRole() != null) {
-                submission.setTargetRole(formValuesWrapper.getTargetRole());
+            
+            // Automatically lookup target role from form template process associations
+            String targetRole = null;
+            if (formValuesWrapper.getProcessDefinitionKey() != null) {
+                try {
+                    targetRole = formTemplateService.getTargetRoleByFormTemplateAndProcess(
+                            formId, formValuesWrapper.getProcessDefinitionKey());
+                    log.info("Found target role: {} for form: {} and process: {}", 
+                            targetRole, formId, formValuesWrapper.getProcessDefinitionKey());
+                } catch (Exception e) {
+                    log.warn("Could not find target role for form: {} and process: {}, error: {}", 
+                            formId, formValuesWrapper.getProcessDefinitionKey(), e.getMessage());
+                }
+            }
+            
+            if (targetRole != null) {
+                submission.setTargetRole(targetRole);
             }
             try {
                 submission.setUserTask(user.get().getFirstname(), user.get().getLastname());
@@ -171,8 +186,9 @@ public class FormSubmissionController {
                 formSubmissionDTO.setProcessDefinitionKey(formValuesWrapper.getProcessDefinitionKey());
             }
 
-            if (formValuesWrapper.getTargetRole() != null) {
-                formSubmissionDTO.setTargetRole(formValuesWrapper.getTargetRole());
+            // Set target role from the automatically looked up value
+            if (targetRole != null) {
+                formSubmissionDTO.setTargetRole(targetRole);
             }
 
             formSubmissionDTO.setFormValues(values.stream()
