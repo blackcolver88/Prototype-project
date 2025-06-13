@@ -78,4 +78,11 @@ public class UserService {
                 .filter(user -> user.getRole() != null && user.getRole().getId().equals(finalRoleId))
                 .toList();
     }
+    public Role findRoleByName(String roleName) {
+        Optional<Role> roleOptional = roleRepository.findByRoleName(roleName);
+        return roleOptional.orElse(null);
+    }
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
 }
