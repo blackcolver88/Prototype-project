@@ -17,6 +17,7 @@ import { ListUsersComponent } from './admin/list-users/list-users.component';
 import { UserLayoutsComponent } from './layouts/user-layouts/user-layouts.component';
 import { ProfilComponent } from './user/pages/profil/profil.component';
 import { RoleModalComponent } from './admin/role-modal/role-modal.component';
+import { RoleTableComponent } from './admin/role-table.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -71,6 +72,11 @@ export const routes: Routes = [
         },
       { path: 'role',
          component: RoleModalComponent,
+         canActivate: [adminOnlyGuard],
+         data: { title: 'Roles', adminOnly: true }
+        },
+      { path: 'role-table',
+         component: RoleTableComponent,
          canActivate: [adminOnlyGuard],
          data: { title: 'Roles', adminOnly: true }
         },

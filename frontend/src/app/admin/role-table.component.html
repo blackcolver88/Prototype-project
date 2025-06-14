@@ -1,0 +1,30 @@
+<div class="roles-header">
+  <h2>Role Management</h2>
+  <button class="add-role-btn" (click)="openAddRoleModal()">+ Add Role</button>
+</div>
+
+<table class="roles-table" *ngIf="!isLoading">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let role of roles">
+      <td>{{ role.name }}</td>
+      <td>
+        <button (click)="openEditRoleModal(role)">Edit</button>
+        <button (click)="deleteRole(role)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div *ngIf="isLoading" class="loading-message">Loading roles...</div>
+
+<app-role-modal
+  *ngIf="showModal"
+  (close)="closeModal()"
+  (roleCreated)="refreshRoles()"
+  [role]="selectedRole">
+</app-role-modal>

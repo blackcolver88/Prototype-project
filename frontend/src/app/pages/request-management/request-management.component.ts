@@ -6,6 +6,8 @@ import { FormResponsesComponent } from '../../user/pages/form-responses/form-res
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faEye, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-request-management',
@@ -14,11 +16,16 @@ import { FormsModule } from '@angular/forms';
     NgxPaginationModule,
     CommonModule,
     FormsModule,
+    FontAwesomeModule
   ],
   templateUrl: './request-management.component.html',
   styleUrls: ['./request-management.component.css']
 })
 export class RequestManagementComponent implements OnInit {
+  faEye = faEye;
+  faCheck = faCheck;
+  faTimes = faTimes;
+
   submissions: any[] = [];
   tasks: any[] = [];
   currentPage: number = 1;
@@ -226,7 +233,9 @@ export class RequestManagementComponent implements OnInit {
     const relatedTask = this.tasks.find(task => 
       task.formSubmissionId === submissionId
     );
-
+    console.log(submissionId);
+    console.log(this.tasks);
+    
     if (!relatedTask) {
       console.error('No task found for submission:', submissionId);
       alert('No active task found for this submission.');

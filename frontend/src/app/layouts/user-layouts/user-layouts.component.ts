@@ -224,7 +224,7 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
         }, 500);
         
         console.log('Photo mise à jour avec succès');
-        alert('Photo mise à jour avec succès !');
+        this.showPhotoSuccessToast();
       },
       error: (err) => {
         console.error("Erreur lors de l'upload", err);
@@ -263,6 +263,30 @@ export class UserLayoutsComponent implements OnInit, AfterViewInit {
 
   closeDropdown(): void {
     this.isDropdownOpen = false;
+  }
+
+  showPhotoSuccessToast() {
+    // Supprime un toast existant si présent
+    const oldToast = document.getElementById('photo-success-toast');
+    if (oldToast) {
+      oldToast.remove();
+    }
+    // Crée le toast à partir du HTML
+    const toast = document.createElement('div');
+    toast.id = 'photo-success-toast';
+    toast.innerHTML = 'Photo mise à jour avec succès !';
+    toast.className = 'custom-toast-success';
+    // Ajoute le CSS si non déjà présent
+    if (!document.getElementById('photo-toast-style')) {
+      const style = document.createElement('style');
+      style.id = 'photo-toast-style';
+      style.innerHTML = `\n.custom-toast-success {\n  position: fixed;\n  bottom: 32px;\n  right: 32px;\n  background: #43a047;\n  color: #fff;\n  padding: 14px 28px;\n  border-radius: 8px;\n  box-shadow: 0 2px 8px rgba(0,0,0,0.13);\n  font-size: 16px;\n  z-index: 9999;\n  opacity: 0.95;\n  animation: fadeInOut 3s forwards;\n}\n@keyframes fadeInOut {\n  0% { opacity: 0; transform: translateY(30px); }\n  10% { opacity: 1; transform: translateY(0); }\n  90% { opacity: 1; }\n  100% { opacity: 0; transform: translateY(30px); }\n}\n`;
+      document.head.appendChild(style);
+    }
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
   }
 
   @HostListener('document:click', ['$event'])

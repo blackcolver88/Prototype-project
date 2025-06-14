@@ -3,7 +3,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { provideCharts, BaseChartDirective } from 'ng2-charts';
-import { BarController, BarElement, CategoryScale, Chart, LinearScale, Title, Tooltip } from 'chart.js';
+import { BarController, BarElement, CategoryScale, Chart, LinearScale, Title, Tooltip, PieController, ArcElement, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Legend } from 'chart.js';
 
 Chart.register(
   BarController,
@@ -11,7 +11,15 @@ Chart.register(
   CategoryScale,
   LinearScale,
   Title,
-  Tooltip
+  Tooltip,
+  PieController,
+  ArcElement,
+  RadarController,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Legend
 );
 @Component({
   selector: 'app-dashboard',
@@ -34,7 +42,39 @@ export class DashboardComponent implements OnInit {
   submissionsCount: number = 0;
   processesCount: number = 0;
 
-  public barChartData = [
+  public statisticsPieData = {
+  datasets: [
+    {
+      data: [0, 0, 0, 0],
+      backgroundColor: [
+        '#e3061581', // Users
+        '#a78bfa', // Templates
+        '#34d399', // Submissions
+        '#3b82f6'  // Processes 
+      ],
+      borderColor: '#fff',
+      borderWidth: 2
+    }
+  ]
+};
+public statisticsPieLabels = ['Users', 'Templates', 'Submissions', 'Processes'];
+public statisticsPieOptions = {
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: function(context: any) {
+          let label = context.label || '';
+          let value = context.parsed || 0;
+          return `${label}: ${value}`;
+        }
+      }
+    }
+  }
+};
+
+public barChartData = [
     {
       data: [0, 0, 0, 0],
       label: 'Statistics',
@@ -167,6 +207,28 @@ export class DashboardComponent implements OnInit {
   }
 
   updateChart() {
+    // Met à jour le pie chart avec les vraies données
+    this.statisticsPieData = {
+      datasets: [
+        {
+          data: [
+            this.usersCount,
+            this.templatesCount,
+            this.submissionsCount,
+            this.processesCount
+          ],
+          backgroundColor: [
+            '#e3061581', // Users
+            '#a78bfa', // Templates
+            '#34d399', // Submissions
+            '#3b82f6'  // Processes
+          ],
+          borderColor: '#fff',
+          borderWidth: 2
+        }
+      ]
+    };
+    // Met à jour le bar chart si besoin (pour compatibilité)
     this.barChartData = [
       {
         data: [

@@ -62,16 +62,23 @@
 
   <div class="mt-8">
     <div class="chart-container">
-      <h3 class="text-lg font-semibold mb-4">Statistics Overview</h3>
-      <div style="height: 320px;">
-        <canvas
-          baseChart
-          [datasets]="barChartData"
-          [labels]="barChartLabels"
-          [options]="barChartOptions"
-          [legend]="barChartLegend"
-          type="bar">
-        </canvas>
-      </div>
-    </div>
+  <h3 class="text-lg font-semibold mb-4">Statistics Overview</h3>
+  <div style="height: 320px;">
+    <canvas
+      baseChart
+      [data]="statisticsPieData"
+      [labels]="statisticsPieLabels"
+      [options]="statisticsPieOptions"
+      [legend]="false"
+      type="pie">
+    </canvas>
+  </div>
+  <div class="custom-legend">
+    <span class="legend-color" style="background:#e3061581"></span> Users
+    <span class="legend-color" style="background:#a78bfa"></span> Templates
+    <span class="legend-color" style="background:#34d399"></span> Submissions
+    <span class="legend-color" style="background:#3b82f6"></span> Processes
+    
+  </div>
+</div>
   </div>

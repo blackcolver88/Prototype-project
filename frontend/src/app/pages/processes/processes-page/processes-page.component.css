@@ -74,6 +74,13 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
+.create-btn-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 /* Table Styles */
 .processes-table {
   width: 100%;

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -17,6 +17,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './role-modal.component.css'
 })
 export class RoleModalComponent implements OnInit {
+  @Input() role: RoleDTO | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() roleCreated = new EventEmitter<RoleDTO>();
 

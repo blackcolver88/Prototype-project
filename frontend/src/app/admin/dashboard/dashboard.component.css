@@ -5,6 +5,21 @@
   min-height: 100vh;
 }
 
+.custom-legend {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.legend-color {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
 .chart-container {
   position: relative;
   padding: 1.5rem;

@@ -175,7 +175,7 @@
   transition: all 0.2s ease;
 }
 
-.actions-cell button i {
+.actions-cell button fa-icon {
   font-size: 0.875rem;
 }
 

@@ -39,13 +39,13 @@
           <td class="table-cell">{{ submission.date | date:'medium' }}</td>
           <td class="table-cell actions-cell">
             <button (click)="showFormResponses(submission.id)" class="btn-view" title="View Details">
-              <i class="fas fa-eye"></i>
+              <fa-icon [icon]="faEye"></fa-icon>
             </button>
             <button (click)="validateRequest(submission.id)" class="btn-validate" title="Validate Request">
-              <i class="fas fa-check"></i>
+              <fa-icon [icon]="faCheck"></fa-icon>
             </button>
             <button (click)="rejectRequest(submission.id)" class="btn-reject" title="Reject Request">
-              <i class="fas fa-times"></i>
+              <fa-icon [icon]="faTimes"></fa-icon>
             </button>
           </td>
         </tr>

@@ -1,12 +1,12 @@
 <div class="processes-container">
   <ng-container *ngIf="isBrowser">
     <div class="table-wrapper">
+      <div class="create-btn-center">
+        <button type="button" (click)="createNewProcess()" class="btn-add">
+          <span class="btn-icon">+</span> Create New Process
+        </button>
+      </div>
       <div class="action-bar">
-        <div class="button-container">
-          <button type="button" (click)="createNewProcess()" class="btn-add">
-            <span class="btn-icon">+</span> Create New Process
-          </button>
-        </div>
         <div class="pagination-controls">
           <div class="items-per-page">
             <label for="itemsPerPage">Items per page:</label>

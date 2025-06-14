@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Rejection Notification</title>
+</head>
+<body>
+    <p>Hello <span th:text="${firstName}"></span>,</p>
+    <p>Your form submission has been <b style="color:red;">rejected</b>:</p>
+    <ul>
+        <li><strong>Form Title:</strong> <span th:text="${formTitle}"></span></li>
+        <li><strong>Reviewed by:</strong> <span th:text="${reviewerName}"></span></li>
+        <li><strong>Rejection Date:</strong> <span th:text="${completionDate}"></span></li>
+        <li><strong>Status:</strong> <span th:text="${status}"></span></li>
+    </ul>
+    <p>You can view the details and possible comments by logging into the system.</p>
+    <p>Best regards,<br>ST2I System</p>
+</body>
+</html>

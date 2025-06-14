@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './processes-page.component.css'
 })
 export class ProcessesPageComponent implements OnInit {
-  rowData: any[] = [];
+  rowData: any[] = []; 
   displayData: any[] = [];
   isBrowser: boolean;
 

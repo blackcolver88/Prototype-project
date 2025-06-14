@@ -13,23 +13,22 @@
           <img src="assets/st2i.png" alt="ST2I Logo" class="img-responsive logo-image" style="max-height: 80px; margin-bottom: 10px;">
       </div>
       <div class="col-sm-6 text-right" style="padding-top: 15px;">
-          <app-notification-icon class="mr-4"></app-notification-icon>
           <div class="dropdown" style="display: inline-block;">
             <button class="btn btn-default dropdown-toggle" type="button" id="userProfileDropdown"
                     (click)="toggleDropdown()"
                     aria-haspopup="true"
                     [attr.aria-expanded]="isDropdownOpen"
                     style="background-color: #f8f9fa; border-color: #3498db; position: relative; display: flex; align-items: center; padding: 8px 12px;">
-                
                 <img [src]="userPhotoUrl || getDefaultAvatarUrl()"
                      class="user-avatar"
                      alt="User Avatar"
                      style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin-right: 8px;"
                      (error)="onImageError($event)">
-                
                 <span style="margin-right: 8px;">{{ currentUser?.firstname || 'User' }} {{ currentUser?.lastname || '' }}</span>
                 <span class="caret"></span>
+                
             </button>
+            
             
             <ul class="dropdown-menu dropdown-menu-right"
                 [class.show]="isDropdownOpen"
@@ -58,7 +57,10 @@
             </ul>
         </div>
       </div>
+      <app-notification-icon class="mr-2"></app-notification-icon>
+
   </div>
+  
   <hr style="border-top: 1px solid #3498db; margin-top: 10px;">
 
   <div class="row">
