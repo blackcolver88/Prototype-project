@@ -161,10 +161,14 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
         if (nearestSectionIndex !== -1) {
           const targetSection = this.editorItems[nearestSectionIndex];
 
-          if (targetSection.children && targetSection.children.length > 0) {
-            this.addItemToSubsection(draggedItem, targetSection.children[0]);
+          if (draggedItem.name === 'Subsection') {
+            this.addSubsection(targetSection);
           } else {
-            this.addItemToSection(draggedItem, targetSection);
+            if (targetSection.children && targetSection.children.length > 0) {
+              this.addItemToSubsection(draggedItem, targetSection.children[0]);
+            } else {
+              this.addItemToSection(draggedItem, targetSection);
+            }
           }
         } else {
           this.createSectionWithItem(draggedItem, targetIndex);
@@ -173,10 +177,14 @@ export class EditorTreeComponent implements OnInit, OnDestroy {
     } else {
       const targetSection = this.findSectionFromEvent(event);
       if (targetSection) {
-        if (targetSection.children && targetSection.children.length > 0) {
-          this.addItemToSubsection(draggedItem, targetSection.children[0]);
+        if (draggedItem.name === 'Subsection') {
+          this.addSubsection(targetSection);
         } else {
-          this.addItemToSection(draggedItem, targetSection);
+          if (targetSection.children && targetSection.children.length > 0) {
+            this.addItemToSubsection(draggedItem, targetSection.children[0]);
+          } else {
+            this.addItemToSection(draggedItem, targetSection);
+          }
         }
       }
     }
@@ -1346,6 +1354,12 @@ private executeRemoveItem(item: any) {
             console.error("Error updating subsection order", err);
           }
         });
+    } else {
+      // Handle drops from external containers
+      const draggedItem = event.item.data;
+      if (draggedItem && draggedItem.name === 'Subsection') {
+        this.addSubsection(section);
+      }
     }
   }
 

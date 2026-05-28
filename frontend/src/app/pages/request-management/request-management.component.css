@@ -175,8 +175,9 @@
   transition: all 0.2s ease;
 }
 
-.actions-cell button i {
-  font-size: 0.875rem;
+.actions-cell button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-view {

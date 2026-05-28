@@ -39,13 +39,21 @@
           <td class="table-cell">{{ submission.date | date:'medium' }}</td>
           <td class="table-cell actions-cell">
             <button (click)="showFormResponses(submission.id)" class="btn-view" title="View Details">
-              <i class="fas fa-eye"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
             <button (click)="validateRequest(submission.id)" class="btn-validate" title="Validate Request">
-              <i class="fas fa-check"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <polyline points="20,6 9,17 4,12"></polyline>
+              </svg>
             </button>
             <button (click)="rejectRequest(submission.id)" class="btn-reject" title="Reject Request">
-              <i class="fas fa-times"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           </td>
         </tr>

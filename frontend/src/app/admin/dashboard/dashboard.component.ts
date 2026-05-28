@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit {
     }
   ];
 
-  public barChartLabels = ['Users', 'Templates', 'Submissions', 'Processes'];
+  public barChartLabels = ['Users', 'Forms', 'Submissions', 'Processes'];
   public barChartLegend = true;
   public barChartOptions = {
     responsive: true,

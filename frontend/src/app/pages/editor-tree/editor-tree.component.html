@@ -211,6 +211,7 @@
         <div 
           cdkDropList 
           [cdkDropListData]="item.children"
+          [cdkDropListConnectedTo]="[acquiredItems]"
           (cdkDropListDropped)="onSubsectionDrop($event, item)" 
           class="subsection-container">
           
